@@ -1,35 +1,64 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ana Sayfa</title>
+    <title>Home - Alumni Network</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; }
-        header { background: #2c3e50; color: #fff; padding: 1rem 0; text-align: center; }
-        nav { background: #34495e; display: flex; justify-content: center; padding: 0.5rem; }
-        nav a { color: #fff; text-decoration: none; padding: 0.5rem 1rem; margin: 0 0.5rem; border-radius: 4px; transition: background 0.3s; }
-        nav a:hover { background: #2980b9; }
-        .container { max-width: 800px; margin: 2rem auto; padding: 2rem; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; }
-        h1 { color: #2c3e50; margin-bottom: 1rem; }
-        p { font-size: 1.1rem; line-height: 1.6; color: #666; }
-        .btn { display: inline-block; margin-top: 1.5rem; padding: 0.75rem 1.5rem; background: #27ae60; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold; transition: 0.3s; }
-        .btn:hover { background: #2ecc71; }
+        :root {
+            --clr-green: #2ecc71;
+            --clr-yellow: #f1c40f;
+            --clr-black: #111111;
+            --clr-blue: #3498db;
+            --clr-white: #ffffff;
+            --clr-bg: #f8f9fa;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: var(--clr-bg); color: var(--clr-black); }
+        header { background: var(--clr-black); color: var(--clr-white); padding: 1.5rem 0; text-align: center; border-bottom: 5px solid var(--clr-blue); }
+        header h2 { margin: 0; font-size: 2rem; letter-spacing: 1px; }
+        nav { background: var(--clr-blue); display: flex; justify-content: center; padding: 0.8rem; }
+        nav a { color: var(--clr-white); text-decoration: none; padding: 0.6rem 1.2rem; margin: 0 0.5rem; border-radius: 4px; font-weight: bold; transition: all 0.3s ease; }
+        nav a:hover { background: var(--clr-yellow); color: var(--clr-black); }
+        .hero { background: linear-gradient(135deg, var(--clr-blue) 0%, #2980b9 100%); color: var(--clr-white); padding: 4rem 2rem; text-align: center; }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; color: var(--clr-yellow); }
+        .container { max-width: 900px; margin: -2rem auto 2rem; padding: 3rem; background: var(--clr-white); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; border-top: 6px solid var(--clr-green); position: relative; }
+        p { font-size: 1.1rem; line-height: 1.8; color: #444; }
+        .btn { display: inline-block; margin-top: 2rem; padding: 0.8rem 2rem; background: var(--clr-green); color: var(--clr-white); text-decoration: none; border-radius: 5px; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 6px rgba(46, 204, 113, 0.3); }
+        .btn:hover { background: #27ae60; transform: translateY(-2px); box-shadow: 0 6px 8px rgba(46, 204, 113, 0.4); }
+        .features { display: flex; justify-content: space-around; margin-top: 3rem; gap: 2rem; }
+        .feature-card { flex: 1; padding: 1.5rem; background: var(--clr-bg); border-radius: 8px; border-bottom: 4px solid var(--clr-yellow); }
+        .feature-card h3 { color: var(--clr-blue); }
     </style>
 </head>
 <body>
     <header>
-        <h2>Alumni Projesi</h2>
+        <h2>Alumni Network</h2>
     </header>
     <nav>
-        <a href="/">Ana Sayfa</a>
-        <a href="/about">Hakkımızda</a>
-        <a href="/alumni">Alumni Sistemi</a>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="alumni.html">Alumni System</a>
     </nav>
+    <div class="hero">
+        <h1>Welcome to Our Community</h1>
+        <p>Connecting graduates, building futures.</p>
+    </div>
     <div class="container">
-        <h1>Geçici Ana Sayfa</h1>
-        <p>Projenize hoş geldiniz! Bu sayfa geçici olarak tasarlanmıştır ve ilerleyen aşamalarda içeriğini istediğiniz gibi zenginleştirebilirsiniz.</p>
-        <a href="/about" class="btn">Hakkımızda Bölümüne Git</a>
+        <h2>Your Journey Continues Here</h2>
+        <p>Welcome to the official Alumni Project platform. This space is designed to help you reconnect with old friends, expand your professional network, and stay updated with the latest news from your alma mater.</p>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>Connect</h3>
+                <p>Find and engage with fellow alumni worldwide.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Grow</h3>
+                <p>Discover new career opportunities and mentorships.</p>
+            </div>
+        </div>
+
+        <a href="about.html" class="btn">Discover More About Us</a>
     </div>
 </body>
 </html>

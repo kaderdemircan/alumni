@@ -1,36 +1,55 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hakkımızda</title>
+    <title>About Us - Alumni Network</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; }
-        header { background: #2c3e50; color: #fff; padding: 1rem 0; text-align: center; }
-        nav { background: #34495e; display: flex; justify-content: center; padding: 0.5rem; }
-        nav a { color: #fff; text-decoration: none; padding: 0.5rem 1rem; margin: 0 0.5rem; border-radius: 4px; transition: background 0.3s; }
-        nav a:hover { background: #2980b9; }
-        .container { max-width: 800px; margin: 2rem auto; padding: 2rem; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; text-align: center; }
-        h1 { color: #2980b9; margin-bottom: 1rem; }
-        p { font-size: 1.1rem; line-height: 1.6; color: #666; }
-        .info-box { background: #e8f4f8; border-left: 4px solid #2980b9; padding: 1rem; margin-top: 2rem; text-align: left; }
+        :root {
+            --clr-green: #2ecc71;
+            --clr-yellow: #f1c40f;
+            --clr-black: #111111;
+            --clr-blue: #3498db;
+            --clr-white: #ffffff;
+            --clr-bg: #f8f9fa;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: var(--clr-bg); color: var(--clr-black); }
+        header { background: var(--clr-black); color: var(--clr-white); padding: 1.5rem 0; text-align: center; border-bottom: 5px solid var(--clr-green); }
+        header h2 { margin: 0; font-size: 2rem; letter-spacing: 1px; }
+        nav { background: var(--clr-blue); display: flex; justify-content: center; padding: 0.8rem; }
+        nav a { color: var(--clr-white); text-decoration: none; padding: 0.6rem 1.2rem; margin: 0 0.5rem; border-radius: 4px; font-weight: bold; transition: all 0.3s ease; }
+        nav a:hover { background: var(--clr-yellow); color: var(--clr-black); }
+        .page-header { background: var(--clr-black); color: var(--clr-white); padding: 3rem 2rem; text-align: center; }
+        .page-header h1 { font-size: 2.2rem; margin: 0; color: var(--clr-green); }
+        .container { max-width: 900px; margin: 2rem auto; padding: 3rem; background: var(--clr-white); box-shadow: 0 8px 15px rgba(0,0,0,0.05); border-radius: 8px; border-top: 6px solid var(--clr-blue); }
+        h2 { color: var(--clr-blue); border-bottom: 2px solid var(--clr-yellow); padding-bottom: 0.5rem; display: inline-block; }
+        p { font-size: 1.1rem; line-height: 1.8; color: #444; }
+        .info-box { background: rgba(52, 152, 219, 0.1); border-left: 5px solid var(--clr-blue); padding: 1.5rem; margin-top: 2rem; border-radius: 0 8px 8px 0; }
+        .info-box p { margin: 0; font-weight: 500; }
+        .highlight { color: var(--clr-green); font-weight: bold; }
     </style>
 </head>
 <body>
     <header>
-        <h2>Alumni Projesi</h2>
+        <h2>Alumni Network</h2>
     </header>
     <nav>
-        <a href="/">Ana Sayfa</a>
-        <a href="/about">Hakkımızda</a>
-        <a href="/alumni">Alumni Sistemi</a>
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="alumni.html">Alumni System</a>
     </nav>
+    <div class="page-header">
+        <h1>About Our Organization</h1>
+    </div>
     <div class="container">
-        <h1>Geçici Hakkımızda Sayfası</h1>
-        <p>Biz kimiz? Bu alan projeniz şekillendikçe doldurulacaktır. Şu an sadece sistemin düzgün çalışıp çalışmadığını test etmek için burada duruyor.</p>
+        <h2>Who We Are</h2>
+        <p>We are a dedicated community of graduates committed to fostering lifelong connections. Our mission is to build a robust network where <span class="highlight">knowledge</span>, <span class="highlight">experience</span>, and <span class="highlight">opportunities</span> are shared freely among members.</p>
+        
+        <h2>Our Vision</h2>
+        <p>To create a global platform that empowers our alumni to achieve professional excellence while giving back to the community that shaped them.</p>
         
         <div class="info-box">
-            <strong>Not:</strong> Bu tasarım tamamen esnektir ve ileride CSS veya farklı framework'ler (Bootstrap, Tailwind) ile kolayca değiştirilebilir.
+            <p><strong>Note:</strong> This platform is continuously evolving. We are currently testing new features to ensure a seamless experience for all our members. Stay tuned for upcoming events and mentorship programs!</p>
         </div>
     </div>
 </body>
