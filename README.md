@@ -54,6 +54,13 @@ To stop the running containers, press `Ctrl+C` in the terminal where `docker-com
 docker-compose down
 ```
 
+## 📚 API Documentation (Swagger)
+
+The project includes interactive API documentation powered by Swagger UI. You can use it to explore all available endpoints, view required request payloads, and test the API directly from your browser.
+
+*   **Swagger UI:** Access the visual documentation at `http://localhost:8080/api/swagger`
+*   **Swagger JSON:** Access the raw OpenAPI specification at `http://localhost:8080/api/swagger.json`
+
 ## 📁 Project Structure
 
 ```text
