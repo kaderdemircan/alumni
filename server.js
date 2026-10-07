@@ -4,8 +4,9 @@ const path = require('path');
 
 const PORT = 8080; // Genellikle 80 portu Windows'ta yönetici izni gerektirebilir veya başka servisler tarafından kullanılabilir. Bu yüzden 8080'i kullanıyoruz.
 
-// In-memory array to store users
-const users = [];
+// Import MVC Routers
+const handleApiUserRoutes = require('./routes/apiUserRoutes');
+const handleUserRoutes = require('./routes/userRoutes');
 
 const server = http.createServer((req, res) => {
     // Kök dizin (/) için geçici ana sayfa tasarımı
@@ -57,137 +58,11 @@ const server = http.createServer((req, res) => {
     } else if (req.url === '/api/health' && req.method === 'GET') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'ok' }));
-    } else if (req.url === '/api/users' && req.method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(users));
-    } else if (req.url.startsWith('/api/users/') && req.method === 'GET') {
-        const parts = req.url.split('/');
-        const id = parseInt(parts[3], 10);
-        
-        if (isNaN(id)) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ error: 'Invalid user ID' }));
-        }
-
-        const user = users.find(u => u.id === id);
-        if (!user) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ error: 'User not found' }));
-        }
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(user));
-    } else if (req.url === '/api/users' && req.method === 'POST') {
-        let body = '';
-        
-        req.on('data', chunk => {
-            body += chunk.toString(); // Convert Buffer to string
-        });
-        
-        req.on('end', () => {
-            try {
-                const userData = JSON.parse(body);
-                
-                // Validate required fields
-                if (!userData.name || !userData.surname || !userData.age || !userData.birthday) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ error: 'Missing required fields: name, surname, age, birthday' }));
-                }
-                
-                // Create new user object
-                const newUser = {
-                    id: users.length + 1,
-                    name: userData.name,
-                    surname: userData.surname,
-                    age: userData.age,
-                    birthday: userData.birthday
-                };
-                
-                // Save user
-                users.push(newUser);
-                
-                // Return success response
-                res.writeHead(201, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ message: 'User created successfully', user: newUser }));
-            } catch (error) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Invalid JSON payload' }));
-            }
-        });
-    } else if (req.url.startsWith('/api/users/') && (req.method === 'PUT' || req.method === 'PATCH')) {
-        const parts = req.url.split('/');
-        // e.g. ['', 'api', 'users', '1']
-        const id = parseInt(parts[3], 10);
-        
-        let body = '';
-        
-        req.on('data', chunk => {
-            body += chunk.toString();
-        });
-        
-        req.on('end', () => {
-            try {
-                if (isNaN(id)) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ error: 'Invalid user ID' }));
-                }
-
-                const userIndex = users.findIndex(u => u.id === id);
-                if (userIndex === -1) {
-                    res.writeHead(404, { 'Content-Type': 'application/json' });
-                    return res.end(JSON.stringify({ error: 'User not found' }));
-                }
-
-                const updateData = JSON.parse(body);
-
-                if (req.method === 'PUT') {
-                    // PUT requires all fields and replaces the object (except ID)
-                    if (!updateData.name || !updateData.surname || !updateData.age || !updateData.birthday) {
-                        res.writeHead(400, { 'Content-Type': 'application/json' });
-                        return res.end(JSON.stringify({ error: 'Missing required fields for PUT: name, surname, age, birthday' }));
-                    }
-                    users[userIndex] = {
-                        id,
-                        name: updateData.name,
-                        surname: updateData.surname,
-                        age: updateData.age,
-                        birthday: updateData.birthday
-                    };
-                } else if (req.method === 'PATCH') {
-                    // PATCH partially updates the object
-                    users[userIndex] = {
-                        ...users[userIndex],
-                        ...updateData,
-                        id // prevent ID from being overwritten
-                    };
-                }
-
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ message: 'User updated successfully', user: users[userIndex] }));
-            } catch (error) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Invalid JSON payload' }));
-            }
-        });
-    } else if (req.url.startsWith('/api/users/') && req.method === 'DELETE') {
-        const parts = req.url.split('/');
-        const id = parseInt(parts[3], 10);
-        
-        if (isNaN(id)) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ error: 'Invalid user ID' }));
-        }
-
-        const userIndex = users.findIndex(u => u.id === id);
-        if (userIndex === -1) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify({ error: 'User not found' }));
-        }
-
-        const deletedUser = users.splice(userIndex, 1)[0];
-
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'User deleted successfully', user: deletedUser }));
+    // MVC Route Handlers (API and Web UI)
+    } else if (handleApiUserRoutes(req, res)) {
+        return;
+    } else if (handleUserRoutes(req, res)) {
+        return;
     } else if (req.url === '/hello') {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.end('hello world!');

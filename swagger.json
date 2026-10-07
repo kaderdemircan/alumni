@@ -1,125 +1,598 @@
 {
-    "openapi": "3.0.0",
-    "info": {
-        "title": "Alumni API",
-        "version": "1.0.0",
-        "description": "API documentation for Alumni users"
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Alumni Tracking System API",
+    "version": "1.0.0",
+    "description": "Comprehensive API documentation for the Alumni Tracking System. Demonstrates MVC architecture with separate API and Web UI controllers."
+  },
+  "tags": [
+    {
+      "name": "API Users (ApiUserController)",
+      "description": "RESTful JSON endpoints managed by ApiUserController"
     },
-    "paths": {
-        "/api/health": {
-            "get": {
-                "summary": "Check API health",
-                "responses": {
-                    "200": { "description": "Successful response" }
-                }
-            }
-        },
-        "/api/users": {
-            "get": {
-                "summary": "Get all users",
-                "responses": {
-                    "200": { "description": "List of users" }
-                }
-            },
-            "post": {
-                "summary": "Create a new user",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": ["name", "surname", "age", "birthday"],
-                                "properties": {
-                                    "name": { "type": "string" },
-                                    "surname": { "type": "string" },
-                                    "age": { "type": "number" },
-                                    "birthday": { "type": "string", "format": "date" }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": { "description": "User created successfully" },
-                    "400": { "description": "Bad request" }
-                }
-            }
-        },
-        "/api/users/{id}": {
-            "get": {
-                "summary": "Get a user by ID",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-                ],
-                "responses": {
-                    "200": { "description": "User found" },
-                    "404": { "description": "User not found" }
-                }
-            },
-            "put": {
-                "summary": "Update a user (replace)",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": ["name", "surname", "age", "birthday"],
-                                "properties": {
-                                    "name": { "type": "string" },
-                                    "surname": { "type": "string" },
-                                    "age": { "type": "number" },
-                                    "birthday": { "type": "string", "format": "date" }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": { "description": "User updated successfully" },
-                    "404": { "description": "User not found" }
-                }
-            },
-            "patch": {
-                "summary": "Update a user (partial)",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "name": { "type": "string" },
-                                    "surname": { "type": "string" },
-                                    "age": { "type": "number" },
-                                    "birthday": { "type": "string", "format": "date" }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": { "description": "User updated successfully" },
-                    "404": { "description": "User not found" }
-                }
-            },
-            "delete": {
-                "summary": "Delete a user",
-                "parameters": [
-                    { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-                ],
-                "responses": {
-                    "200": { "description": "User deleted successfully" },
-                    "404": { "description": "User not found" }
-                }
-            }
-        }
+    {
+      "name": "Web Users (UserController)",
+      "description": "Browser HTML view endpoints managed by UserController"
+    },
+    {
+      "name": "Utilities",
+      "description": "Health check and calculation endpoints"
     }
+  ],
+  "paths": {
+    "/api/users": {
+      "get": {
+        "tags": ["API Users (ApiUserController)"],
+        "summary": "Get all alumni users (JSON)",
+        "description": "Retrieves the full list of alumni users in JSON format.",
+        "responses": {
+          "200": {
+            "description": "List of all alumni users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["API Users (ApiUserController)"],
+        "summary": "Create a new alumni user (JSON)",
+        "description": "Validates schema and saves a new alumnus to the in-memory data store.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateInput"
+              },
+              "example": {
+                "name": "Kader",
+                "surname": "Demircan",
+                "age": 23,
+                "birthday": "2001-05-14"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request / Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": ["API Users (ApiUserController)"],
+        "summary": "Get user by ID (JSON)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Numeric User ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["API Users (ApiUserController)"],
+        "summary": "Update user completely (PUT)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Numeric User ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateInput"
+              },
+              "example": {
+                "name": "Kader",
+                "surname": "Demircan",
+                "age": 24,
+                "birthday": "2001-05-14"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields or invalid ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["API Users (ApiUserController)"],
+        "summary": "Partially update user (PATCH)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Numeric User ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPatchInput"
+              },
+              "example": {
+                "age": 25
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user ID or payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["API Users (ApiUserController)"],
+        "summary": "Delete user (DELETE)",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Numeric User ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid user ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": ["Web Users (UserController)"],
+        "summary": "View Alumni Directory (HTML Web Page)",
+        "description": "Renders an HTML table listing all registered alumni members.",
+        "responses": {
+          "200": {
+            "description": "HTML page displaying the alumni directory table",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Web Users (UserController)"],
+        "summary": "Create Alumni Member via Web Form",
+        "description": "Processes form submission and creates a new alumnus.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateInput"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "HTML success page",
+            "content": {
+              "text/html": {}
+            }
+          },
+          "400": {
+            "description": "HTML validation error page",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": ["Web Users (UserController)"],
+        "summary": "View Alumni Member Profile (HTML Web Page)",
+        "description": "Renders an HTML profile card for the specified alumnus ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Numeric User ID",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML profile page",
+            "content": {
+              "text/html": {}
+            }
+          },
+          "404": {
+            "description": "HTML Not Found page",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "tags": ["Utilities"],
+        "summary": "Check API health",
+        "responses": {
+          "200": {
+            "description": "API status ok",
+            "content": {
+              "application/json": {
+                "example": {
+                  "status": "ok"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hello": {
+      "get": {
+        "tags": ["Utilities"],
+        "summary": "Hello World greeting",
+        "responses": {
+          "200": {
+            "description": "Plain text hello world",
+            "content": {
+              "text/plain": {
+                "example": "hello world!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hello/{name}": {
+      "get": {
+        "tags": ["Utilities"],
+        "summary": "Personalized greeting",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Personalized plain text greeting",
+            "content": {
+              "text/plain": {
+                "example": "Hello, Kader!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sum/{num1}/{num2}": {
+      "get": {
+        "tags": ["Utilities"],
+        "summary": "Calculate sum of two numbers",
+        "parameters": [
+          {
+            "name": "num1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "num2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Calculated total",
+            "content": {
+              "text/plain": {
+                "example": "15"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid numbers provided"
+          }
+        }
+      }
+    },
+    "/alumni": {
+      "get": {
+        "tags": ["Utilities"],
+        "summary": "Alumni test endpoint",
+        "responses": {
+          "200": {
+            "description": "Returns 'ok'"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Utilities"],
+        "summary": "Alumni test endpoint",
+        "responses": {
+          "200": {
+            "description": "Returns 'ok'"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Kader"
+          },
+          "surname": {
+            "type": "string",
+            "example": "Demircan"
+          },
+          "age": {
+            "type": "number",
+            "example": 23
+          },
+          "birthday": {
+            "type": "string",
+            "format": "date",
+            "example": "2001-05-14"
+          }
+        }
+      },
+      "UserCreateInput": {
+        "type": "object",
+        "required": ["name", "surname", "age", "birthday"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Kader"
+          },
+          "surname": {
+            "type": "string",
+            "example": "Demircan"
+          },
+          "age": {
+            "type": "number",
+            "example": 23
+          },
+          "birthday": {
+            "type": "string",
+            "format": "date",
+            "example": "2001-05-14"
+          }
+        }
+      },
+      "UserPatchInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "age": {
+            "type": "number"
+          },
+          "birthday": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "User created successfully"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "User not found"
+          }
+        }
+      }
+    }
+  }
 }
