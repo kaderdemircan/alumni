@@ -2,16 +2,26 @@
  * UserController
  * 
  * Handles Web UI interactions and views for User/Alumni resources.
- * Renders HTML templates from the View layer (views/users.html) for browser clients,
+ * Renders HTML templates from the View layer (views/) for browser clients,
  * and processes web form submissions.
+ * 
+ * CRUD operations:
+ *   GET    /users              → getAll()    - List all alumni (table view)
+ *   GET    /users/:id          → getById()   - View single alumni detail
+ *   POST   /users              → create()    - Create new alumni (form submit)
+ *   GET    /users/:id/edit     → edit()      - Render edit form pre-filled
+ *   POST   /users/:id/edit     → update()    - Process edit form (full update)
+ *   POST   /users/:id/delete   → delete()    - Delete alumni via form POST
  */
 
 const fs = require('fs');
 const path = require('path');
 const UserModel = require('../models/userModel');
 
-// Path to the View Layer template
+// Paths to View Layer templates
 const USERS_VIEW_PATH = path.join(__dirname, '..', 'views', 'users.html');
+const USER_DETAIL_VIEW_PATH = path.join(__dirname, '..', 'views', 'user-detail.html');
+const USER_EDIT_VIEW_PATH = path.join(__dirname, '..', 'views', 'user-edit.html');
 
 /**
  * Helper to parse URL-encoded or JSON body from web forms
@@ -59,13 +69,13 @@ function parseRequestBody(req) {
 }
 
 /**
- * Helper to generate HTML table rows from user models
+ * Helper to generate HTML table rows from user models (with action links)
  * @param {Array<Object>} users
  * @returns {string}
  */
 function renderUserTableRows(users) {
     if (!users || users.length === 0) {
-        return `<tr><td colspan="5" style="text-align:center; padding: 2rem; color: #888;">Henüz kayıtlı mezun bulunmuyor. Yukarıdaki formdan yeni bir mezun ekleyebilirsiniz!</td></tr>`;
+        return `<tr><td colspan="6" style="text-align:center; padding: 2rem; color: #888;">Henüz kayıtlı mezun bulunmuyor. Yukarıdaki formdan yeni bir mezun ekleyebilirsiniz!</td></tr>`;
     }
     return users.map(u => `
         <tr>
@@ -74,12 +84,19 @@ function renderUserTableRows(users) {
             <td>${u.surname}</td>
             <td><span class="badge">${u.age}</span></td>
             <td>${u.birthday}</td>
+            <td>
+                <a href="/users/${u.id}" class="action-link view" title="View">👁️</a>
+                <a href="/users/${u.id}/edit" class="action-link edit" title="Edit">✏️</a>
+                <form action="/users/${u.id}/delete" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete #${u.id} ${u.name} ${u.surname}?');">
+                    <button type="submit" class="action-link delete" title="Delete">🗑️</button>
+                </form>
+            </td>
         </tr>
     `).join('');
 }
 
 /**
- * Helper to render an HTML document for standalone/detail pages
+ * Helper to render an HTML document for standalone/error pages
  * @param {import('http').ServerResponse} res
  * @param {number} statusCode
  * @param {string} title
@@ -131,6 +148,20 @@ function renderHtmlPage(res, statusCode, title, contentHtml) {
     res.end(html);
 }
 
+/**
+ * Helper to read a template file and return its content
+ * @param {string} filePath
+ * @returns {Promise<string>}
+ */
+function readTemplate(filePath) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, 'utf8', (err, content) => {
+            if (err) return reject(err);
+            resolve(content);
+        });
+    });
+}
+
 class UserController {
     /**
      * GET /users
@@ -138,27 +169,25 @@ class UserController {
      */
     async getAll(req, res) {
         try {
-            fs.readFile(USERS_VIEW_PATH, 'utf8', (err, template) => {
-                if (err) {
-                    res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
-                    return res.end('View Layer Hatası: views/users.html şablonu bulunamadı.');
-                }
+            const template = await readTemplate(USERS_VIEW_PATH);
+            const users = UserModel.getAll();
+            const tableRows = renderUserTableRows(users);
 
-                const users = UserModel.getAll();
-                const tableRows = renderUserTableRows(users);
+            // Check for success/deleted banner flags
+            let alertHtml = '';
+            if (req.url.includes('created=true')) {
+                alertHtml = '<div class="alert alert-success">✅ Alumnus successfully registered!</div>';
+            } else if (req.url.includes('updated=true')) {
+                alertHtml = '<div class="alert alert-success">✅ Alumnus record updated successfully!</div>';
+            } else if (req.url.includes('deleted=true')) {
+                alertHtml = '<div class="alert alert-success">✅ Alumnus record deleted successfully!</div>';
+            }
 
-                // Check for success banner flag (e.g. redirected from POST /users)
-                let alertHtml = '';
-                if (req.url.includes('created=true')) {
-                    alertHtml = '<div class="alert alert-success">✅ Alumnus successfully registered! / Mezun başarıyla kaydedildi!</div>';
-                }
+            let html = template.replace('<!-- USERS_TABLE_ROWS -->', tableRows);
+            html = html.replace('<!-- ALERT_MESSAGE -->', alertHtml);
 
-                let html = template.replace('<!-- USERS_TABLE_ROWS -->', tableRows);
-                html = html.replace('<!-- ALERT_MESSAGE -->', alertHtml);
-
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                res.end(html);
-            });
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(html);
         } catch (error) {
             res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end(`Sunucu Hatası: ${error.message}`);
@@ -168,7 +197,7 @@ class UserController {
     /**
      * POST /users
      * View Layer Route: Handles web form submission to register a new alumnus
-     * Implements Post/Redirect/Get (PRG) pattern on success, or re-renders template with validation errors.
+     * Implements Post/Redirect/Get (PRG) pattern on success.
      */
     async create(req, res) {
         try {
@@ -177,21 +206,16 @@ class UserController {
 
             if (!result.success) {
                 // Validation error: re-render view template with error alert
-                return fs.readFile(USERS_VIEW_PATH, 'utf8', (err, template) => {
-                    if (err) {
-                        res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
-                        return res.end(`Kayıt Hatası: ${result.error}`);
-                    }
-                    const users = UserModel.getAll();
-                    const tableRows = renderUserTableRows(users);
-                    const alertHtml = `<div class="alert alert-danger">⚠️ Kayıt Başarısız: ${result.error}</div>`;
+                const template = await readTemplate(USERS_VIEW_PATH);
+                const users = UserModel.getAll();
+                const tableRows = renderUserTableRows(users);
+                const alertHtml = `<div class="alert alert-danger">⚠️ Kayıt Başarısız: ${result.error}</div>`;
 
-                    let html = template.replace('<!-- USERS_TABLE_ROWS -->', tableRows);
-                    html = html.replace('<!-- ALERT_MESSAGE -->', alertHtml);
+                let html = template.replace('<!-- USERS_TABLE_ROWS -->', tableRows);
+                html = html.replace('<!-- ALERT_MESSAGE -->', alertHtml);
 
-                    res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
-                    res.end(html);
-                });
+                res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
+                return res.end(html);
             }
 
             // Post/Redirect/Get (PRG) pattern: redirect back to /users with success flag
@@ -205,36 +229,85 @@ class UserController {
 
     /**
      * GET /users/:id
-     * View Layer Route: View single alumni details HTML card
+     * View Layer Route: View single alumni details using user-detail.html template
      */
     async getById(req, res, id) {
         const numericId = parseInt(id, 10);
         if (isNaN(numericId)) {
-            return renderHtmlPage(res, 400, 'Invalid ID', `<h2>Geçersiz ID</h2><p>Lütfen geçerli bir sayı girin.</p>`);
+            return renderHtmlPage(res, 400, 'Invalid ID', `<h2>Geçersiz ID</h2><p>Lütfen geçerli bir sayı girin.</p><a href="/users" class="btn">⬅️ Back to Directory</a>`);
         }
 
         const user = UserModel.getById(numericId);
         if (!user) {
-            return renderHtmlPage(res, 404, 'Not Found', `<h2>Kullanıcı Bulunamadı</h2><p>ID #${numericId} numaralı mezun bulunamadı.</p>`);
+            return renderHtmlPage(res, 404, 'Not Found', `<h2>Kullanıcı Bulunamadı</h2><p>ID #${numericId} numaralı mezun bulunamadı.</p><a href="/users" class="btn">⬅️ Back to Directory</a>`);
         }
 
-        const content = `
-            <h2>🎓 Mezun Profili: ${user.name} ${user.surname}</h2>
-            <div style="background: #fdfdfd; padding: 1.5rem; border-left: 4px solid var(--clr-blue); margin: 1rem 0;">
-                <p><strong>ID:</strong> #${user.id}</p>
-                <p><strong>İsim:</strong> ${user.name}</p>
-                <p><strong>Soyisim:</strong> ${user.surname}</p>
-                <p><strong>Yaş:</strong> ${user.age}</p>
-                <p><strong>Doğum Tarihi:</strong> ${user.birthday}</p>
-            </div>
-            <a href="/users" class="btn">Tüm Listeye Dön</a>
-        `;
-        renderHtmlPage(res, 200, `${user.name} ${user.surname}`, content);
+        try {
+            let template = await readTemplate(USER_DETAIL_VIEW_PATH);
+
+            // Replace all template placeholders with user data
+            template = template.replace(/<!-- USER_ID -->/g, user.id);
+            template = template.replace(/<!-- USER_NAME -->/g, user.name);
+            template = template.replace(/<!-- USER_SURNAME -->/g, user.surname);
+            template = template.replace(/<!-- USER_AGE -->/g, user.age);
+            template = template.replace(/<!-- USER_BIRTHDAY -->/g, user.birthday);
+
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(template);
+        } catch (error) {
+            // Fallback to inline HTML if template file is missing
+            const content = `
+                <h2>🎓 Mezun Profili: ${user.name} ${user.surname}</h2>
+                <div style="background: #fdfdfd; padding: 1.5rem; border-left: 4px solid var(--clr-blue); margin: 1rem 0;">
+                    <p><strong>ID:</strong> #${user.id}</p>
+                    <p><strong>İsim:</strong> ${user.name}</p>
+                    <p><strong>Soyisim:</strong> ${user.surname}</p>
+                    <p><strong>Yaş:</strong> ${user.age}</p>
+                    <p><strong>Doğum Tarihi:</strong> ${user.birthday}</p>
+                </div>
+                <a href="/users/${user.id}/edit" class="btn" style="background:#f39c12;">✏️ Edit</a>
+                <a href="/users" class="btn">⬅️ Back to Directory</a>
+            `;
+            renderHtmlPage(res, 200, `${user.name} ${user.surname}`, content);
+        }
     }
 
     /**
-     * PUT /users/:id
-     * Full update of a user
+     * GET /users/:id/edit
+     * View Layer Route: Render the edit form pre-filled with current user data
+     */
+    async edit(req, res, id) {
+        const numericId = parseInt(id, 10);
+        if (isNaN(numericId)) {
+            return renderHtmlPage(res, 400, 'Invalid ID', '<h2>Geçersiz ID</h2><p>Lütfen geçerli bir sayı girin.</p><a href="/users" class="btn">⬅️ Back</a>');
+        }
+
+        const user = UserModel.getById(numericId);
+        if (!user) {
+            return renderHtmlPage(res, 404, 'Not Found', `<h2>Kullanıcı Bulunamadı</h2><p>ID #${numericId} numaralı mezun bulunamadı.</p><a href="/users" class="btn">⬅️ Back</a>`);
+        }
+
+        try {
+            let template = await readTemplate(USER_EDIT_VIEW_PATH);
+
+            template = template.replace(/<!-- USER_ID -->/g, user.id);
+            template = template.replace(/<!-- USER_NAME -->/g, user.name);
+            template = template.replace(/<!-- USER_SURNAME -->/g, user.surname);
+            template = template.replace(/<!-- USER_AGE -->/g, user.age);
+            template = template.replace(/<!-- USER_BIRTHDAY -->/g, user.birthday);
+            template = template.replace('<!-- ALERT_MESSAGE -->', '');
+
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(template);
+        } catch (error) {
+            renderHtmlPage(res, 500, 'Error', `<p>Edit form template could not be loaded: ${error.message}</p>`);
+        }
+    }
+
+    /**
+     * POST /users/:id/edit
+     * View Layer Route: Process edit form submission (full update via PUT semantics)
+     * Uses PRG pattern on success, re-renders edit form with errors on failure.
      */
     async update(req, res, id) {
         const numericId = parseInt(id, 10);
@@ -247,14 +320,47 @@ class UserController {
             const result = UserModel.update(numericId, body);
 
             if (!result.success) {
-                return renderHtmlPage(res, result.notFound ? 404 : 400, 'Hata', `<p>${result.error}</p>`);
+                if (result.notFound) {
+                    return renderHtmlPage(res, 404, 'Not Found', `<h2>Kullanıcı Bulunamadı</h2><p>ID #${numericId} numaralı mezun bulunamadı.</p><a href="/users" class="btn">⬅️ Back</a>`);
+                }
+
+                // Validation error: re-render edit form with error
+                const user = UserModel.getById(numericId);
+                if (user) {
+                    try {
+                        let template = await readTemplate(USER_EDIT_VIEW_PATH);
+                        const alertHtml = `<div class="alert alert-danger">⚠️ Güncelleme Başarısız: ${result.error}</div>`;
+
+                        template = template.replace(/<!-- USER_ID -->/g, user.id);
+                        template = template.replace(/<!-- USER_NAME -->/g, body.name || user.name);
+                        template = template.replace(/<!-- USER_SURNAME -->/g, body.surname || user.surname);
+                        template = template.replace(/<!-- USER_AGE -->/g, body.age !== undefined ? body.age : user.age);
+                        template = template.replace(/<!-- USER_BIRTHDAY -->/g, body.birthday || user.birthday);
+                        template = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
+
+                        res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
+                        return res.end(template);
+                    } catch (e) {
+                        // fallback
+                    }
+                }
+                return renderHtmlPage(res, 400, 'Hata', `<p>${result.error}</p><a href="/users" class="btn">⬅️ Back</a>`);
             }
 
-            res.writeHead(303, { 'Location': '/users' });
+            // PRG: redirect to user list with success flag
+            res.writeHead(303, { 'Location': '/users?updated=true' });
             res.end();
         } catch (error) {
             renderHtmlPage(res, 400, 'Hata', `<p>${error.message}</p>`);
         }
+    }
+
+    /**
+     * PUT /users/:id
+     * API-style full update (kept for backwards compatibility)
+     */
+    async put(req, res, id) {
+        return this.update(req, res, id);
     }
 
     /**
@@ -275,7 +381,7 @@ class UserController {
                 return renderHtmlPage(res, result.notFound ? 404 : 400, 'Hata', `<p>${result.error}</p>`);
             }
 
-            res.writeHead(303, { 'Location': '/users' });
+            res.writeHead(303, { 'Location': '/users?updated=true' });
             res.end();
         } catch (error) {
             renderHtmlPage(res, 400, 'Hata', `<p>${error.message}</p>`);
@@ -283,8 +389,9 @@ class UserController {
     }
 
     /**
-     * DELETE /users/:id
-     * Delete a user
+     * POST /users/:id/delete  (Web form delete via POST)
+     * DELETE /users/:id        (API-style delete)
+     * Deletes a user and redirects back to the directory.
      */
     async delete(req, res, id) {
         const numericId = parseInt(id, 10);
@@ -294,10 +401,10 @@ class UserController {
 
         const result = UserModel.delete(numericId);
         if (!result.success) {
-            return renderHtmlPage(res, result.notFound ? 404 : 400, 'Hata', `<p>${result.error}</p>`);
+            return renderHtmlPage(res, result.notFound ? 404 : 400, 'Hata', `<p>${result.error}</p><a href="/users" class="btn">⬅️ Back</a>`);
         }
 
-        res.writeHead(303, { 'Location': '/users' });
+        res.writeHead(303, { 'Location': '/users?deleted=true' });
         res.end();
     }
 

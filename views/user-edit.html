@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Alumnus - Alumni Network</title>
+    <style>
+        :root {
+            --clr-green: #2ecc71;
+            --clr-yellow: #f1c40f;
+            --clr-black: #111111;
+            --clr-blue: #3498db;
+            --clr-white: #ffffff;
+            --clr-bg: #f8f9fa;
+            --clr-danger: #e74c3c;
+            --clr-warning: #f39c12;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--clr-bg); 
+            color: var(--clr-black); 
+        }
+        header { 
+            background: var(--clr-black); 
+            color: var(--clr-white); 
+            padding: 1.5rem 0; 
+            text-align: center; 
+            border-bottom: 5px solid var(--clr-blue); 
+        }
+        header h2 { margin: 0; font-size: 2rem; }
+        nav { 
+            background: var(--clr-blue); 
+            display: flex; 
+            justify-content: center; 
+            padding: 0.8rem; 
+        }
+        nav a { 
+            color: var(--clr-white); 
+            text-decoration: none; 
+            padding: 0.6rem 1.2rem; 
+            margin: 0 0.5rem; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            transition: 0.3s; 
+        }
+        nav a:hover, nav a.active { 
+            background: var(--clr-yellow); 
+            color: var(--clr-black); 
+        }
+        .container { 
+            max-width: 700px; 
+            margin: 3rem auto; 
+            padding: 0 1rem; 
+        }
+        .card {
+            background: var(--clr-white);
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            padding: 2.5rem;
+            border-top: 6px solid var(--clr-warning);
+        }
+        h2 { 
+            margin-top: 0; 
+            color: var(--clr-blue); 
+            border-bottom: 2px solid var(--clr-yellow); 
+            padding-bottom: 0.5rem; 
+            display: inline-block; 
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .form-group input {
+            padding: 0.7rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--clr-blue);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        .form-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        .btn { 
+            display: inline-block; 
+            padding: 0.6rem 1.4rem; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: 0.2s; 
+        }
+        .btn-primary { background: var(--clr-warning); color: white; }
+        .btn-primary:hover { background: #d68910; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-secondary:hover { background: #7f8c8d; }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Alumni Network</h2>
+    </header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About Us</a>
+        <a href="/users" class="active">Alumni System</a>
+        <a href="/api/swagger">API Docs</a>
+    </nav>
+
+    <div class="container">
+        <!-- ALERT_MESSAGE -->
+
+        <div class="card">
+            <h2>✏️ Edit Alumnus #<!-- USER_ID --></h2>
+            <p>Update the alumni record below and click Save.</p>
+
+            <form method="POST" action="/users/<!-- USER_ID -->/edit">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">First Name (Ad):</label>
+                        <input type="text" id="name" name="name" value="<!-- USER_NAME -->" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="surname">Last Name (Soyad):</label>
+                        <input type="text" id="surname" name="surname" value="<!-- USER_SURNAME -->" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="age">Age (Yaş):</label>
+                        <input type="number" id="age" name="age" min="1" max="120" value="<!-- USER_AGE -->" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="birthday">Birthday (Doğum Tarihi):</label>
+                        <input type="date" id="birthday" name="birthday" value="<!-- USER_BIRTHDAY -->" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <a href="/users/<!-- USER_ID -->" class="btn btn-secondary">⬅️ Cancel</a>
+                    <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
