@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: alumni_app
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-8080}:${PORT:-8080}"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-8080}
+      - DB_HOST=db
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_NAME=${DB_NAME:-alumni_db}
+    volumes:
+      # Verilerin container down/up durumunda kaybolmaması için kalıcı volume
+      - ./data:/app/data
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    container_name: alumni_db
+    env_file:
+      - .env
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_NAME:-alumni_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # İlk çalıştırmada veritabanı şemalarını ve seed verilerini otomatik uygulayan migration mount'u
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+
+volumes:
+  pgdata:

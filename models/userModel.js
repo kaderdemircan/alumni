@@ -12,11 +12,46 @@
  * - birthday: string (required, YYYY-MM-DD format)
  */
 
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const DATA_FILE = path.join(DATA_DIR, 'users.json');
+
 class UserModel {
     constructor() {
-        // In-memory data store for users
+        // In-memory data store with file persistence fallback
         this.users = [];
         this.currentId = 1;
+        this._load();
+    }
+
+    _load() {
+        try {
+            if (fs.existsSync(DATA_FILE)) {
+                const raw = fs.readFileSync(DATA_FILE, 'utf8');
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    this.users = parsed;
+                    if (this.users.length > 0) {
+                        this.currentId = Math.max(...this.users.map(u => u.id || 0)) + 1;
+                    }
+                }
+            }
+        } catch (e) {
+            // Keep in-memory store if file read fails
+        }
+    }
+
+    _save() {
+        try {
+            if (!fs.existsSync(DATA_DIR)) {
+                fs.mkdirSync(DATA_DIR, { recursive: true });
+            }
+            fs.writeFileSync(DATA_FILE, JSON.stringify(this.users, null, 2), 'utf8');
+        } catch (e) {
+            // Fallback gracefully
+        }
     }
 
     /**
@@ -103,6 +138,7 @@ class UserModel {
         };
 
         this.users.push(newUser);
+        this._save();
         return { success: true, user: { ...newUser } };
     }
 
@@ -137,6 +173,7 @@ class UserModel {
         };
 
         this.users[index] = updatedUser;
+        this._save();
         return { success: true, user: { ...updatedUser } };
     }
 
@@ -174,6 +211,7 @@ class UserModel {
         }
 
         this.users[index] = updatedUser;
+        this._save();
         return { success: true, user: { ...updatedUser } };
     }
 
@@ -204,6 +242,7 @@ class UserModel {
         }
 
         const [deletedUser] = this.users.splice(index, 1);
+        this._save();
         return { success: true, user: deletedUser };
     }
 
@@ -222,6 +261,7 @@ class UserModel {
     clear() {
         this.users = [];
         this.currentId = 1;
+        this._save();
     }
 }
 

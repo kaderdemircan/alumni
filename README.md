@@ -61,6 +61,12 @@ The project includes interactive API documentation powered by Swagger UI. You ca
 *   **Swagger UI:** Access the visual documentation at `http://localhost:8080/api/swagger`
 *   **Swagger JSON:** Access the raw OpenAPI specification at `http://localhost:8080/api/swagger.json`
 
+## 🗄️ Veri Tasarımı ve Şema Dökümantasyonu (Data Design Documentation)
+
+Mezun Takip Sistemi'nin veritabanı mimarisi, ER (Entity-Relationship) diyagramı, ilişkisel şemalar, veri sözlüğü (Data Dictionary), indeksleme stratejileri ve PostgreSQL DDL betikleri kapsamlı olarak **[ddd.md](ddd.md)** dosyasında yer almaktadır.
+
+> 📖 **Bilgi:** Bütün veri tasarımını ve veritabanı dökümantasyonunu **[Data Design Documentation (ddd.md)](ddd.md)** dosyasından okuyabilir ve inceleyebilirsiniz.
+
 ## 🏛️ MVC (Model-View-Controller) Architecture
 
 The application adopts the **Model-View-Controller (MVC)** software architectural pattern. This pattern separates application concerns into three interconnected components, ensuring code modularity, maintainability, and scalability.
@@ -146,6 +152,7 @@ alumni/
 ├── swagger.html                     # [VIEW] Swagger UI documentation presentation
 ├── swagger.json                     # [VIEW / CONTRACT] OpenAPI 3.0 API specifications (updated with all endpoints)
 ├── server.js                        # [SERVER ENTRY] HTTP server listener and top-level route coordinator
+├── ddd.md                           # [DATA DESIGN] Database schemas, ER diagram, data dictionary & DDL
 ├── README.md                        # Project and architectural documentation
 ├── .postman/                        # API client configuration
 │   └── resources.yaml               # Postman workspace configuration
@@ -155,6 +162,9 @@ alumni/
 ```
 
 #### Detailed Breakdown of Existing Files:
+
+*   **`ddd.md` (Data Design Documentation)**
+    *   Mezun Takip Sistemi veritabanı mimarisini, Mermaid ER diyagramını, tüm tablo şemalarını (users, academic_records, work_experiences, skills, events, jobs, mentorships vb.), veri sözlüğünü, kısıtları ve PostgreSQL DDL betiklerini içerir.
 
 *   **`models/userModel.js` (Model Layer)**
     *   Encapsulates the Alumni / User data entity and business state in an in-memory collection without requiring an external database.

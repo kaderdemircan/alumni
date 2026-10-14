@@ -14,9 +14,15 @@
  * - priority: string (optional - Normal, Önemli, Acil; default: Normal)
  */
 
+const fs = require('fs');
+const path = require('path');
+
+const DATA_DIR = path.join(__dirname, '..', 'data');
+const ANNOUNCEMENTS_FILE = path.join(DATA_DIR, 'announcements.json');
+
 class AnnouncementModel {
     constructor() {
-        // In-memory data store for announcements
+        // In-memory data store for announcements with file persistence
         this.announcements = [
             {
                 id: 1,
@@ -38,6 +44,35 @@ class AnnouncementModel {
             }
         ];
         this.currentId = 3;
+        this._load();
+    }
+
+    _load() {
+        try {
+            if (fs.existsSync(ANNOUNCEMENTS_FILE)) {
+                const raw = fs.readFileSync(ANNOUNCEMENTS_FILE, 'utf8');
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    this.announcements = parsed;
+                    this.currentId = Math.max(...this.announcements.map(a => a.id || 0)) + 1;
+                }
+            } else {
+                this._save();
+            }
+        } catch (e) {
+            // Keep in-memory
+        }
+    }
+
+    _save() {
+        try {
+            if (!fs.existsSync(DATA_DIR)) {
+                fs.mkdirSync(DATA_DIR, { recursive: true });
+            }
+            fs.writeFileSync(ANNOUNCEMENTS_FILE, JSON.stringify(this.announcements, null, 2), 'utf8');
+        } catch (e) {
+            // Keep in-memory
+        }
     }
 
     /**
@@ -136,6 +171,7 @@ class AnnouncementModel {
         };
 
         this.announcements.push(newAnnouncement);
+        this._save();
         return { success: true, announcement: { ...newAnnouncement } };
     }
 
@@ -172,6 +208,7 @@ class AnnouncementModel {
         };
 
         this.announcements[index] = updatedAnnouncement;
+        this._save();
         return { success: true, announcement: { ...updatedAnnouncement } };
     }
 
@@ -209,6 +246,7 @@ class AnnouncementModel {
         };
 
         this.announcements[index] = patchedAnnouncement;
+        this._save();
         return { success: true, announcement: { ...patchedAnnouncement } };
     }
 
@@ -229,6 +267,7 @@ class AnnouncementModel {
         }
 
         const [deleted] = this.announcements.splice(index, 1);
+        this._save();
         return { success: true, announcement: deleted };
     }
 
@@ -238,6 +277,7 @@ class AnnouncementModel {
     clear() {
         this.announcements = [];
         this.currentId = 1;
+        this._save();
     }
 }
 

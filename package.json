@@ -1,0 +1,17 @@
+{
+  "name": "alumni",
+  "version": "1.0.0",
+  "description": "Alumni Tracking System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "migrate": "node scripts/migrate.js"
+  },
+  "keywords": [
+    "alumni",
+    "mvc",
+    "docker"
+  ],
+  "author": "kaderdemircan",
+  "license": "ISC"
+}

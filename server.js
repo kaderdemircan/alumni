@@ -2,7 +2,30 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 8080; // Genellikle 80 portu Windows'ta yönetici izni gerektirebilir veya başka servisler tarafından kullanılabilir. Bu yüzden 8080'i kullanıyoruz.
+// Load environment variables from .env if present (zero-dependency)
+const envPath = path.join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+    try {
+        const envContent = fs.readFileSync(envPath, 'utf8');
+        envContent.split(/\r?\n/).forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed && !trimmed.startsWith('#')) {
+                const firstEq = trimmed.indexOf('=');
+                if (firstEq > 0) {
+                    const key = trimmed.slice(0, firstEq).trim();
+                    const value = trimmed.slice(firstEq + 1).trim();
+                    if (!process.env[key]) {
+                        process.env[key] = value;
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        console.warn('Could not read .env file:', e.message);
+    }
+}
+
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 
 // Import MVC Routers
 const handleApiUserRoutes = require('./routes/apiUserRoutes');
