@@ -170,7 +170,7 @@ class UserController {
     async getAll(req, res) {
         try {
             const template = await readTemplate(USERS_VIEW_PATH);
-            const users = UserModel.getAll();
+            const users = await UserModel.getAll();
             const tableRows = renderUserTableRows(users);
 
             // Check for success/deleted banner flags
@@ -202,12 +202,12 @@ class UserController {
     async create(req, res) {
         try {
             const body = await parseRequestBody(req);
-            const result = UserModel.create(body);
+            const result = await UserModel.create(body);
 
             if (!result.success) {
                 // Validation error: re-render view template with error alert
                 const template = await readTemplate(USERS_VIEW_PATH);
-                const users = UserModel.getAll();
+                const users = await UserModel.getAll();
                 const tableRows = renderUserTableRows(users);
                 const alertHtml = `<div class="alert alert-danger">⚠️ Kayıt Başarısız: ${result.error}</div>`;
 
@@ -237,7 +237,7 @@ class UserController {
             return renderHtmlPage(res, 400, 'Invalid ID', `<h2>Geçersiz ID</h2><p>Lütfen geçerli bir sayı girin.</p><a href="/users" class="btn">⬅️ Back to Directory</a>`);
         }
 
-        const user = UserModel.getById(numericId);
+        const user = await UserModel.getById(numericId);
         if (!user) {
             return renderHtmlPage(res, 404, 'Not Found', `<h2>Kullanıcı Bulunamadı</h2><p>ID #${numericId} numaralı mezun bulunamadı.</p><a href="/users" class="btn">⬅️ Back to Directory</a>`);
         }
@@ -282,7 +282,7 @@ class UserController {
             return renderHtmlPage(res, 400, 'Invalid ID', '<h2>Geçersiz ID</h2><p>Lütfen geçerli bir sayı girin.</p><a href="/users" class="btn">⬅️ Back</a>');
         }
 
-        const user = UserModel.getById(numericId);
+        const user = await UserModel.getById(numericId);
         if (!user) {
             return renderHtmlPage(res, 404, 'Not Found', `<h2>Kullanıcı Bulunamadı</h2><p>ID #${numericId} numaralı mezun bulunamadı.</p><a href="/users" class="btn">⬅️ Back</a>`);
         }
@@ -317,7 +317,7 @@ class UserController {
 
         try {
             const body = await parseRequestBody(req);
-            const result = UserModel.update(numericId, body);
+            const result = await UserModel.update(numericId, body);
 
             if (!result.success) {
                 if (result.notFound) {
@@ -325,7 +325,7 @@ class UserController {
                 }
 
                 // Validation error: re-render edit form with error
-                const user = UserModel.getById(numericId);
+                const user = await UserModel.getById(numericId);
                 if (user) {
                     try {
                         let template = await readTemplate(USER_EDIT_VIEW_PATH);
@@ -375,7 +375,7 @@ class UserController {
 
         try {
             const body = await parseRequestBody(req);
-            const result = UserModel.patch(numericId, body);
+            const result = await UserModel.patch(numericId, body);
 
             if (!result.success) {
                 return renderHtmlPage(res, result.notFound ? 404 : 400, 'Hata', `<p>${result.error}</p>`);
@@ -399,7 +399,7 @@ class UserController {
             return renderHtmlPage(res, 400, 'Hata', '<p>Geçersiz ID</p>');
         }
 
-        const result = UserModel.delete(numericId);
+        const result = await UserModel.delete(numericId);
         if (!result.success) {
             return renderHtmlPage(res, result.notFound ? 404 : 400, 'Hata', `<p>${result.error}</p><a href="/users" class="btn">⬅️ Back</a>`);
         }

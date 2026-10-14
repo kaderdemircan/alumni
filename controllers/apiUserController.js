@@ -51,7 +51,7 @@ class ApiUserController {
      */
     async getAll(req, res) {
         try {
-            const users = UserModel.getAll();
+            const users = await UserModel.getAll();
             sendJson(res, 200, users);
         } catch (error) {
             sendJson(res, 500, { error: 'Internal server error' });
@@ -68,7 +68,7 @@ class ApiUserController {
             return sendJson(res, 400, { error: 'Invalid user ID' });
         }
 
-        const user = UserModel.getById(numericId);
+        const user = await UserModel.getById(numericId);
         if (!user) {
             return sendJson(res, 404, { error: 'User not found' });
         }
@@ -83,7 +83,7 @@ class ApiUserController {
     async create(req, res) {
         try {
             const body = await parseJsonBody(req);
-            const result = UserModel.create(body);
+            const result = await UserModel.create(body);
 
             if (!result.success) {
                 return sendJson(res, 400, { error: result.error });
@@ -110,7 +110,7 @@ class ApiUserController {
 
         try {
             const body = await parseJsonBody(req);
-            const result = UserModel.update(numericId, body);
+            const result = await UserModel.update(numericId, body);
 
             if (!result.success) {
                 const statusCode = result.notFound ? 404 : 400;
@@ -138,7 +138,7 @@ class ApiUserController {
 
         try {
             const body = await parseJsonBody(req);
-            const result = UserModel.patch(numericId, body);
+            const result = await UserModel.patch(numericId, body);
 
             if (!result.success) {
                 const statusCode = result.notFound ? 404 : 400;
@@ -164,7 +164,7 @@ class ApiUserController {
             return sendJson(res, 400, { error: 'Invalid user ID' });
         }
 
-        const result = UserModel.delete(numericId);
+        const result = await UserModel.delete(numericId);
         if (!result.success) {
             const statusCode = result.notFound ? 404 : 400;
             return sendJson(res, statusCode, { error: result.error });

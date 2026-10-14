@@ -51,7 +51,7 @@ class ApiAnnouncementController {
      */
     async getAll(req, res) {
         try {
-            const announcements = AnnouncementModel.getAll();
+            const announcements = await AnnouncementModel.getAll();
             sendJson(res, 200, announcements);
         } catch (error) {
             sendJson(res, 500, { error: 'Internal server error' });
@@ -68,7 +68,7 @@ class ApiAnnouncementController {
             return sendJson(res, 400, { error: 'Invalid announcement ID' });
         }
 
-        const announcement = AnnouncementModel.getById(numericId);
+        const announcement = await AnnouncementModel.getById(numericId);
         if (!announcement) {
             return sendJson(res, 404, { error: 'Announcement not found' });
         }
@@ -83,7 +83,7 @@ class ApiAnnouncementController {
     async create(req, res) {
         try {
             const body = await parseJsonBody(req);
-            const result = AnnouncementModel.create(body);
+            const result = await AnnouncementModel.create(body);
 
             if (!result.success) {
                 return sendJson(res, 400, { error: result.error });
@@ -110,7 +110,7 @@ class ApiAnnouncementController {
 
         try {
             const body = await parseJsonBody(req);
-            const result = AnnouncementModel.update(numericId, body);
+            const result = await AnnouncementModel.update(numericId, body);
 
             if (!result.success) {
                 const statusCode = result.notFound ? 404 : 400;
@@ -138,7 +138,7 @@ class ApiAnnouncementController {
 
         try {
             const body = await parseJsonBody(req);
-            const result = AnnouncementModel.patch(numericId, body);
+            const result = await AnnouncementModel.patch(numericId, body);
 
             if (!result.success) {
                 const statusCode = result.notFound ? 404 : 400;
@@ -164,7 +164,7 @@ class ApiAnnouncementController {
             return sendJson(res, 400, { error: 'Invalid announcement ID' });
         }
 
-        const result = AnnouncementModel.delete(numericId);
+        const result = await AnnouncementModel.delete(numericId);
         if (!result.success) {
             const statusCode = result.notFound ? 404 : 400;
             return sendJson(res, statusCode, { error: result.error });

@@ -1,53 +1,26 @@
 /**
- * Announcement Model (In-Memory)
+ * Announcement Model
  * 
- * Represents the Announcement entity and encapsulates all data-access
- * and business logic without requiring an external database connection yet.
- * 
- * Schema:
- * - id: number (auto-incremented)
- * - title: string (required)
- * - content: string (required)
- * - author: string (required)
- * - category: string (required - e.g. Genel, Etkinlik, Kariyer, Akademik)
- * - date: string (required - YYYY-MM-DD format)
- * - priority: string (optional - Normal, Önemli, Acil; default: Normal)
+ * Encapsulates data access and business logic for Announcement entity.
+ * Uses PostgreSQL database connection pool via config/db.js, with
+ * automatic fallback to local storage if database is unavailable.
  */
 
 const fs = require('fs');
 const path = require('path');
+const db = require('../config/db');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const ANNOUNCEMENTS_FILE = path.join(DATA_DIR, 'announcements.json');
 
 class AnnouncementModel {
     constructor() {
-        // In-memory data store for announcements with file persistence
-        this.announcements = [
-            {
-                id: 1,
-                title: '2026 Mezunlar Buluşması Tarihi Belirlendi',
-                content: 'Geleneksel yıllık mezunlar buluşmamız bu yıl 25 Ekim tarihinde ana kampüste gerçekleştirilecektir. Tüm mezunlarımız davetlidir.',
-                author: 'Rektörlük Mezun Ofisi',
-                category: 'Etkinlik',
-                date: '2026-10-10',
-                priority: 'Önemli'
-            },
-            {
-                id: 2,
-                title: 'Kariyer ve Mentorluk Ağı Başvuruları Başladı',
-                content: 'Genç mezunlarımıza kariyer yolculuklarında rehberlik etmek isteyen deneyimli mezunlarımız için mentorluk kayıtları açılmıştır.',
-                author: 'Kariyer Merkezi',
-                category: 'Kariyer',
-                date: '2026-10-12',
-                priority: 'Normal'
-            }
-        ];
-        this.currentId = 3;
-        this._load();
+        this.announcements = [];
+        this.currentId = 1;
+        this._loadFallback();
     }
 
-    _load() {
+    _loadFallback() {
         try {
             if (fs.existsSync(ANNOUNCEMENTS_FILE)) {
                 const raw = fs.readFileSync(ANNOUNCEMENTS_FILE, 'utf8');
@@ -56,15 +29,13 @@ class AnnouncementModel {
                     this.announcements = parsed;
                     this.currentId = Math.max(...this.announcements.map(a => a.id || 0)) + 1;
                 }
-            } else {
-                this._save();
             }
         } catch (e) {
             // Keep in-memory
         }
     }
 
-    _save() {
+    _saveFallback() {
         try {
             if (!fs.existsSync(DATA_DIR)) {
                 fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -77,10 +48,6 @@ class AnnouncementModel {
 
     /**
      * Validate announcement input fields
-     * @param {Object} data - Announcement input payload
-     * @param {boolean} isPartial - If true, only provided fields are validated (PATCH)
-     * @param {string} [operation=''] - Optional operation name ('PUT' or 'POST')
-     * @returns {{ isValid: boolean, error: string|null }}
      */
     validate(data, isPartial = false, operation = '') {
         if (!data || typeof data !== 'object') {
@@ -110,86 +77,135 @@ class AnnouncementModel {
     }
 
     /**
-     * Retrieve all announcements
-     * @returns {Array<Object>} List of all announcement records
+     * Retrieve all announcements from PostgreSQL
+     * @returns {Promise<Array<Object>>}
      */
-    getAll() {
-        return [...this.announcements];
+    async getAll() {
+        try {
+            const res = await db.query(
+                "SELECT id, title, content, author, category, priority, TO_CHAR(date, 'YYYY-MM-DD') AS date FROM announcements ORDER BY id ASC;"
+            );
+            return res.rows.map(r => ({
+                id: Number(r.id),
+                title: r.title,
+                content: r.content,
+                author: r.author,
+                category: r.category || 'Genel',
+                priority: r.priority || 'Normal',
+                date: r.date || ''
+            }));
+        } catch (error) {
+            return [...this.announcements];
+        }
     }
 
-    /**
-     * Retrieve all announcements (alias for getAll)
-     * @returns {Array<Object>}
-     */
-    findAll() {
+    async findAll() {
         return this.getAll();
     }
 
     /**
-     * Find a single announcement by ID
-     * @param {number|string} id - Announcement ID
-     * @returns {Object|null} The announcement object or null if not found
+     * Find single announcement by ID from PostgreSQL
+     * @param {number|string} id
+     * @returns {Promise<Object|null>}
      */
-    getById(id) {
+    async getById(id) {
         const numericId = parseInt(id, 10);
         if (isNaN(numericId)) return null;
 
-        const announcement = this.announcements.find(a => a.id === numericId);
-        return announcement ? { ...announcement } : null;
+        try {
+            const res = await db.query(
+                "SELECT id, title, content, author, category, priority, TO_CHAR(date, 'YYYY-MM-DD') AS date FROM announcements WHERE id = $1 LIMIT 1;",
+                [numericId]
+            );
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                return {
+                    id: Number(r.id),
+                    title: r.title,
+                    content: r.content,
+                    author: r.author,
+                    category: r.category || 'Genel',
+                    priority: r.priority || 'Normal',
+                    date: r.date || ''
+                };
+            }
+            return null;
+        } catch (error) {
+            const announcement = this.announcements.find(a => a.id === numericId);
+            return announcement ? { ...announcement } : null;
+        }
     }
 
-    /**
-     * Find a single announcement by ID (alias for getById)
-     * @param {number|string} id
-     * @returns {Object|null}
-     */
-    findById(id) {
+    async findById(id) {
         return this.getById(id);
     }
 
     /**
-     * Create a new announcement
-     * @param {Object} data - Object containing title, content, author, category, date, priority
-     * @returns {{ success: boolean, announcement?: Object, error?: string }}
+     * Create new announcement in PostgreSQL
+     * @param {Object} data
+     * @returns {Promise<{ success: boolean, announcement?: Object, error?: string }>}
      */
-    create(data) {
+    async create(data) {
         const validation = this.validate(data, false, 'POST');
         if (!validation.isValid) {
             return { success: false, error: validation.error };
         }
 
         const today = new Date().toISOString().split('T')[0];
+        const date = data.date && data.date.trim() !== '' ? data.date.trim() : today;
+        const category = data.category ? data.category.trim() : 'Genel';
+        const priority = data.priority ? data.priority.trim() : 'Normal';
+
+        try {
+            const res = await db.query(
+                "INSERT INTO announcements (title, content, author, category, priority, date) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, title, content, author, category, priority, TO_CHAR(date, 'YYYY-MM-DD') AS date;",
+                [data.title.trim(), data.content.trim(), data.author.trim(), category, priority, date]
+            );
+
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                const newAnnouncement = {
+                    id: Number(r.id),
+                    title: r.title,
+                    content: r.content,
+                    author: r.author,
+                    category: r.category,
+                    priority: r.priority,
+                    date: r.date
+                };
+                this.announcements.push(newAnnouncement);
+                this._saveFallback();
+                return { success: true, announcement: newAnnouncement };
+            }
+        } catch (error) {
+            console.warn('DB create announcement fallback:', error.message);
+        }
 
         const newAnnouncement = {
             id: this.currentId++,
             title: data.title.trim(),
             content: data.content.trim(),
             author: data.author.trim(),
-            category: data.category ? data.category.trim() : 'Genel',
-            date: data.date && data.date.trim() !== '' ? data.date.trim() : today,
-            priority: data.priority ? data.priority.trim() : 'Normal'
+            category,
+            priority,
+            date
         };
 
         this.announcements.push(newAnnouncement);
-        this._save();
+        this._saveFallback();
         return { success: true, announcement: { ...newAnnouncement } };
     }
 
     /**
-     * Full update of an announcement (PUT)
-     * @param {number|string} id - Announcement ID
-     * @param {Object} updateData - Complete announcement data
-     * @returns {{ success: boolean, announcement?: Object, error?: string, notFound?: boolean }}
+     * Full update of an announcement in PostgreSQL (PUT)
+     * @param {number|string} id
+     * @param {Object} updateData
+     * @returns {Promise<{ success: boolean, announcement?: Object, error?: string, notFound?: boolean }>}
      */
-    update(id, updateData) {
+    async update(id, updateData) {
         const numericId = parseInt(id, 10);
         if (isNaN(numericId)) {
             return { success: false, error: 'Invalid announcement ID' };
-        }
-
-        const index = this.announcements.findIndex(a => a.id === numericId);
-        if (index === -1) {
-            return { success: false, notFound: true, error: 'Announcement not found' };
         }
 
         const validation = this.validate(updateData, false, 'PUT');
@@ -197,31 +213,36 @@ class AnnouncementModel {
             return { success: false, error: validation.error };
         }
 
-        const updatedAnnouncement = {
-            id: numericId,
-            title: updateData.title.trim(),
-            content: updateData.content.trim(),
-            author: updateData.author.trim(),
-            category: updateData.category ? updateData.category.trim() : 'Genel',
-            date: updateData.date ? updateData.date.trim() : this.announcements[index].date,
-            priority: updateData.priority ? updateData.priority.trim() : 'Normal'
-        };
+        const category = updateData.category ? updateData.category.trim() : 'Genel';
+        const priority = updateData.priority ? updateData.priority.trim() : 'Normal';
+        const date = updateData.date ? updateData.date.trim() : new Date().toISOString().split('T')[0];
 
-        this.announcements[index] = updatedAnnouncement;
-        this._save();
-        return { success: true, announcement: { ...updatedAnnouncement } };
-    }
+        try {
+            const res = await db.query(
+                "UPDATE announcements SET title = $1, content = $2, author = $3, category = $4, priority = $5, date = $6, updated_at = NOW() WHERE id = $7 RETURNING id, title, content, author, category, priority, TO_CHAR(date, 'YYYY-MM-DD') AS date;",
+                [updateData.title.trim(), updateData.content.trim(), updateData.author.trim(), category, priority, date, numericId]
+            );
 
-    /**
-     * Partial update of an announcement (PATCH)
-     * @param {number|string} id - Announcement ID
-     * @param {Object} partialData - Partial fields to update
-     * @returns {{ success: boolean, announcement?: Object, error?: string, notFound?: boolean }}
-     */
-    patch(id, partialData) {
-        const numericId = parseInt(id, 10);
-        if (isNaN(numericId)) {
-            return { success: false, error: 'Invalid announcement ID' };
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                const updated = {
+                    id: Number(r.id),
+                    title: r.title,
+                    content: r.content,
+                    author: r.author,
+                    category: r.category,
+                    priority: r.priority,
+                    date: r.date
+                };
+                const idx = this.announcements.findIndex(a => a.id === numericId);
+                if (idx !== -1) this.announcements[idx] = updated;
+                this._saveFallback();
+                return { success: true, announcement: updated };
+            } else {
+                return { success: false, notFound: true, error: 'Announcement not found' };
+            }
+        } catch (error) {
+            // Fallback
         }
 
         const index = this.announcements.findIndex(a => a.id === numericId);
@@ -229,36 +250,119 @@ class AnnouncementModel {
             return { success: false, notFound: true, error: 'Announcement not found' };
         }
 
+        const updatedAnnouncement = {
+            id: numericId,
+            title: updateData.title.trim(),
+            content: updateData.content.trim(),
+            author: updateData.author.trim(),
+            category,
+            priority,
+            date
+        };
+
+        this.announcements[index] = updatedAnnouncement;
+        this._saveFallback();
+        return { success: true, announcement: { ...updatedAnnouncement } };
+    }
+
+    /**
+     * Partial update of an announcement (PATCH)
+     * @param {number|string} id
+     * @param {Object} partialData
+     * @returns {Promise<{ success: boolean, announcement?: Object, error?: string, notFound?: boolean }>}
+     */
+    async patch(id, partialData) {
+        const numericId = parseInt(id, 10);
+        if (isNaN(numericId)) {
+            return { success: false, error: 'Invalid announcement ID' };
+        }
+
         const validation = this.validate(partialData, true, 'PATCH');
         if (!validation.isValid) {
             return { success: false, error: validation.error };
         }
 
-        const current = this.announcements[index];
-        const patchedAnnouncement = {
-            ...current,
-            title: partialData.title !== undefined ? partialData.title.trim() : current.title,
-            content: partialData.content !== undefined ? partialData.content.trim() : current.content,
-            author: partialData.author !== undefined ? partialData.author.trim() : current.author,
-            category: partialData.category !== undefined ? partialData.category.trim() : current.category,
-            date: partialData.date !== undefined ? partialData.date.trim() : current.date,
-            priority: partialData.priority !== undefined ? partialData.priority.trim() : current.priority
+        const existing = await this.getById(numericId);
+        if (!existing) {
+            return { success: false, notFound: true, error: 'Announcement not found' };
+        }
+
+        const title = partialData.title !== undefined ? partialData.title.trim() : existing.title;
+        const content = partialData.content !== undefined ? partialData.content.trim() : existing.content;
+        const author = partialData.author !== undefined ? partialData.author.trim() : existing.author;
+        const category = partialData.category !== undefined ? partialData.category.trim() : existing.category;
+        const priority = partialData.priority !== undefined ? partialData.priority.trim() : existing.priority;
+        const date = partialData.date !== undefined ? partialData.date.trim() : existing.date;
+
+        try {
+            const res = await db.query(
+                "UPDATE announcements SET title = $1, content = $2, author = $3, category = $4, priority = $5, date = $6, updated_at = NOW() WHERE id = $7 RETURNING id, title, content, author, category, priority, TO_CHAR(date, 'YYYY-MM-DD') AS date;",
+                [title, content, author, category, priority, date, numericId]
+            );
+
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                const updated = {
+                    id: Number(r.id),
+                    title: r.title,
+                    content: r.content,
+                    author: r.author,
+                    category: r.category,
+                    priority: r.priority,
+                    date: r.date
+                };
+                const idx = this.announcements.findIndex(a => a.id === numericId);
+                if (idx !== -1) this.announcements[idx] = updated;
+                this._saveFallback();
+                return { success: true, announcement: updated };
+            }
+        } catch (error) {
+            // Fallback
+        }
+
+        const index = this.announcements.findIndex(a => a.id === numericId);
+        if (index === -1) {
+            return { success: false, notFound: true, error: 'Announcement not found' };
+        }
+
+        const local = {
+            ...this.announcements[index],
+            title,
+            content,
+            author,
+            category,
+            priority,
+            date
         };
 
-        this.announcements[index] = patchedAnnouncement;
-        this._save();
-        return { success: true, announcement: { ...patchedAnnouncement } };
+        this.announcements[index] = local;
+        this._saveFallback();
+        return { success: true, announcement: { ...local } };
     }
 
     /**
      * Delete an announcement by ID
-     * @param {number|string} id - Announcement ID
-     * @returns {{ success: boolean, announcement?: Object, error?: string, notFound?: boolean }}
+     * @param {number|string} id
+     * @returns {Promise<{ success: boolean, announcement?: Object, error?: string, notFound?: boolean }>}
      */
-    delete(id) {
+    async delete(id) {
         const numericId = parseInt(id, 10);
         if (isNaN(numericId)) {
             return { success: false, error: 'Invalid announcement ID' };
+        }
+
+        try {
+            const res = await db.query("DELETE FROM announcements WHERE id = $1 RETURNING id, title;", [numericId]);
+            if (res.rows.length > 0) {
+                const idx = this.announcements.findIndex(a => a.id === numericId);
+                if (idx !== -1) this.announcements.splice(idx, 1);
+                this._saveFallback();
+                return { success: true, announcement: res.rows[0] };
+            } else {
+                return { success: false, notFound: true, error: 'Announcement not found' };
+            }
+        } catch (error) {
+            // Fallback
         }
 
         const index = this.announcements.findIndex(a => a.id === numericId);
@@ -267,21 +371,22 @@ class AnnouncementModel {
         }
 
         const [deleted] = this.announcements.splice(index, 1);
-        this._save();
+        this._saveFallback();
         return { success: true, announcement: deleted };
     }
 
-    /**
-     * Reset/clear all announcements
-     */
-    clear() {
+    async clear() {
+        try {
+            await db.query("TRUNCATE TABLE announcements RESTART IDENTITY CASCADE;");
+        } catch (e) {
+            // Fallback
+        }
         this.announcements = [];
         this.currentId = 1;
-        this._save();
+        this._saveFallback();
     }
 }
 
-// Export singleton instance as default, and the class as named export
 const announcementModelInstance = new AnnouncementModel();
 module.exports = announcementModelInstance;
 module.exports.AnnouncementModel = AnnouncementModel;

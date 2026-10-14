@@ -1,32 +1,26 @@
 /**
- * User Model (In-Memory)
+ * User Model
  * 
- * Represents the User/Alumni entity and encapsulates all data-access
- * and business logic without requiring an external database connection.
- * 
- * Schema:
- * - id: number (auto-incremented)
- * - name: string (required)
- * - surname: string (required)
- * - age: number (required)
- * - birthday: string (required, YYYY-MM-DD format)
+ * Encapsulates data access and business logic for User/Alumni entity.
+ * Uses PostgreSQL database connection pool via config/db.js, with
+ * automatic fallback to local storage if database is unavailable.
  */
 
 const fs = require('fs');
 const path = require('path');
+const db = require('../config/db');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const DATA_FILE = path.join(DATA_DIR, 'users.json');
 
 class UserModel {
     constructor() {
-        // In-memory data store with file persistence fallback
         this.users = [];
         this.currentId = 1;
-        this._load();
+        this._loadFallback();
     }
 
-    _load() {
+    _loadFallback() {
         try {
             if (fs.existsSync(DATA_FILE)) {
                 const raw = fs.readFileSync(DATA_FILE, 'utf8');
@@ -39,11 +33,11 @@ class UserModel {
                 }
             }
         } catch (e) {
-            // Keep in-memory store if file read fails
+            // Keep in-memory
         }
     }
 
-    _save() {
+    _saveFallback() {
         try {
             if (!fs.existsSync(DATA_DIR)) {
                 fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -73,7 +67,7 @@ class UserModel {
             }
         }
 
-        if (data.age !== undefined && (typeof data.age !== 'number' || isNaN(data.age) || data.age < 0)) {
+        if (data.age !== undefined && (typeof Number(data.age) !== 'number' || isNaN(Number(data.age)) || Number(data.age) < 0)) {
             return { isValid: false, error: 'Age must be a valid non-negative number' };
         }
 
@@ -81,82 +75,131 @@ class UserModel {
     }
 
     /**
-     * Retrieve all users
-     * @returns {Array<Object>} List of all user records
+     * Retrieve all users from PostgreSQL (or fallback)
+     * @returns {Promise<Array<Object>>}
      */
-    getAll() {
-        return [...this.users];
+    async getAll() {
+        try {
+            const res = await db.query(
+                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city FROM users ORDER BY id ASC;"
+            );
+            return res.rows.map(r => ({
+                id: Number(r.id),
+                name: r.name,
+                surname: r.surname,
+                age: Number(r.age),
+                birthday: r.birthday || '',
+                email: r.email || '',
+                city: r.city || ''
+            }));
+        } catch (error) {
+            return [...this.users];
+        }
     }
 
-    /**
-     * Retrieve all users (alias for getAll)
-     * @returns {Array<Object>}
-     */
-    findAll() {
+    async findAll() {
         return this.getAll();
     }
 
     /**
-     * Find a single user by ID
-     * @param {number|string} id - User ID
-     * @returns {Object|null} The user object or null if not found
+     * Find a single user by ID from PostgreSQL
+     * @param {number|string} id
+     * @returns {Promise<Object|null>}
      */
-    getById(id) {
+    async getById(id) {
         const numericId = parseInt(id, 10);
         if (isNaN(numericId)) return null;
 
-        const user = this.users.find(u => u.id === numericId);
-        return user ? { ...user } : null;
+        try {
+            const res = await db.query(
+                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city FROM users WHERE id = $1 LIMIT 1;",
+                [numericId]
+            );
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                return {
+                    id: Number(r.id),
+                    name: r.name,
+                    surname: r.surname,
+                    age: Number(r.age),
+                    birthday: r.birthday || '',
+                    email: r.email || '',
+                    city: r.city || ''
+                };
+            }
+            return null;
+        } catch (error) {
+            const user = this.users.find(u => u.id === numericId);
+            return user ? { ...user } : null;
+        }
     }
 
-    /**
-     * Find a single user by ID (alias for getById)
-     * @param {number|string} id
-     * @returns {Object|null}
-     */
-    findById(id) {
+    async findById(id) {
         return this.getById(id);
     }
 
     /**
-     * Create a new user
-     * @param {Object} userData - Object containing name, surname, age, birthday
-     * @returns {{ success: boolean, user?: Object, error?: string }}
+     * Create a new user in PostgreSQL
+     * @param {Object} userData
+     * @returns {Promise<{ success: boolean, user?: Object, error?: string }>}
      */
-    create(userData) {
+    async create(userData) {
         const validation = this.validate(userData, false, 'POST');
         if (!validation.isValid) {
             return { success: false, error: validation.error };
         }
 
+        const email = userData.email || `${userData.name.toLowerCase()}.${userData.surname.toLowerCase()}${Date.now() % 10000}@example.com`;
+
+        try {
+            const res = await db.query(
+                "INSERT INTO users (name, surname, age, birthday, email, city) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city;",
+                [userData.name.trim(), userData.surname.trim(), Number(userData.age), userData.birthday, email, userData.city || '']
+            );
+
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                const newUser = {
+                    id: Number(r.id),
+                    name: r.name,
+                    surname: r.surname,
+                    age: Number(r.age),
+                    birthday: r.birthday,
+                    email: r.email,
+                    city: r.city
+                };
+                this.users.push(newUser);
+                this._saveFallback();
+                return { success: true, user: newUser };
+            }
+        } catch (error) {
+            // In case of DB constraint or offline, fallback to local storage
+            console.warn('DB create fallback:', error.message);
+        }
+
         const newUser = {
             id: this.currentId++,
-            name: userData.name,
-            surname: userData.surname,
+            name: userData.name.trim(),
+            surname: userData.surname.trim(),
             age: Number(userData.age),
             birthday: userData.birthday
         };
 
         this.users.push(newUser);
-        this._save();
+        this._saveFallback();
         return { success: true, user: { ...newUser } };
     }
 
     /**
      * Replace an existing user (Full update - PUT)
-     * @param {number|string} id - User ID
-     * @param {Object} updateData - Object containing all required user fields
-     * @returns {{ success: boolean, user?: Object, error?: string, notFound?: boolean }}
+     * @param {number|string} id
+     * @param {Object} updateData
+     * @returns {Promise<{ success: boolean, user?: Object, error?: string, notFound?: boolean }>}
      */
-    update(id, updateData) {
+    async update(id, updateData) {
         const numericId = parseInt(id, 10);
         if (isNaN(numericId)) {
             return { success: false, error: 'Invalid user ID' };
-        }
-
-        const index = this.users.findIndex(u => u.id === numericId);
-        if (index === -1) {
-            return { success: false, notFound: true, error: 'User not found' };
         }
 
         const validation = this.validate(updateData, false, 'PUT');
@@ -164,29 +207,40 @@ class UserModel {
             return { success: false, error: validation.error };
         }
 
-        const updatedUser = {
-            id: numericId,
-            name: updateData.name,
-            surname: updateData.surname,
-            age: Number(updateData.age),
-            birthday: updateData.birthday
-        };
+        try {
+            const existing = await this.getById(numericId);
+            if (!existing) {
+                return { success: false, notFound: true, error: 'User not found' };
+            }
 
-        this.users[index] = updatedUser;
-        this._save();
-        return { success: true, user: { ...updatedUser } };
-    }
+            const email = updateData.email !== undefined ? updateData.email.trim() : existing.email;
+            const city = updateData.city !== undefined ? updateData.city.trim() : existing.city;
 
-    /**
-     * Partially update an existing user (PATCH)
-     * @param {number|string} id - User ID
-     * @param {Object} updateData - Object containing fields to update
-     * @returns {{ success: boolean, user?: Object, error?: string, notFound?: boolean }}
-     */
-    patch(id, updateData) {
-        const numericId = parseInt(id, 10);
-        if (isNaN(numericId)) {
-            return { success: false, error: 'Invalid user ID' };
+            const res = await db.query(
+                "UPDATE users SET name = $1, surname = $2, age = $3, birthday = $4, email = $5, city = $6, updated_at = NOW() WHERE id = $7 RETURNING id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city;",
+                [updateData.name.trim(), updateData.surname.trim(), Number(updateData.age), updateData.birthday, email, city, numericId]
+            );
+
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                const updatedUser = {
+                    id: Number(r.id),
+                    name: r.name,
+                    surname: r.surname,
+                    age: Number(r.age),
+                    birthday: r.birthday,
+                    email: r.email,
+                    city: r.city
+                };
+                const idx = this.users.findIndex(u => u.id === numericId);
+                if (idx !== -1) this.users[idx] = updatedUser;
+                this._saveFallback();
+                return { success: true, user: updatedUser };
+            } else {
+                return { success: false, notFound: true, error: 'User not found' };
+            }
+        } catch (error) {
+            // Fallback
         }
 
         const index = this.users.findIndex(u => u.id === numericId);
@@ -194,46 +248,123 @@ class UserModel {
             return { success: false, notFound: true, error: 'User not found' };
         }
 
+        const updatedUser = {
+            id: numericId,
+            name: updateData.name.trim(),
+            surname: updateData.surname.trim(),
+            age: Number(updateData.age),
+            birthday: updateData.birthday,
+            email: updateData.email !== undefined ? updateData.email.trim() : this.users[index].email,
+            city: updateData.city !== undefined ? updateData.city.trim() : this.users[index].city
+        };
+
+        this.users[index] = updatedUser;
+        this._saveFallback();
+        return { success: true, user: { ...updatedUser } };
+    }
+
+    /**
+     * Partially update an existing user (PATCH)
+     * @param {number|string} id
+     * @param {Object} updateData
+     * @returns {Promise<{ success: boolean, user?: Object, error?: string, notFound?: boolean }>}
+     */
+    async patch(id, updateData) {
+        const numericId = parseInt(id, 10);
+        if (isNaN(numericId)) {
+            return { success: false, error: 'Invalid user ID' };
+        }
+
         const validation = this.validate(updateData, true);
         if (!validation.isValid) {
             return { success: false, error: validation.error };
         }
 
-        const existingUser = this.users[index];
-        const updatedUser = {
-            ...existingUser,
-            ...updateData,
-            id: numericId // Ensure ID cannot be overridden
-        };
-
-        if (updateData.age !== undefined) {
-            updatedUser.age = Number(updateData.age);
+        const existing = await this.getById(numericId);
+        if (!existing) {
+            return { success: false, notFound: true, error: 'User not found' };
         }
 
-        this.users[index] = updatedUser;
-        this._save();
-        return { success: true, user: { ...updatedUser } };
+        const name = updateData.name !== undefined ? updateData.name.trim() : existing.name;
+        const surname = updateData.surname !== undefined ? updateData.surname.trim() : existing.surname;
+        const age = updateData.age !== undefined ? Number(updateData.age) : existing.age;
+        const birthday = updateData.birthday !== undefined ? updateData.birthday : existing.birthday;
+        const email = updateData.email !== undefined ? updateData.email.trim() : existing.email;
+        const city = updateData.city !== undefined ? updateData.city.trim() : existing.city;
+
+        try {
+            const res = await db.query(
+                "UPDATE users SET name = $1, surname = $2, age = $3, birthday = $4, email = $5, city = $6, updated_at = NOW() WHERE id = $7 RETURNING id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city;",
+                [name, surname, age, birthday, email, city, numericId]
+            );
+
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                const updatedUser = {
+                    id: Number(r.id),
+                    name: r.name,
+                    surname: r.surname,
+                    age: Number(r.age),
+                    birthday: r.birthday,
+                    email: r.email,
+                    city: r.city
+                };
+                const idx = this.users.findIndex(u => u.id === numericId);
+                if (idx !== -1) this.users[idx] = updatedUser;
+                this._saveFallback();
+                return { success: true, user: updatedUser };
+            }
+        } catch (error) {
+            // Fallback
+        }
+
+        const index = this.users.findIndex(u => u.id === numericId);
+        if (index === -1) {
+            return { success: false, notFound: true, error: 'User not found' };
+        }
+
+        const localUser = {
+            ...this.users[index],
+            name,
+            surname,
+            age,
+            birthday,
+            email,
+            city
+        };
+
+        this.users[index] = localUser;
+        this._saveFallback();
+        return { success: true, user: { ...localUser } };
     }
 
-    /**
-     * Partially update an existing user (alias for patch)
-     * @param {number|string} id
-     * @param {Object} updateData
-     * @returns {{ success: boolean, user?: Object, error?: string, notFound?: boolean }}
-     */
-    partialUpdate(id, updateData) {
+    async partialUpdate(id, updateData) {
         return this.patch(id, updateData);
     }
 
     /**
      * Delete a user by ID
-     * @param {number|string} id - User ID
-     * @returns {{ success: boolean, user?: Object, error?: string, notFound?: boolean }}
+     * @param {number|string} id
+     * @returns {Promise<{ success: boolean, user?: Object, error?: string, notFound?: boolean }>}
      */
-    delete(id) {
+    async delete(id) {
         const numericId = parseInt(id, 10);
         if (isNaN(numericId)) {
             return { success: false, error: 'Invalid user ID' };
+        }
+
+        try {
+            const res = await db.query("DELETE FROM users WHERE id = $1 RETURNING id, name, surname;", [numericId]);
+            if (res.rows.length > 0) {
+                const idx = this.users.findIndex(u => u.id === numericId);
+                if (idx !== -1) this.users.splice(idx, 1);
+                this._saveFallback();
+                return { success: true, user: res.rows[0] };
+            } else {
+                return { success: false, notFound: true, error: 'User not found' };
+            }
+        } catch (error) {
+            // Fallback
         }
 
         const index = this.users.findIndex(u => u.id === numericId);
@@ -242,30 +373,29 @@ class UserModel {
         }
 
         const [deletedUser] = this.users.splice(index, 1);
-        this._save();
+        this._saveFallback();
         return { success: true, user: deletedUser };
     }
 
-    /**
-     * Delete a user by ID (alias for delete)
-     * @param {number|string} id
-     * @returns {{ success: boolean, user?: Object, error?: string, notFound?: boolean }}
-     */
-    deleteById(id) {
+    async deleteById(id) {
         return this.delete(id);
     }
 
     /**
-     * Reset/clear all users (useful for testing and reinitialization)
+     * Clear all users
      */
-    clear() {
+    async clear() {
+        try {
+            await db.query("TRUNCATE TABLE users RESTART IDENTITY CASCADE;");
+        } catch (e) {
+            // Fallback
+        }
         this.users = [];
         this.currentId = 1;
-        this._save();
+        this._saveFallback();
     }
 }
 
-// Export singleton instance as default, and the class as named export
 const userModelInstance = new UserModel();
 module.exports = userModelInstance;
 module.exports.UserModel = UserModel;

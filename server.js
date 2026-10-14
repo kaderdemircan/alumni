@@ -27,6 +27,10 @@ if (fs.existsSync(envPath)) {
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 
+// Initialize Database connection & verify tables
+const db = require('./config/db');
+db.initDb().catch(err => console.warn('Database init note:', err.message));
+
 // Import MVC Routers
 const handleApiUserRoutes = require('./routes/apiUserRoutes');
 const handleUserRoutes = require('./routes/userRoutes');

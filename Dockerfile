@@ -5,6 +5,9 @@ WORKDIR /app
 # Bağımlılık ve proje tanımlarını kopyala
 COPY package*.json ./
 
+# Bağımlılıkları yükle
+RUN npm install --omit=dev
+
 # Tüm proje dosyalarını kopyala
 COPY . .
 

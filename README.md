@@ -290,3 +290,49 @@ To illustrate how MVC components interact during execution:
 4.  **View / Response Rendering:**
     *   The controller sets HTTP status `201 Created` and header `Content-Type: application/json`.
     *   The controller sends the serialized response object `{ message: "User created successfully", user: newUser }` back to the client.
+
+---
+
+## 🌾 Database Migrations, Factories & Seeders
+
+Proje, veritabanı şemalarının versiyonlanması ve test/geliştirme ortamları için zengin sahte veri üretimi adına modern **Factory & Seeder** mimarisini içerir:
+
+### 1. Migrations (`migrations/`)
+* **`migrations/001_create_alumni_schema.sql`:** Kullanıcı ve mezuniyet ilişkisel tabloları.
+* **`migrations/002_create_announcements_schema.sql`:** Duyurular tablosu ve indeksleri.
+* **`migrations/003_seed_initial_data.sql`:** Başlangıç tohum verileri.
+* **`migrations/init.sql`:** Docker PostgreSQL konteyneri başlatıldığında otomatik çalışan tam şema.
+* **Durum Kontrolü:** `npm run migrate`
+
+### 2. Factories (`factories/`)
+Dış bağımlılığa gerek kalmadan (zero-dependency) gerçekçi Türkçe ve uluslararası sahte veriler üretir:
+* **`UserFactory` (`factories/userFactory.js`):** `make()`, `makeMany()`, `create()`, `createMany()`
+* **`AnnouncementFactory` (`factories/announcementFactory.js`):** `make()`, `makeMany()`, `create()`, `createMany()`
+
+### 3. Seeders (`seeders/`)
+* **`UserSeeder` (`seeders/userSeeder.js`):** Çekirdek demo hesapları ve rastgele mezunları sisteme yükler.
+* **`AnnouncementSeeder` (`seeders/announcementSeeder.js`):** Haber ve duyuruları yükler.
+* **`DatabaseSeeder` (`seeders/databaseSeeder.js`):** Tüm tohumlayıcıları koordine eder ve SQL çıktısı üretir.
+
+```bash
+# Veritabanını ve modelleri tohumlama:
+npm run seed
+
+# Mevcut verileri sıfırlayıp baştan temiz tohumlama:
+npm run db:seed
+```
+
+---
+
+## 🗄️ Database Connection & CRUD Interfaces
+
+Sistemdeki tüm CRUD operasyonları (REST API ve Web UI) PostgreSQL veritabanı ile doğrudan entegre çalışacak şekilde güncellenmiştir:
+
+* **Bağlantı Havuzu (`config/db.js`):** Node.js `pg` kütüphanesi ile bağlantı havuzu (`Pool`) yönetilir. `.env` dosyasındaki çevre değişkenleri (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`) otomatik okunur.
+* **Otomatik Tablo Başlatma (`initDb`):** Sunucu başladığında `users` ve `announcements` tablolarını doğrular ve eksikse otomatik oluşturur.
+* **Asenkron Model Mimarisi:** `UserModel` ve `AnnouncementModel` metodları parametreli SQL sorguları (`$1, $2, ...`) ile SQL Injection korumalı olarak çalışır.
+* **Akıllı Fallback Güvencesi:** PostgreSQL servisi kapalı veya erişilemez olduğunda sistem kesintiye uğramadan yerel veri depolamasına geri döner (graceful fallback).
+* **Uçtan Uca Arayüz Desteği:**
+  * **Web UI:** `/users` ve `/announcements` üzerinden tarayıcı formları ile ekleme, güncelleme, silme ve detay görüntüleme.
+  * **REST API:** `/api/users` ve `/api/announcements` üzerinden standart JSON yanıtları ve HTTP durum kodları ile tam CRUD desteği (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`).
+

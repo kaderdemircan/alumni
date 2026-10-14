@@ -146,7 +146,7 @@ class AnnouncementController {
     async getAll(req, res) {
         try {
             const template = await readTemplate(ANNOUNCEMENTS_VIEW_PATH);
-            const announcements = AnnouncementModel.getAll();
+            const announcements = await AnnouncementModel.getAll();
             const tableRows = renderAnnouncementTableRows(announcements);
 
             let alertHtml = '';
@@ -176,11 +176,11 @@ class AnnouncementController {
     async create(req, res) {
         try {
             const body = await parseRequestBody(req);
-            const result = AnnouncementModel.create(body);
+            const result = await AnnouncementModel.create(body);
 
             if (!result.success) {
                 const template = await readTemplate(ANNOUNCEMENTS_VIEW_PATH);
-                const announcements = AnnouncementModel.getAll();
+                const announcements = await AnnouncementModel.getAll();
                 const tableRows = renderAnnouncementTableRows(announcements);
                 const alertHtml = `<div class="alert alert-danger">⚠️ Hata: ${result.error}</div>`;
 
@@ -211,7 +211,7 @@ class AnnouncementController {
             return res.end('Geçersiz ID');
         }
 
-        const announcement = AnnouncementModel.getById(numericId);
+        const announcement = await AnnouncementModel.getById(numericId);
         if (!announcement) {
             res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
             return res.end('Duyuru bulunamadı.');
@@ -246,7 +246,7 @@ class AnnouncementController {
             return res.end('Geçersiz ID');
         }
 
-        const announcement = AnnouncementModel.getById(numericId);
+        const announcement = await AnnouncementModel.getById(numericId);
         if (!announcement) {
             res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
             return res.end('Duyuru bulunamadı.');
@@ -295,7 +295,7 @@ class AnnouncementController {
 
         try {
             const body = await parseRequestBody(req);
-            const result = AnnouncementModel.update(numericId, body);
+            const result = await AnnouncementModel.update(numericId, body);
 
             if (!result.success) {
                 return this.edit(req, res, id);
@@ -320,7 +320,7 @@ class AnnouncementController {
             return res.end('Geçersiz ID');
         }
 
-        AnnouncementModel.delete(numericId);
+        await AnnouncementModel.delete(numericId);
         res.writeHead(303, { 'Location': '/announcements?deleted=true' });
         res.end();
     }
