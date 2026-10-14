@@ -122,26 +122,36 @@ The current repository layout and how each file maps to MVC principles:
 ```text
 alumni/
 ├── controllers/
-│   ├── apiUserController.js     # [CONTROLLER] REST API controller handling JSON requests & responses
-│   └── userController.js        # [CONTROLLER] Web UI controller rendering HTML views & managing pages
+│   ├── apiAnnouncementController.js # [CONTROLLER] REST API controller for announcements (JSON)
+│   ├── apiUserController.js         # [CONTROLLER] REST API controller handling JSON requests & responses
+│   ├── announcementController.js    # [CONTROLLER] Web UI controller rendering announcement HTML views
+│   └── userController.js            # [CONTROLLER] Web UI controller rendering HTML views & managing pages
 ├── routes/
-│   ├── apiUserRoutes.js         # [ROUTER] Maps /api/users endpoints to ApiUserController
-│   └── userRoutes.js            # [ROUTER] Maps /users endpoints to UserController
+│   ├── apiAnnouncementRoutes.js     # [ROUTER] Maps /api/announcements to ApiAnnouncementController
+│   ├── apiUserRoutes.js             # [ROUTER] Maps /api/users endpoints to ApiUserController
+│   ├── announcementRoutes.js        # [ROUTER] Maps /announcements to AnnouncementController
+│   └── userRoutes.js                # [ROUTER] Maps /users endpoints to UserController
 ├── models/
-│   └── userModel.js             # [MODEL] In-memory User data model with full CRUD functions & validation
+│   ├── announcementModel.js         # [MODEL] In-memory Announcement data model with full CRUD & validation
+│   └── userModel.js                 # [MODEL] In-memory User data model with full CRUD functions & validation
 ├── views/
-│   └── users.html               # [VIEW] Alumni Directory table & user registration form template
-├── index.html                   # [VIEW] Home page UI for users
-├── about.html                   # [VIEW] About us page UI
-├── swagger.html                 # [VIEW] Swagger UI documentation presentation
-├── swagger.json                 # [VIEW / CONTRACT] OpenAPI 3.0 API specifications (updated with all endpoints)
-├── server.js                    # [SERVER ENTRY] HTTP server listener and top-level route coordinator
-├── README.md                    # Project and architectural documentation
-├── .postman/                    # API client configuration
-│   └── resources.yaml           # Postman workspace configuration
-└── postman/                     # API testing definitions
+│   ├── announcement-detail.html     # [VIEW] Single announcement detail page
+│   ├── announcement-edit.html       # [VIEW] Announcement edit form page
+│   ├── announcements.html           # [VIEW] Announcement management table & posting form
+│   ├── user-detail.html             # [VIEW] Single alumni profile card
+│   ├── user-edit.html               # [VIEW] Alumni edit form
+│   └── users.html                   # [VIEW] Alumni Directory table & user registration form template
+├── index.html                       # [VIEW] Home page UI for users
+├── about.html                       # [VIEW] About us page UI
+├── swagger.html                     # [VIEW] Swagger UI documentation presentation
+├── swagger.json                     # [VIEW / CONTRACT] OpenAPI 3.0 API specifications (updated with all endpoints)
+├── server.js                        # [SERVER ENTRY] HTTP server listener and top-level route coordinator
+├── README.md                        # Project and architectural documentation
+├── .postman/                        # API client configuration
+│   └── resources.yaml               # Postman workspace configuration
+└── postman/                         # API testing definitions
     └── globals/
-        └── workspace.globals.yaml # Postman global variables
+        └── workspace.globals.yaml   # Postman global variables
 ```
 
 #### Detailed Breakdown of Existing Files:

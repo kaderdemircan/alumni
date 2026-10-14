@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements Management - Alumni Network</title>
+    <style>
+        :root {
+            --clr-green: #2ecc71;
+            --clr-yellow: #f1c40f;
+            --clr-black: #111111;
+            --clr-blue: #3498db;
+            --clr-white: #ffffff;
+            --clr-bg: #f8f9fa;
+            --clr-gray: #e9ecef;
+            --clr-danger: #e74c3c;
+            --clr-warning: #f39c12;
+            --clr-purple: #9b59b6;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--clr-bg); 
+            color: var(--clr-black); 
+        }
+        header { 
+            background: var(--clr-black); 
+            color: var(--clr-white); 
+            padding: 1.5rem 0; 
+            text-align: center; 
+            border-bottom: 5px solid var(--clr-blue); 
+        }
+        header h2 { margin: 0; font-size: 2rem; letter-spacing: 1px; }
+        nav { 
+            background: var(--clr-blue); 
+            display: flex; 
+            justify-content: center; 
+            padding: 0.8rem; 
+            flex-wrap: wrap;
+        }
+        nav a { 
+            color: var(--clr-white); 
+            text-decoration: none; 
+            padding: 0.6rem 1.2rem; 
+            margin: 0.2rem 0.4rem; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            transition: all 0.3s ease; 
+        }
+        nav a:hover, nav a.active { 
+            background: var(--clr-yellow); 
+            color: var(--clr-black); 
+        }
+        .hero { 
+            background: linear-gradient(135deg, #8e44ad 0%, #2980b9 100%); 
+            color: var(--clr-white); 
+            padding: 3rem 2rem; 
+            text-align: center; 
+        }
+        .hero h1 { margin: 0 0 0.5rem; color: var(--clr-yellow); font-size: 2.2rem; }
+        .hero p { margin: 0; font-size: 1.1rem; opacity: 0.95; }
+        
+        .container { 
+            max-width: 1000px; 
+            margin: 2rem auto; 
+            padding: 0 1rem; 
+        }
+
+        .card {
+            background: var(--clr-white);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card-form { border-top: 5px solid var(--clr-purple); }
+        .card-table { border-top: 5px solid var(--clr-blue); }
+
+        h2 { 
+            margin-top: 0; 
+            color: var(--clr-black); 
+            border-bottom: 2px solid var(--clr-yellow); 
+            padding-bottom: 0.5rem; 
+            display: inline-block; 
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1.2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #333;
+        }
+
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            padding: 0.7rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .form-group input:focus, 
+        .form-group select:focus, 
+        .form-group textarea:focus {
+            border-color: var(--clr-purple);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(155, 89, 182, 0.2);
+        }
+
+        .form-actions {
+            margin-top: 1.5rem;
+            text-align: right;
+        }
+
+        .btn {
+            background: var(--clr-purple);
+            color: var(--clr-white);
+            border: none;
+            padding: 0.75rem 1.6rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background: #7d3c98; }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .alert-success { background: #d4edda; color: #155724; border-left: 5px solid var(--clr-green); }
+        .alert-danger { background: #f8d7da; color: #721c24; border-left: 5px solid var(--clr-danger); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        th, td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--clr-gray);
+        }
+
+        th {
+            background: #f1f2f6;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        tr:hover { background-color: #fafbfc; }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-general { background: #e2e3e5; color: #383d41; }
+        .badge-event { background: #d1ecf1; color: #0c5460; }
+        .badge-career { background: #d4edda; color: #155724; }
+        .badge-academic { background: #fff3cd; color: #856404; }
+
+        .priority-normal { color: #2ecc71; font-weight: 600; }
+        .priority-important { color: #f39c12; font-weight: 700; }
+        .priority-urgent { color: #e74c3c; font-weight: 800; }
+
+        .action-link {
+            display: inline-block;
+            padding: 0.3rem 0.5rem;
+            margin: 0 0.15rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .action-link:hover { background: var(--clr-gray); }
+        .action-link.delete { color: var(--clr-danger); }
+        .action-link.edit { color: var(--clr-warning); }
+        .action-link.view { color: var(--clr-blue); }
+
+        .links-bar {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+        .btn-outline {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--clr-blue);
+            color: var(--clr-blue);
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-outline:hover {
+            background: var(--clr-blue);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Alumni Network</h2>
+    </header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About Us</a>
+        <a href="/users">Alumni Directory</a>
+        <a href="/announcements" class="active">Announcements</a>
+        <a href="/api/swagger">API Docs (Swagger)</a>
+    </nav>
+    <div class="hero">
+        <h1>📢 Announcements & News</h1>
+        <p>Stay informed about campus events, career opportunities, and network updates.</p>
+    </div>
+
+    <div class="container">
+        <!-- ALERT_MESSAGE -->
+
+        <!-- 1. CREATE ANNOUNCEMENT FORM -->
+        <div class="card card-form">
+            <h2>➕ Post New Announcement</h2>
+            <p>Publish a new notice, event reminder, or news update to the alumni portal.</p>
+            
+            <form action="/announcements" method="POST">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="title">Title (Başlık):</label>
+                        <input type="text" id="title" name="title" placeholder="e.g. 2026 Mezunlar Zirvesi Kayıtları Açıldı" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="content">Content (İçerik):</label>
+                        <textarea id="content" name="content" placeholder="Duyuru detaylarını ve açıklamasını buraya yazın..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="author">Author / Unit (Yayınlayan):</label>
+                        <input type="text" id="author" name="author" placeholder="e.g. Mezunlar Derneği" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category (Kategori):</label>
+                        <select id="category" name="category" required>
+                            <option value="Genel">Genel</option>
+                            <option value="Etkinlik">Etkinlik</option>
+                            <option value="Kariyer">Kariyer</option>
+                            <option value="Akademik">Akademik</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">Priority (Öncelik):</label>
+                        <select id="priority" name="priority">
+                            <option value="Normal">Normal</option>
+                            <option value="Önemli">Önemli</option>
+                            <option value="Acil">Acil</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Date (Tarih):</label>
+                        <input type="date" id="date" name="date">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn">Publish Announcement</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 2. ANNOUNCEMENTS LIST / TABLE -->
+        <div class="card card-table">
+            <h2>📋 Active Announcements</h2>
+            <p>Below is the current list of announcements managed in the system.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">ID</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Author</th>
+                        <th>Date</th>
+                        <th>Priority</th>
+                        <th style="width: 120px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ANNOUNCEMENTS_TABLE_ROWS -->
+                </tbody>
+            </table>
+
+            <div class="links-bar">
+                <a href="/api/announcements" class="btn-outline" target="_blank">View Raw JSON API Data</a>
+                <a href="/api/swagger" class="btn-outline">Test in Swagger UI</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

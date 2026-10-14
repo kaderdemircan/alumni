@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Announcement #<!-- ANNOUNCEMENT_ID --> - Alumni Network</title>
+    <style>
+        :root {
+            --clr-green: #2ecc71;
+            --clr-yellow: #f1c40f;
+            --clr-black: #111111;
+            --clr-blue: #3498db;
+            --clr-white: #ffffff;
+            --clr-bg: #f8f9fa;
+            --clr-gray: #e9ecef;
+            --clr-danger: #e74c3c;
+            --clr-warning: #f39c12;
+            --clr-purple: #9b59b6;
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: var(--clr-bg); 
+            color: var(--clr-black); 
+        }
+        header { 
+            background: var(--clr-black); 
+            color: var(--clr-white); 
+            padding: 1.5rem 0; 
+            text-align: center; 
+            border-bottom: 5px solid var(--clr-blue); 
+        }
+        header h2 { margin: 0; font-size: 2rem; }
+        nav { 
+            background: var(--clr-blue); 
+            display: flex; 
+            justify-content: center; 
+            padding: 0.8rem; 
+            flex-wrap: wrap;
+        }
+        nav a { 
+            color: var(--clr-white); 
+            text-decoration: none; 
+            padding: 0.6rem 1.2rem; 
+            margin: 0.2rem 0.4rem; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            transition: 0.3s; 
+        }
+        nav a:hover, nav a.active { 
+            background: var(--clr-yellow); 
+            color: var(--clr-black); 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 3rem auto; 
+            padding: 0 1rem; 
+        }
+        .card {
+            background: var(--clr-white);
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            padding: 2.5rem;
+            border-top: 6px solid var(--clr-warning);
+        }
+        h2 { 
+            margin-top: 0; 
+            color: #2c3e50; 
+            border-bottom: 2px solid var(--clr-yellow); 
+            padding-bottom: 0.5rem; 
+            display: inline-block; 
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #333;
+        }
+        .form-group input, 
+        .form-group select, 
+        .form-group textarea {
+            padding: 0.7rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        .form-actions {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.6rem;
+            border-radius: 4px;
+            font-weight: bold;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-submit { background: var(--clr-green); color: white; }
+        .btn-submit:hover { background: #27ae60; }
+        .btn-cancel { background: #6c757d; color: white; }
+        .btn-cancel:hover { background: #5a6268; }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .alert-danger { background: #f8d7da; color: #721c24; border-left: 5px solid var(--clr-danger); }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Alumni Network</h2>
+    </header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About Us</a>
+        <a href="/users">Alumni Directory</a>
+        <a href="/announcements" class="active">Announcements</a>
+        <a href="/api/swagger">API Docs</a>
+    </nav>
+
+    <div class="container">
+        <!-- ALERT_MESSAGE -->
+        <div class="card">
+            <h2>✏️ Edit Announcement #<!-- ANNOUNCEMENT_ID --></h2>
+            <p>Update the information and content of this announcement.</p>
+
+            <form action="/announcements/<!-- ANNOUNCEMENT_ID -->/edit" method="POST">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="title">Title (Başlık):</label>
+                        <input type="text" id="title" name="title" value="<!-- ANNOUNCEMENT_TITLE -->" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="content">Content (İçerik):</label>
+                        <textarea id="content" name="content" required><!-- ANNOUNCEMENT_CONTENT --></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="author">Author / Unit (Yayınlayan):</label>
+                        <input type="text" id="author" name="author" value="<!-- ANNOUNCEMENT_AUTHOR -->" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category (Kategori):</label>
+                        <select id="category" name="category" required>
+                            <!-- CATEGORY_OPTIONS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">Priority (Öncelik):</label>
+                        <select id="priority" name="priority">
+                            <!-- PRIORITY_OPTIONS -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Date (Tarih):</label>
+                        <input type="date" id="date" name="date" value="<!-- ANNOUNCEMENT_DATE -->">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <a href="/announcements" class="btn btn-cancel">Cancel</a>
+                    <button type="submit" class="btn btn-submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

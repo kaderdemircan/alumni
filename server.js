@@ -7,6 +7,8 @@ const PORT = 8080; // Genellikle 80 portu Windows'ta yönetici izni gerektirebil
 // Import MVC Routers
 const handleApiUserRoutes = require('./routes/apiUserRoutes');
 const handleUserRoutes = require('./routes/userRoutes');
+const handleApiAnnouncementRoutes = require('./routes/apiAnnouncementRoutes');
+const handleAnnouncementRoutes = require('./routes/announcementRoutes');
 
 const server = http.createServer((req, res) => {
     // Kök dizin (/) için geçici ana sayfa tasarımı
@@ -62,6 +64,10 @@ const server = http.createServer((req, res) => {
     } else if (handleApiUserRoutes(req, res)) {
         return;
     } else if (handleUserRoutes(req, res)) {
+        return;
+    } else if (handleApiAnnouncementRoutes(req, res)) {
+        return;
+    } else if (handleAnnouncementRoutes(req, res)) {
         return;
     } else if (req.url === '/hello') {
         res.writeHead(200, { 'Content-Type': 'text/plain' });
