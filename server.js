@@ -36,6 +36,9 @@ const handleApiUserRoutes = require('./routes/apiUserRoutes');
 const handleUserRoutes = require('./routes/userRoutes');
 const handleApiAnnouncementRoutes = require('./routes/apiAnnouncementRoutes');
 const handleAnnouncementRoutes = require('./routes/announcementRoutes');
+const handleApiJobRoutes = require('./routes/apiJobRoutes');
+const handleApiJobApplicationRoutes = require('./routes/apiJobApplicationRoutes');
+const handleApiSkillRoutes = require('./routes/apiSkillRoutes');
 
 const server = http.createServer((req, res) => {
     // Kök dizin (/) için geçici ana sayfa tasarımı
@@ -87,10 +90,16 @@ const server = http.createServer((req, res) => {
     } else if (req.url === '/api/health' && req.method === 'GET') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'ok' }));
-    // MVC Route Handlers (API and Web UI)
+    // MVC Route Handlers (API and Web UI - Direct and Nested)
     } else if (handleApiUserRoutes(req, res)) {
         return;
     } else if (handleUserRoutes(req, res)) {
+        return;
+    } else if (handleApiJobRoutes(req, res)) {
+        return;
+    } else if (handleApiJobApplicationRoutes(req, res)) {
+        return;
+    } else if (handleApiSkillRoutes(req, res)) {
         return;
     } else if (handleApiAnnouncementRoutes(req, res)) {
         return;

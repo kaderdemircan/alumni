@@ -13,7 +13,7 @@ Bu döküman, **Mezun Takip Sistemi (Alumni Tracking System)** uygulamasının v
    - [3.3. work_experiences (İş Deneyimleri ve Kariyer)](#33-work_experiences-%C4%B0%C5%9F-deneyimleri-ve-kariyer)
    - [3.4. skills & alumni_skills (Yetkinlikler ve Eşleştirmeler)](#34-skills--alumni_skills-yetkinlikler-ve-e%C5%9Fle%C5%9Ftirmeler)
    - [3.5. events & event_attendees (Etkinlikler ve Katılım)](#35-events--event_attendees-etkinlikler-ve-kat%C4%B1l%C4%B1m)
-   - [3.6. job_postings & job_applications (Kariyer İlanları ve Başvurular)](#36-job_postings--job_applications-kariyer-%C4%B0lanlar%C4%B1-ve-ba%C5%9Fvurular)
+   - [3.6. job_postings, job_skills & job_applications (Kariyer İlanları ve Başvurular)](#36-job_postings-job_skills--job_applications-kariyer-%C4%B0lanlar%C4%B1-ve-ba%C5%9Fvurular)
    - [3.7. mentorships (Mentorluk İlişkileri)](#37-mentorships-mentorluk-%C4%B0li%C5%9Fkileri)
    - [3.8. privacy_settings (Gizlilik ve KVKK Tercihleri)](#38-privacy_settings-gizlilik-ve-kvkk-tercihleri)
 4. [İlişki Türleri ve Bütünlük Kuralları (Referential Integrity)](#4-%C4%B0li%C5%9Fki-t%C3%BCrleri-ve-b%C3%BCt%C3%BCnl%C3%BCk-kurallar%C4%B1)
@@ -46,7 +46,6 @@ erDiagram
     SKILLS ||--o{ ALUMNI_SKILLS : "gruplar"
     USERS ||--o{ EVENT_ATTENDEES : "katilir"
     EVENTS ||--o{ EVENT_ATTENDEES : "listeler"
-    USERS ||--o{ JOB_POSTINGS : "yayinlar"
     USERS ||--o{ JOB_APPLICATIONS : "basvurur"
     JOB_POSTINGS ||--o{ JOB_APPLICATIONS : "alır"
     USERS ||--o{ MENTORSHIPS : "mentor_olur"
@@ -118,6 +117,9 @@ erDiagram
         integer capacity
     }
 
+    JOB_POSTINGS ||--o{ JOB_SKILLS : "gerektirir"
+    SKILLS ||--o{ JOB_SKILLS : "eslestirir"
+
     EVENT_ATTENDEES {
         bigint event_id PK,FK
         bigint user_id PK,FK
@@ -127,24 +129,54 @@ erDiagram
 
     JOB_POSTINGS {
         bigserial id PK
-        bigint posted_by FK
         varchar company_name
+        varchar company_logo_url
         varchar title
+        varchar category
         text description
+        text requirements
+        text benefits
         varchar employment_type
+        varchar workplace_type
+        varchar experience_level
         varchar location
+        numeric salary_min
+        numeric salary_max
+        varchar currency
+        boolean is_salary_visible
+        varchar application_url
+        varchar contact_email
         date deadline
         varchar status
+        boolean is_featured
+        integer views_count
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    JOB_SKILLS {
+        bigint job_id PK,FK
+        bigint skill_id PK,FK
+        boolean is_mandatory
     }
 
     JOB_APPLICATIONS {
         bigserial id PK
         bigint job_id FK
         bigint user_id FK
-        text cover_letter
         varchar resume_url
+        text cover_letter
+        varchar portfolio_url
+        numeric expected_salary
+        varchar currency
+        integer notice_period_days
         varchar status
+        text review_notes
+        timestamp interview_date
+        text rejection_reason
+        smallint feedback_score
         timestamp applied_at
+        timestamp updated_at
     }
 
     MENTORSHIPS {
@@ -276,32 +308,70 @@ Mezunların sahip olduğu teknik ve sosyal yetkinlikleri çoktan çoğa (M:N) il
 
 ---
 
-### 3.6. `job_postings` & `job_applications` (Kariyer İlanları ve Başvurular)
-Mezunların kendi şirketleri adına iş ilanı yayınlayabileceği ve diğer mezunların başvurabileceği kariyer havuzu.
+### 3.6. `job_postings`, `job_skills` & `job_applications` (Kariyer İlanları ve Başvurular)
+Kariyer havuzundaki şirketlerin bağımsız iş ilanları, aranan yetkinlikler ve mezunların bu ilanlara yaptıkları başvurular. İlanlar doğrudan şirket/pozisyon bazlı yönetilir; mezunlar iş ilanlarına doğrudan `job_applications` üzerinden bağlanır.
 
 #### `job_postings` Tablosu
 | Kolon Adı | Veri Tipi | Kısıtlar | Açıklama |
 | :--- | :--- | :--- | :--- |
-| `id` | `BIGSERIAL` | `PRIMARY KEY` | İlan kimliği. |
-| `posted_by` | `BIGINT` | `NOT NULL`, `FK -> users(id) ON DELETE CASCADE` | İlanı veren mezun. |
-| `company_name` | `VARCHAR(200)` | `NOT NULL` | Firma adı. |
-| `title` | `VARCHAR(150)` | `NOT NULL` | İlan başlığı. |
-| `description` | `TEXT` | `NOT NULL` | İlan açıklaması ve aranan nitelikler. |
-| `employment_type`| `VARCHAR(30)` | `DEFAULT 'full-time'` | Tür: `full-time`, `part-time`, `contract`, `internship`. |
-| `location` | `VARCHAR(100)` | `NOT NULL` | Şehir veya `Remote`. |
+| `id` | `BIGSERIAL` | `PRIMARY KEY` | Benzersiz iş ilanı kimliği. |
+| `company_name` | `VARCHAR(200)` | `NOT NULL` | İlan sahibi kurum / şirket adı. |
+| `company_logo_url` | `VARCHAR(500)` | `NULL` | Şirket logosu görsel URL bağlantısı. |
+| `title` | `VARCHAR(150)` | `NOT NULL` | Pozisyon / İlan başlığı (örn. Senior Full Stack Engineer). |
+| `category` | `VARCHAR(100)` | `NOT NULL` | Sektör / İş alanı (Yazılım, Veri Bilimi, Finans, Pazarlama, İK vb.). |
+| `description` | `TEXT` | `NOT NULL` | Pozisyon tanımı, temel sorumluluklar ve rol kapsamı. |
+| `requirements` | `TEXT` | `NULL` | Aranan teknik/sosyal nitelikler ve mezuniyet kriterleri. |
+| `benefits` | `TEXT` | `NULL` | Yan haklar (Özel sağlık sigortası, yemek kartı, yol, eğitim fonu vb.). |
+| `employment_type` | `VARCHAR(30)` | `DEFAULT 'full-time'` | İstihdam türü: `full-time`, `part-time`, `contract`, `internship`, `freelance`. |
+| `workplace_type` | `VARCHAR(30)` | `DEFAULT 'hybrid'` | Çalışma modeli: `remote` (uzaktan), `hybrid` (hibrit), `on-site` (ofisten). |
+| `experience_level`| `VARCHAR(30)` | `DEFAULT 'mid'` | Deneyim seviyesi: `intern`, `entry`, `mid`, `senior`, `lead`, `executive`. |
+| `location` | `VARCHAR(150)` | `NOT NULL` | Şehir / Ülke bilgisi veya `Remote / Türkiye Geneli`. |
+| `salary_min` | `NUMERIC(12,2)` | `CHECK (salary_min >= 0)` | Minimum maaş / bütçe aralığı (isteğe bağlı). |
+| `salary_max` | `NUMERIC(12,2)` | `CHECK (salary_max >= salary_min)` | Maksimum maaş skalası (isteğe bağlı). |
+| `currency` | `VARCHAR(3)` | `DEFAULT 'TRY'` | Para birimi: `TRY`, `USD`, `EUR`, `GBP`. |
+| `is_salary_visible`| `BOOLEAN` | `DEFAULT FALSE` | Maaş aralığı mezunlara açıkça gösterilsin mi? |
+| `application_url` | `VARCHAR(500)` | `NULL` | Harici başvuru bağlantısı (LinkedIn, Kariyer.net, Şirket Portalı). |
+| `contact_email` | `VARCHAR(255)` | `NULL` | İlan başvuru/soru iletişim e-posta adresi. |
 | `deadline` | `DATE` | `NULL` | Son başvuru tarihi. |
-| `status` | `VARCHAR(20)` | `DEFAULT 'open'` | Durum: `open`, `closed`, `draft`. |
+| `status` | `VARCHAR(20)` | `DEFAULT 'open'` | İlan yayın durumu: `draft` (taslak), `open` (aktif), `closed` (kapandı), `archived` (arşiv). |
+| `is_featured` | `BOOLEAN` | `DEFAULT FALSE` | Vitrinde / öne çıkanlarda listelenme durumu. |
+| `views_count` | `INTEGER` | `DEFAULT 0`, `CHECK (views_count >= 0)` | İlan görüntülenme / sayaç istatistiği. |
+| `created_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | İlanın oluşturulma zaman damgası. |
+| `updated_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | İlanın son güncellenme zaman damgası. |
+
+#### `job_skills` Tablosu (İlan - Yetkinlik Eşleştirme)
+İş ilanlarının gerektirdiği teknik ve mesleki yetkinlikleri `skills` tablosuyla çoktan-çoğa (M:N) ilişkilendirir. Mezunların profil yetkinlikleriyle ilanların otomatik eşleştirilmesini sağlar.
+
+| Kolon Adı | Veri Tipi | Kısıtlar | Açıklama |
+| :--- | :--- | :--- | :--- |
+| `job_id` | `BIGINT` | `NOT NULL`, `FK -> job_postings(id) ON DELETE CASCADE` | İlgili iş ilanı. |
+| `skill_id` | `BIGINT` | `NOT NULL`, `FK -> skills(id) ON DELETE CASCADE` | İstenen yetkinlik. |
+| `is_mandatory` | `BOOLEAN` | `DEFAULT TRUE` | Zorunlu yetkinlik mi (`true`) yoksa tercih sebebi mi (`false`). |
+
+*Birleşik Birincil Anahtar (Composite PK):* `(job_id, skill_id)`
 
 #### `job_applications` Tablosu
 | Kolon Adı | Veri Tipi | Kısıtlar | Açıklama |
 | :--- | :--- | :--- | :--- |
-| `id` | `BIGSERIAL` | `PRIMARY KEY` | Başvuru kimliği. |
-| `job_id` | `BIGINT` | `NOT NULL`, `FK -> job_postings(id) ON DELETE CASCADE` | İlgili iş ilanı. |
-| `user_id` | `BIGINT` | `NOT NULL`, `FK -> users(id) ON DELETE CASCADE` | Başvuran mezun. |
-| `cover_letter` | `TEXT` | `NULL` | Ön yazı / niyet mektubu. |
+| `id` | `BIGSERIAL` | `PRIMARY KEY` | Başvuru benzersiz kimliği. |
+| `job_id` | `BIGINT` | `NOT NULL`, `FK -> job_postings(id) ON DELETE CASCADE` | İlgili iş ilanı referansı. |
+| `user_id` | `BIGINT` | `NOT NULL`, `FK -> users(id) ON DELETE CASCADE` | Başvuran mezun referansı. |
 | `resume_url` | `VARCHAR(500)` | `NULL` | Özgeçmiş (CV) doküman bağlantısı. |
-| `status` | `VARCHAR(20)` | `DEFAULT 'submitted'` | Durum: `submitted`, `in_review`, `accepted`, `rejected`. |
-| `applied_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Başvuru zamanı. |
+| `cover_letter` | `TEXT` | `NULL` | Ön yazı / niyet mektubu. |
+| `portfolio_url` | `VARCHAR(500)` | `NULL` | Portföy/GitHub/LinkedIn web bağlantısı. |
+| `expected_salary` | `NUMERIC(12,2)` | `NULL`, `CHECK (expected_salary >= 0)` | Adayın beklediği aylık net/brüt ücret. |
+| `currency` | `VARCHAR(3)` | `DEFAULT 'TRY'` | Para birimi (`TRY`, `USD`, `EUR`, `GBP`). |
+| `notice_period_days` | `INTEGER` | `DEFAULT 0`, `CHECK (notice_period_days >= 0)` | İhbar süresi (gün cinsinden). |
+| `status` | `VARCHAR(30)` | `DEFAULT 'submitted'` | Başvuru süreci durumu: `submitted`, `in_review`, `interview_scheduled`, `shortlisted`, `offered`, `accepted`, `rejected`, `withdrawn`. |
+| `review_notes` | `TEXT` | `NULL` | İK ve ilan sahibi değerlendirme / mülakat notları. |
+| `interview_date` | `TIMESTAMPTZ` | `NULL` | Planlanan mülakat tarihi ve saati. |
+| `rejection_reason` | `TEXT` | `NULL` | Reddedilme gerekçesi / adaya iletilen geri bildirim. |
+| `feedback_score` | `SMALLINT` | `NULL`, `CHECK (feedback_score >= 1 AND feedback_score <= 5)` | Aday değerlendirme puanı (1-5 arası). |
+| `applied_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Başvuru yapılma zamanı. |
+| `updated_at` | `TIMESTAMPTZ` | `DEFAULT NOW()` | Son durum / kayıt güncelleme zamanı. |
+
+*Benzersizlik Kısıtı (Unique Constraint):* `CONSTRAINT unique_user_job_application UNIQUE (job_id, user_id)`
+*Açıklama:* Bir mezun aynı ilana birden fazla aktif başvuru gönderemez; mükerrer başvuru veritabanı seviyesinde engellenir.
 
 ---
 
@@ -337,9 +407,15 @@ Her mezunun kişisel profilinde hangi verilerin rehberde açık olacağını bel
 ## 4. İlişki Türleri ve Bütünlük Kuralları
 
 * **Cascade Silme (ON DELETE CASCADE):**
-  Bir mezun (`users`) silindiğinde; ona ait tüm `academic_records`, `work_experiences`, `alumni_skills`, `job_applications` ve `privacy_settings` kayıtları ilişkisel bütünlük gereği otomatik olarak temizlenir.
+  Bir mezun (`users`) silindiğinde; ona ait tüm `academic_records`, `work_experiences`, `alumni_skills`, `job_applications` ve `privacy_settings` kayıtları ilişkisel bütünlük gereği otomatik olarak temizlenir. Bir iş ilanı (`job_postings`) silindiğinde ise ilana bağlı tüm `job_applications` ve `job_skills` kayıtları otomatik silinir. İş ilanları doğrudan bireysel kullanıcıya bağlı olmayıp bağımsız kurumsal ilanlardır; mezunlar iş ilanlarıyla doğrudan `job_applications` başvuruları üzerinden bağlanır.
 * **Yetim Kayıt Önleme (ON DELETE SET NULL):**
   Bir etkinlik organizatörü hesabı silinirse, etkinlik kaybolmaz; sadece `events.organizer_id` değeri `NULL` yapılır.
+* **Maaş Skalası ve Değer Doğrulama (Domain Integrity):**
+  `job_postings` tablosunda `salary_min >= 0` ve `salary_max >= salary_min` kontrolleri `CHECK` kısıtıyla garanti altına alınır.
+* **Tekil Başvuru Bütünlüğü (Unique Application Constraint):**
+  Bir mezunun aynı iş ilanına mükerrer başvuru yapmasını engellemek amacıyla `(job_id, user_id)` üzerinde `UNIQUE` kısıtı (`unique_user_job_application`) uygulanır.
+* **Başvuru Yaşam Döngüsü ve Değerlendirme Kısıtları:**
+  `job_applications` tablosunda `status` alanı tanımlı durumlarla (`submitted`, `in_review`, `interview_scheduled`, `shortlisted`, `offered`, `accepted`, `rejected`, `withdrawn`) sınırlandırılır; `expected_salary >= 0`, `notice_period_days >= 0` ve `feedback_score BETWEEN 1 AND 5` kontrolleri `CHECK` ile güvenceye alınır.
 * **Kendine Referans & Rol Ayrımı (Self-Referential Logic):**
   `mentorships` tablosundaki `mentor_id` ve `mentee_id` alanlarının ikisi de `users(id)` anahtarına bağlanır. Bir kullanıcının kendisinin mentoru olmasını engellemek için `CHECK (mentor_id <> mentee_id)` kuralı uygulanır.
 
@@ -352,8 +428,13 @@ Sık yapılan arama ve filtreleme operasyonlarında veritabanı yanıt süreleri
 1. **`users(email)`:** Giriş işlemlerinde ve tekillik kontrolünde anlık arama (Unique Index).
 2. **`academic_records(department, graduation_year)`:** "2020 yılı Bilgisayar Mühendisliği mezunları" gibi filtrelemeler için birleşik indeks (Composite Index).
 3. **`work_experiences(company_name)`:** "X şirketinde çalışan mezunları bul" sorguları için indeks.
-4. **`job_postings(status, deadline)`:** Açık ilanların listelenmesi için filtreleme indeksi.
-5. **`event_attendees(user_id)` & `event_attendees(event_id)`:** Katılımcı ve etkinlik bazlı hızlı sorgulama.
+4. **`job_postings(status, deadline)`:** Açık ilanların süresine göre listelenmesi için filtreleme indeksi.
+5. **`job_postings(category, location)`:** Sektör ve şehir bazlı kariyer ilan aramaları için birleşik indeks.
+6. **`job_postings(workplace_type, employment_type)`:** "Remote & Full-time" gibi çalışma modeli filtreleme indeksi.
+7. **`job_skills(skill_id)`:** Yetkinlik bazlı iş ilanı ve mezun eşleştirme sorguları için ters indeks.
+8. **`event_attendees(user_id)` & `event_attendees(event_id)`:** Katılımcı ve etkinlik bazlı hızlı sorgulama.
+9. **`job_applications(job_id, status)`:** Bir ilana gelen başvuruların aşamalarına göre hızlı filtrelenmesi için birleşik indeks.
+10. **`job_applications(user_id, applied_at DESC)`:** Mezunun kendi başvuru geçmişini kronolojik listeleme indeksi.
 
 ---
 
@@ -443,31 +524,66 @@ CREATE TABLE event_attendees (
     PRIMARY KEY (event_id, user_id)
 );
 
--- 8. JOB POSTINGS TABLOSU
+-- 8. JOB POSTINGS TABLOSU (Kariyer & İş İlanları)
 CREATE TABLE job_postings (
     id BIGSERIAL PRIMARY KEY,
-    posted_by BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     company_name VARCHAR(200) NOT NULL,
+    company_logo_url VARCHAR(500),
     title VARCHAR(150) NOT NULL,
+    category VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
+    requirements TEXT,
+    benefits TEXT,
     employment_type VARCHAR(30) DEFAULT 'full-time',
-    location VARCHAR(100) NOT NULL,
+    workplace_type VARCHAR(30) DEFAULT 'hybrid',
+    experience_level VARCHAR(30) DEFAULT 'mid',
+    location VARCHAR(150) NOT NULL,
+    salary_min NUMERIC(12,2) CHECK (salary_min >= 0),
+    salary_max NUMERIC(12,2),
+    currency VARCHAR(3) DEFAULT 'TRY',
+    is_salary_visible BOOLEAN DEFAULT FALSE,
+    application_url VARCHAR(500),
+    contact_email VARCHAR(255),
     deadline DATE,
-    status VARCHAR(20) DEFAULT 'open'
+    status VARCHAR(20) DEFAULT 'open',
+    is_featured BOOLEAN DEFAULT FALSE,
+    views_count INTEGER DEFAULT 0 CHECK (views_count >= 0),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT check_salary_range CHECK (salary_max IS NULL OR salary_min IS NULL OR salary_max >= salary_min)
 );
 
--- 9. JOB APPLICATIONS TABLOSU
+-- 9. JOB SKILLS TABLOSU (İlan - Yetkinlik Eşleştirme)
+CREATE TABLE job_skills (
+    job_id BIGINT NOT NULL REFERENCES job_postings(id) ON DELETE CASCADE,
+    skill_id BIGINT NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+    is_mandatory BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (job_id, skill_id)
+);
+
+-- 10. JOB APPLICATIONS TABLOSU
 CREATE TABLE job_applications (
     id BIGSERIAL PRIMARY KEY,
     job_id BIGINT NOT NULL REFERENCES job_postings(id) ON DELETE CASCADE,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    cover_letter TEXT,
     resume_url VARCHAR(500),
-    status VARCHAR(20) DEFAULT 'submitted',
-    applied_at TIMESTAMPTZ DEFAULT NOW()
+    cover_letter TEXT,
+    portfolio_url VARCHAR(500),
+    expected_salary NUMERIC(12,2) CHECK (expected_salary >= 0),
+    currency VARCHAR(3) DEFAULT 'TRY',
+    notice_period_days INTEGER DEFAULT 0 CHECK (notice_period_days >= 0),
+    status VARCHAR(30) DEFAULT 'submitted',
+    review_notes TEXT,
+    interview_date TIMESTAMPTZ,
+    rejection_reason TEXT,
+    feedback_score SMALLINT CHECK (feedback_score >= 1 AND feedback_score <= 5),
+    applied_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT unique_user_job_application UNIQUE (job_id, user_id),
+    CONSTRAINT check_application_status CHECK (status IN ('submitted', 'in_review', 'interview_scheduled', 'shortlisted', 'offered', 'accepted', 'rejected', 'withdrawn'))
 );
 
--- 10. MENTORSHIPS TABLOSU
+-- 11. MENTORSHIPS TABLOSU
 CREATE TABLE mentorships (
     id BIGSERIAL PRIMARY KEY,
     mentor_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -479,7 +595,7 @@ CREATE TABLE mentorships (
     CONSTRAINT check_different_users CHECK (mentor_id <> mentee_id)
 );
 
--- 11. PRIVACY SETTINGS TABLOSU
+-- 12. PRIVACY SETTINGS TABLOSU
 CREATE TABLE privacy_settings (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
@@ -493,5 +609,10 @@ CREATE TABLE privacy_settings (
 CREATE INDEX idx_academic_records_dept_grad ON academic_records (department, graduation_year);
 CREATE INDEX idx_work_experiences_company ON work_experiences (company_name);
 CREATE INDEX idx_job_postings_status_deadline ON job_postings (status, deadline);
+CREATE INDEX idx_job_postings_category_location ON job_postings (category, location);
+CREATE INDEX idx_job_postings_workplace_type ON job_postings (workplace_type, employment_type);
+CREATE INDEX idx_job_skills_skill ON job_skills (skill_id);
 CREATE INDEX idx_events_date ON events (event_date);
+CREATE INDEX idx_job_applications_job_status ON job_applications (job_id, status);
+CREATE INDEX idx_job_applications_user_applied ON job_applications (user_id, applied_at DESC);
 ```

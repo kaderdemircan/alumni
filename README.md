@@ -301,6 +301,9 @@ Proje, veritabanı şemalarının versiyonlanması ve test/geliştirme ortamlar�
 * **`migrations/001_create_alumni_schema.sql`:** Kullanıcı ve mezuniyet ilişkisel tabloları.
 * **`migrations/002_create_announcements_schema.sql`:** Duyurular tablosu ve indeksleri.
 * **`migrations/003_seed_initial_data.sql`:** Başlangıç tohum verileri.
+* **`migrations/004_update_job_postings_schema.sql`:** Kariyer ilanları (`job_postings`) ve yetkinlik eşleştirme (`job_skills`) şeması.
+* **`migrations/005_update_job_applications_schema.sql`:** Kariyer başvuruları (`job_applications`) gelişmiş nitelikleri (maaş beklentisi, ihbar süresi, portföy, mülakat tarihi, değerlendirme notları, skor), tekil başvuru (`unique`) kısıtı ve performans indeksleri.
+* **`migrations/006_decouple_user_and_job_postings.sql`:** İş ilanlarını (`job_postings`) kullanıcılardan (`users`) tamamen ayırır (`posted_by` kaldırıldı). Kullanıcılar ile ilanlar arasındaki ilişki doğrudan değil, yalnızca iş başvuruları (`job_applications`) üzerinden kurulur.
 * **`migrations/init.sql`:** Docker PostgreSQL konteyneri başlatıldığında otomatik çalışan tam şema.
 * **Durum Kontrolü:** `npm run migrate`
 
@@ -308,15 +311,20 @@ Proje, veritabanı şemalarının versiyonlanması ve test/geliştirme ortamlar�
 Dış bağımlılığa gerek kalmadan (zero-dependency) gerçekçi Türkçe ve uluslararası sahte veriler üretir:
 * **`UserFactory` (`factories/userFactory.js`):** `make()`, `makeMany()`, `create()`, `createMany()`
 * **`AnnouncementFactory` (`factories/announcementFactory.js`):** `make()`, `makeMany()`, `create()`, `createMany()`
+* **`JobPostingFactory` (`factories/jobPostingFactory.js`):** `make()`, `makeMany()`, `create()`, `createMany()`
 
 ### 3. Seeders (`seeders/`)
 * **`UserSeeder` (`seeders/userSeeder.js`):** Çekirdek demo hesapları ve rastgele mezunları sisteme yükler.
 * **`AnnouncementSeeder` (`seeders/announcementSeeder.js`):** Haber ve duyuruları yükler.
+* **`JobPostingSeeder` (`seeders/jobPostingSeeder.js`):** Sektör devi şirketlerin kariyer fırsatlarını ve aranan yetkinlikleri (`job_skills`) tohumlar.
 * **`DatabaseSeeder` (`seeders/databaseSeeder.js`):** Tüm tohumlayıcıları koordine eder ve SQL çıktısı üretir.
 
 ```bash
-# Veritabanını ve modelleri tohumlama:
+# Tüm tabloları (kullanıcılar, duyurular, iş ilanları) tohumlama:
 npm run seed
+
+# Yalnızca iş ilanları (job-postings) tablosunu tohumlama:
+npm run seed:jobs
 
 # Mevcut verileri sıfırlayıp baştan temiz tohumlama:
 npm run db:seed
@@ -335,4 +343,46 @@ Sistemdeki tüm CRUD operasyonları (REST API ve Web UI) PostgreSQL veritabanı 
 * **Uçtan Uca Arayüz Desteği:**
   * **Web UI:** `/users` ve `/announcements` üzerinden tarayıcı formları ile ekleme, güncelleme, silme ve detay görüntüleme.
   * **REST API:** `/api/users` ve `/api/announcements` üzerinden standart JSON yanıtları ve HTTP durum kodları ile tam CRUD desteği (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`).
+
+---
+
+## 🔗 Direct and Nested REST API Routes
+
+Uygulama, RESTful mimari standartlarına uygun **Doğrudan (Direct)** ve **İlişkisel İçiçe (Nested)** rotaları destekler:
+
+### 1. Doğrudan Rotalar (Direct Routes)
+Ana varlıkların (Users, Jobs, Applications, Skills, Announcements) bağımsız CRUD operasyonları:
+
+| HTTP Metodu | Uç Nokta (Endpoint) | Açıklama |
+| :--- | :--- | :--- |
+| `GET` | `/api/users` | Tüm mezunları listeler |
+| `POST` | `/api/users` | Yeni mezun kaydı oluşturur |
+| `GET` / `PUT` / `PATCH` / `DELETE` | `/api/users/:id` | Tekil kullanıcı CRUD işlemleri |
+| `GET` | `/api/jobs` | Tüm iş ilanlarını listeler (`?status=open&category=...` filtreleri desteklenir) |
+| `POST` | `/api/jobs` | Yeni iş ilanı yayınlar |
+| `GET` / `PUT` / `PATCH` / `DELETE` | `/api/jobs/:id` | Tekil iş ilanı detay, güncelleme ve silme |
+| `GET` | `/api/applications` | Tüm iş başvurularını listeler (`?job_id=...&user_id=...&status=...` filtreleri desteklenir) |
+| `POST` | `/api/applications` | Yeni başvuru kaydı oluşturur (mükerrer başvuru engellenir) |
+| `GET` | `/api/applications/:id` | Başvuru detayını, ilan ve aday profiliyle birlikte görüntüler |
+| `PUT` | `/api/applications/:id` | Başvuru kaydını tam günceller |
+| `PATCH` | `/api/applications/:id` | Başvuru alanlarını kısmi günceller |
+| `PATCH` | `/api/applications/:id/status` | Başvuru durumunu günceller (`submitted`, `in_review`, `interview_scheduled`, `shortlisted`, `offered`, `accepted`, `rejected`, `withdrawn`) |
+| `POST` | `/api/applications/:id/interview` | Aday için mülakat tarihi planlar ve not ekler |
+| `DELETE` | `/api/applications/:id` | Başvuruyu siler / geri çeker |
+| `GET` / `POST` | `/api/skills` | Yetkinlik listeleme ve yeni yetkinlik ekleme |
+| `GET` / `POST` | `/api/announcements` | Duyurular listesi ve yeni duyuru oluşturma |
+
+### 2. İçiçe Rotalar (Nested Routes)
+İlişkisel bağımlılıkları ve üst-alt varlık hiyerarşisini temsil eden rotalar:
+
+| Üst Varlık (Parent) | Alt Varlık (Child) | HTTP Metodu | Uç Nokta (Nested Endpoint) | Açıklama |
+| :--- | :--- | :--- | :--- | :--- |
+| **User** | **Applications** | `GET` | `/api/users/:userId/applications` | Belirli bir mezunun yaptığı tüm iş başvurularını listeler |
+| **User** | **Applications** | `POST` | `/api/users/:userId/applications` | Belirli bir mezun adına otomatik bağlı yeni iş başvurusu gönderir |
+| **User** | **Skills** | `GET` | `/api/users/:userId/skills` | Belirli bir mezunun sahip olduğu yetkinlikleri listeler |
+| **Job** | **Applications** | `GET` | `/api/jobs/:jobId/applications` | Belirli bir ilana gelen tüm başvuruları ve aday profillerini listeler |
+| **Job** | **Applications** | `POST` | `/api/jobs/:jobId/applications` | Belirli bir iş ilanına yeni başvuru gönderir (`job_id` otomatik bağlanır) |
+| **Job** | **Skills** | `GET` | `/api/jobs/:jobId/skills` | Belirli bir ilanın aradığı zorunlu/tercih yetkinlikleri listeler |
+| **Job** | **Skills** | `POST` | `/api/jobs/:jobId/skills` | Belirli bir ilana yeni yetkinlik bağlar (`skill_id`, `is_mandatory`) |
+| **Job** | **Skills** | `DELETE` | `/api/jobs/:jobId/skills/:skillId` | İlandan yetkinlik bağlantısını kaldırır |
 

@@ -394,6 +394,55 @@ class UserModel {
         this.currentId = 1;
         this._saveFallback();
     }
+
+    // =========================================================================
+    // RELATIONSHIPS & ASSOCIATIONS (Defined using migration schema)
+    // =========================================================================
+
+
+
+    /**
+     * Relationship: HasMany -> JobApplications (job_applications.user_id -> users.id)
+     * Fetches all career job applications submitted by this alumnus
+     * @param {number|string} userId
+     * @returns {Promise<Array<Object>>}
+     */
+    async getJobApplications(userId) {
+        const numericId = parseInt(userId, 10);
+        if (isNaN(numericId)) return [];
+        const JobApplicationModel = require('./jobApplicationModel');
+        return JobApplicationModel.getByUserId(numericId);
+    }
+
+    /**
+     * Relationship: BelongsToMany -> Skills (via alumni_skills)
+     * Fetches all skills tagged to this alumnus profile
+     * @param {number|string} userId
+     * @returns {Promise<Array<Object>>}
+     */
+    async getSkills(userId) {
+        const numericId = parseInt(userId, 10);
+        if (isNaN(numericId)) return [];
+
+        try {
+            const res = await db.query(`
+                SELECT s.id, s.name, s.category, als.proficiency_level
+                FROM skills s
+                JOIN alumni_skills als ON s.id = als.skill_id
+                WHERE als.user_id = $1
+                ORDER BY s.name ASC;
+            `, [numericId]);
+
+            return res.rows.map(r => ({
+                id: Number(r.id),
+                name: r.name,
+                category: r.category || '',
+                proficiency_level: r.proficiency_level || 'intermediate'
+            }));
+        } catch (e) {
+            return [];
+        }
+    }
 }
 
 const userModelInstance = new UserModel();

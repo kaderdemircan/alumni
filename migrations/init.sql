@@ -81,24 +81,58 @@ CREATE TABLE IF NOT EXISTS event_attendees (
 
 CREATE TABLE IF NOT EXISTS job_postings (
     id BIGSERIAL PRIMARY KEY,
-    posted_by BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     company_name VARCHAR(200) NOT NULL,
+    company_logo_url VARCHAR(500),
     title VARCHAR(150) NOT NULL,
+    category VARCHAR(100) NOT NULL DEFAULT 'Genel',
     description TEXT NOT NULL,
+    requirements TEXT,
+    benefits TEXT,
     employment_type VARCHAR(30) DEFAULT 'full-time',
-    location VARCHAR(100) NOT NULL,
+    workplace_type VARCHAR(30) DEFAULT 'hybrid',
+    experience_level VARCHAR(30) DEFAULT 'mid',
+    location VARCHAR(150) NOT NULL,
+    salary_min NUMERIC(12,2) CHECK (salary_min >= 0),
+    salary_max NUMERIC(12,2),
+    currency VARCHAR(3) DEFAULT 'TRY',
+    is_salary_visible BOOLEAN DEFAULT FALSE,
+    application_url VARCHAR(500),
+    contact_email VARCHAR(255),
     deadline DATE,
-    status VARCHAR(20) DEFAULT 'open'
+    status VARCHAR(20) DEFAULT 'open',
+    is_featured BOOLEAN DEFAULT FALSE,
+    views_count INTEGER DEFAULT 0 CHECK (views_count >= 0),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT check_salary_range CHECK (salary_max IS NULL OR salary_min IS NULL OR salary_max >= salary_min)
+);
+
+CREATE TABLE IF NOT EXISTS job_skills (
+    job_id BIGINT NOT NULL REFERENCES job_postings(id) ON DELETE CASCADE,
+    skill_id BIGINT NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+    is_mandatory BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (job_id, skill_id)
 );
 
 CREATE TABLE IF NOT EXISTS job_applications (
     id BIGSERIAL PRIMARY KEY,
     job_id BIGINT NOT NULL REFERENCES job_postings(id) ON DELETE CASCADE,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    cover_letter TEXT,
     resume_url VARCHAR(500),
-    status VARCHAR(20) DEFAULT 'submitted',
-    applied_at TIMESTAMPTZ DEFAULT NOW()
+    cover_letter TEXT,
+    portfolio_url VARCHAR(500),
+    expected_salary NUMERIC(12,2) CHECK (expected_salary >= 0),
+    currency VARCHAR(3) DEFAULT 'TRY',
+    notice_period_days INTEGER DEFAULT 0 CHECK (notice_period_days >= 0),
+    status VARCHAR(30) DEFAULT 'submitted',
+    review_notes TEXT,
+    interview_date TIMESTAMPTZ,
+    rejection_reason TEXT,
+    feedback_score SMALLINT CHECK (feedback_score >= 1 AND feedback_score <= 5),
+    applied_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT unique_user_job_application UNIQUE (job_id, user_id),
+    CONSTRAINT check_application_status CHECK (status IN ('submitted', 'in_review', 'interview_scheduled', 'shortlisted', 'offered', 'accepted', 'rejected', 'withdrawn'))
 );
 
 CREATE TABLE IF NOT EXISTS mentorships (
@@ -138,9 +172,14 @@ CREATE TABLE IF NOT EXISTS announcements (
 CREATE INDEX IF NOT EXISTS idx_academic_records_dept_grad ON academic_records (department, graduation_year);
 CREATE INDEX IF NOT EXISTS idx_work_experiences_company ON work_experiences (company_name);
 CREATE INDEX IF NOT EXISTS idx_job_postings_status_deadline ON job_postings (status, deadline);
+CREATE INDEX IF NOT EXISTS idx_job_postings_category_location ON job_postings (category, location);
+CREATE INDEX IF NOT EXISTS idx_job_postings_workplace_type ON job_postings (workplace_type, employment_type);
+CREATE INDEX IF NOT EXISTS idx_job_skills_skill ON job_skills (skill_id);
 CREATE INDEX IF NOT EXISTS idx_events_date ON events (event_date);
 CREATE INDEX IF NOT EXISTS idx_announcements_category ON announcements (category);
 CREATE INDEX IF NOT EXISTS idx_announcements_date ON announcements (date);
+CREATE INDEX IF NOT EXISTS idx_job_applications_job_status ON job_applications (job_id, status);
+CREATE INDEX IF NOT EXISTS idx_job_applications_user_applied ON job_applications (user_id, applied_at DESC);
 
 -- 4. SEED DATA
 INSERT INTO users (name, surname, age, birthday, email, city, country, bio)

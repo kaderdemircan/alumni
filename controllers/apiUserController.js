@@ -176,6 +176,85 @@ class ApiUserController {
         });
     }
 
+    // =========================================================================
+    // NESTED ROUTES (/api/users/:userId/applications, /skills)
+    // =========================================================================
+
+    /**
+     * GET /api/users/:userId/applications
+     * Nested: List all job applications submitted by this user
+     */
+    async getUserApplications(req, res, userId) {
+        const numericId = parseInt(userId, 10);
+        if (isNaN(numericId)) return sendJson(res, 400, { error: 'Invalid user ID' });
+
+        try {
+            const user = await UserModel.getById(numericId);
+            if (!user) return sendJson(res, 404, { error: 'User not found' });
+
+            const applications = await UserModel.getJobApplications(numericId);
+            sendJson(res, 200, {
+                user_id: numericId,
+                user_name: `${user.name} ${user.surname}`,
+                total_applications: applications.length,
+                applications
+            });
+        } catch (error) {
+            sendJson(res, 500, { error: error.message });
+        }
+    }
+
+    /**
+     * POST /api/users/:userId/applications
+     * Nested: Submit a job application by this user (auto-binding user_id)
+     */
+    async submitUserApplication(req, res, userId) {
+        const numericId = parseInt(userId, 10);
+        if (isNaN(numericId)) return sendJson(res, 400, { error: 'Invalid user ID' });
+
+        try {
+            const user = await UserModel.getById(numericId);
+            if (!user) return sendJson(res, 404, { error: 'User not found' });
+
+            const body = await parseJsonBody(req);
+            body.user_id = numericId;
+
+            const JobApplicationModel = require('../models/jobApplicationModel');
+            const result = await JobApplicationModel.create(body);
+
+            if (!result.success) {
+                const statusCode = result.duplicate ? 409 : 400;
+                return sendJson(res, statusCode, { error: result.error });
+            }
+
+            sendJson(res, 201, {
+                message: 'Job application submitted successfully under user',
+                application: result.application
+            });
+        } catch (error) {
+            sendJson(res, 400, { error: error.message || 'Invalid JSON payload' });
+        }
+    }
+
+    /**
+     * GET /api/users/:userId/skills
+     * Nested: List all skills associated with this user
+     */
+    async getUserSkills(req, res, userId) {
+        const numericId = parseInt(userId, 10);
+        if (isNaN(numericId)) return sendJson(res, 400, { error: 'Invalid user ID' });
+
+        try {
+            const user = await UserModel.getById(numericId);
+            if (!user) return sendJson(res, 404, { error: 'User not found' });
+
+            const skills = await UserModel.getSkills(numericId);
+            sendJson(res, 200, skills);
+        } catch (error) {
+            sendJson(res, 500, { error: error.message });
+        }
+    }
+
     // Common aliases for flexibility
     getUsers(req, res) { return this.getAll(req, res); }
     getUserById(req, res, id) { return this.getById(req, res, id); }
