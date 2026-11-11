@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found - Alumni Network</title>
+    <style>
+        :root {
+            --clr-green: #2ecc71;
+            --clr-yellow: #f1c40f;
+            --clr-black: #111111;
+            --clr-blue: #3498db;
+            --clr-white: #ffffff;
+            --clr-bg: #f8f9fa;
+            --clr-danger: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--clr-bg);
+            color: var(--clr-black);
+        }
+        header {
+            background: var(--clr-black);
+            color: var(--clr-white);
+            padding: 1.5rem 0;
+            text-align: center;
+            border-bottom: 5px solid var(--clr-blue);
+        }
+        header h2 { margin: 0; font-size: 2rem; letter-spacing: 1px; }
+        nav {
+            background: var(--clr-blue);
+            display: flex;
+            justify-content: center;
+            padding: 0.8rem;
+        }
+        nav a {
+            color: var(--clr-white);
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            margin: 0 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        nav a:hover {
+            background: var(--clr-yellow);
+            color: var(--clr-black);
+        }
+        .error-container {
+            max-width: 700px;
+            margin: 4rem auto;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: var(--clr-white);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border-top: 6px solid var(--clr-danger);
+        }
+        .error-code {
+            font-size: 8rem;
+            font-weight: 900;
+            color: var(--clr-danger);
+            margin: 0;
+            line-height: 1;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.02); }
+        }
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 0.5rem;
+            animation: bounce 1.5s ease infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .error-title {
+            font-size: 1.8rem;
+            color: var(--clr-black);
+            margin: 0.5rem 0;
+            font-weight: 700;
+        }
+        .error-reason {
+            font-size: 1.1rem;
+            color: #555;
+            margin: 1.5rem 0;
+            line-height: 1.6;
+            padding: 1rem 1.5rem;
+            background: #fef9e7;
+            border-left: 4px solid var(--clr-yellow);
+            border-radius: 4px;
+            text-align: left;
+        }
+        .error-url {
+            font-size: 0.9rem;
+            color: #888;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            background: var(--clr-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+        .error-actions {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: var(--clr-blue);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52,152,219,0.3);
+        }
+        .btn-success {
+            background: var(--clr-green);
+            color: white;
+        }
+        .btn-success:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(46,204,113,0.3);
+        }
+        .suggestions {
+            margin-top: 2rem;
+            font-size: 0.95rem;
+            color: #666;
+        }
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+        .suggestions li {
+            padding: 0.3rem 0;
+        }
+        .suggestions li::before {
+            content: "→ ";
+            color: var(--clr-blue);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>Alumni Network</h2>
+    </header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About Us</a>
+        <a href="/users">Alumni System</a>
+        <a href="/api/swagger">API Docs</a>
+    </nav>
+
+    <div class="error-container">
+        <div class="error-icon">🔍</div>
+        <p class="error-code">404</p>
+        <h1 class="error-title">Page Not Found</h1>
+
+        <div class="error-reason">
+            <!-- ERROR_REASON -->
+        </div>
+
+        <div class="error-url">
+            Requested URL: <!-- REQUESTED_URL -->
+        </div>
+
+        <div class="suggestions">
+            <p>Here are some helpful links:</p>
+            <ul>
+                <li><a href="/">Go to Home Page</a></li>
+                <li><a href="/users">Browse Alumni Directory</a></li>
+                <li><a href="/api/swagger">View API Documentation</a></li>
+            </ul>
+        </div>
+
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">🏠 Back to Home</a>
+            <a href="/users" class="btn btn-success">🎓 Alumni Directory</a>
+        </div>
+    </div>
+</body>
+</html>

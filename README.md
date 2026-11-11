@@ -1,388 +1,252 @@
 # Alumni Tracking System
 
-This is a comprehensive Alumni Tracking System designed to manage, connect, and engage with university/school alumni. The platform provides a centralized hub for tracking alumni data, fostering networking opportunities, and maintaining strong relationships between the institution and its graduates.
+A comprehensive Alumni Tracking System designed to manage, connect, and engage with university/school alumni. The platform provides a centralized hub for tracking alumni data, fostering networking opportunities, and maintaining strong relationships between the institution and its graduates.
 
 ## 🚀 Technologies Used
 
-This project is built using a modern, full-stack architecture and is fully containerized for easy deployment and development.
+- **Backend:** Node.js (built-in `http` module — no external frameworks)
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript
+- **Architecture:** MVC (Model-View-Controller)
+- **API Docs:** Swagger / OpenAPI 3.0
 
-*   **Frontend:** HTML5, CSS3, Vanilla JavaScript
-*   **Backend:** Node.js
-*   **Database:** PostgreSQL
-*   **Containerization:** Docker & Docker Compose
+## ✨ Features
 
-## ✨ Key Features (Planned/Implemented)
+- **Full CRUD** for alumni records via both a Web UI and a REST JSON API
+- **Request Logger:** Every request printed to the terminal with color-coded status codes and response times
+- **Error Logging:** All 4xx/5xx responses automatically appended to `logs/error.log`
+- **Themed Error Pages:** Custom 404 and 5xx pages with context-aware reasons, matching the project's design
+- **Swagger UI** interactive API documentation at `/api/swagger`
+- **Responsive Design** with consistent Alumni Network branding
 
-*   **Alumni Profiles:** Detailed profiles for each alumnus, including contact information, graduation year, current employment, and location.
-*   **Directory Search:** Easy-to-use search and filtering capabilities to find specific alumni.
-*   **Data Management:** Secure backend API for creating, reading, updating, and deleting alumni records.
-*   **Responsive Design:** A clean, accessible, and responsive user interface built with standard web technologies.
+---
 
-## 🐳 Getting Started with Docker
+## 🗂️ Project Structure
 
-The easiest way to get the project up and running is by using Docker. This ensures that the application runs in a consistent environment regardless of your local setup.
-
-### Prerequisites
-
-*   [Docker](https://docs.docker.com/get-docker/) installed on your machine.
-*   [Docker Compose](https://docs.docker.com/compose/install/) installed (usually comes with Docker Desktop).
-
-### Running the Application
-
-1.  **Clone the repository:**
-    ```bash
-    git clone <your-repository-url>
-    cd <your-repository-directory>
-    ```
-
-2.  **Start the containers:**
-    Run the following command in the root directory of the project:
-    ```bash
-    docker-compose up --build
-    ```
-    *(Note: Add the `-d` flag (`docker-compose up -d --build`) to run the containers in detached mode / in the background.)*
-
-3.  **Access the application:**
-    *   **Frontend:** Open your browser and navigate to `http://localhost:<frontend-port>` (Replace `<frontend-port>` with the actual port defined in your docker-compose, e.g., 80 or 8080).
-    *   **Backend API:** The API will be accessible at `http://localhost:<backend-port>` (e.g., 3000).
-    *   **Database:** PostgreSQL will be running on `localhost:5432`.
-
-### Stopping the Application
-
-To stop the running containers, press `Ctrl+C` in the terminal where `docker-compose up` is running. If you ran it in detached mode, use:
-```bash
-docker-compose down
+```
+alumni/
+├── controllers/
+│   ├── apiUserController.js    # [CONTROLLER] REST API — JSON responses
+│   └── userController.js       # [CONTROLLER] Web UI — HTML template rendering
+├── middleware/
+│   ├── logger.js               # [MIDDLEWARE] Terminal request logger (color-coded)
+│   ├── errorLogger.js          # [MIDDLEWARE] File logger → logs/error.log
+│   ├── notFoundHandler.js      # [MIDDLEWARE] 404 Guardian — themed 404 page
+│   └── errorHandler.js         # [MIDDLEWARE] 5xx Guardian — themed server error page
+├── models/
+│   └── userModel.js            # [MODEL] In-memory Alumni data model + validation
+├── routes/
+│   ├── apiUserRoutes.js        # [ROUTER] /api/users endpoints
+│   └── userRoutes.js           # [ROUTER] /users endpoints (Web UI)
+├── views/
+│   ├── users.html              # Alumni directory + registration form
+│   ├── user-detail.html        # Single alumnus profile
+│   ├── user-edit.html          # Edit form
+│   ├── 404.html                # Themed 404 error page
+│   └── 5xx.html                # Themed 5xx error page
+├── logs/
+│   ├── .gitkeep                # Keeps the logs/ folder in git
+│   └── error.log               # Auto-generated — all error requests (gitignored)
+├── index.html                  # Home page
+├── about.html                  # About page
+├── swagger.html                # Swagger UI
+├── swagger.json                # OpenAPI 3.0 spec
+├── server.js                   # Entry point — HTTP server + middleware wiring
+├── ddd.md                      # Domain-Driven Design rules & validation
+├── README.md                   # This file
+└── .gitignore
 ```
 
-## 📚 API Documentation (Swagger)
+---
 
-The project includes interactive API documentation powered by Swagger UI. You can use it to explore all available endpoints, view required request payloads, and test the API directly from your browser.
-
-*   **Swagger UI:** Access the visual documentation at `http://localhost:8080/api/swagger`
-*   **Swagger JSON:** Access the raw OpenAPI specification at `http://localhost:8080/api/swagger.json`
-
-## 🗄️ Veri Tasarımı ve Şema Dökümantasyonu (Data Design Documentation)
-
-Mezun Takip Sistemi'nin veritabanı mimarisi, ER (Entity-Relationship) diyagramı, ilişkisel şemalar, veri sözlüğü (Data Dictionary), indeksleme stratejileri ve PostgreSQL DDL betikleri kapsamlı olarak **[ddd.md](ddd.md)** dosyasında yer almaktadır.
-
-> 📖 **Bilgi:** Bütün veri tasarımını ve veritabanı dökümantasyonunu **[Data Design Documentation (ddd.md)](ddd.md)** dosyasından okuyabilir ve inceleyebilirsiniz.
-
-## 🏛️ MVC (Model-View-Controller) Architecture
-
-The application adopts the **Model-View-Controller (MVC)** software architectural pattern. This pattern separates application concerns into three interconnected components, ensuring code modularity, maintainability, and scalability.
+## 🏛️ MVC Architecture
 
 ```mermaid
 flowchart TD
     Client["Client / Browser / Postman"]
-    
+
+    subgraph Middleware ["🔧 Middleware Layer"]
+        Logger["Logger (terminal)"]
+        ErrorLogger["ErrorLogger (logs/error.log)"]
+        NotFound["404 Guardian"]
+        ErrorGuard["5xx Guardian"]
+    end
+
     subgraph ControllerLayer ["🎮 Controller Layer"]
-        Router["HTTP Server & Route Dispatcher (server.js)"]
-        UserCtrl["User / Alumni Controller Logic"]
-        PageCtrl["Page Controller Logic"]
+        Router["server.js — Route Dispatcher"]
+        UserCtrl["UserController (Web UI)"]
+        ApiCtrl["ApiUserController (REST API)"]
     end
-    
+
     subgraph ModelLayer ["📦 Model Layer"]
-        UserModel["User Entity & In-Memory Store (users = [])"]
-        Validation["Schema Validation (name, surname, age, birthday)"]
+        UserModel["UserModel — In-Memory Store"]
+        Validation["Validation (name, surname, age, birthday)"]
     end
-    
+
     subgraph ViewLayer ["👁️ View Layer"]
-        HTMLViews["HTML Web Pages (index.html, about.html)"]
-        SwaggerView["Swagger UI (swagger.html, swagger.json)"]
-        JSONView["API JSON Responses (Status, Objects, Errors)"]
+        HTMLViews["HTML Templates (users, detail, edit)"]
+        ErrorPages["Error Pages (404.html, 5xx.html)"]
+        JSONView["JSON Responses"]
     end
 
-    Client -->|"1. HTTP Request (GET, POST, PUT, DELETE)"| Router
-    Router -->|"2. Dispatches Request"| UserCtrl
-    Router -->|"2. Dispatches Request"| PageCtrl
-    
-    PageCtrl -->|"3. Loads and Serves"| HTMLViews
-    PageCtrl -->|"3. Serves API Docs"| SwaggerView
-    
-    UserCtrl -->|"3. Queries / Updates State"| UserModel
-    UserModel -->|"Validates Fields"| Validation
-    UserModel -->|"4. Returns Data"| UserCtrl
-    
-    UserCtrl -->|"5. Formats JSON Response"| JSONView
-    HTMLViews -->|"6. HTTP Response (HTML)"| Client
-    SwaggerView -->|"6. HTTP Response (HTML/JSON)"| Client
-    JSONView -->|"6. HTTP Response (JSON)"| Client
+    Client -->|HTTP Request| Logger
+    Logger --> Router
+    Router --> UserCtrl
+    Router --> ApiCtrl
+    Router -->|No match| NotFound
+    UserCtrl --> UserModel
+    ApiCtrl --> UserModel
+    UserModel --> Validation
+    UserCtrl --> HTMLViews
+    ApiCtrl --> JSONView
+    NotFound --> ErrorPages
+    ErrorGuard --> ErrorPages
+    HTMLViews -->|HTTP Response| Client
+    JSONView -->|HTTP Response| Client
+    ErrorPages -->|HTTP Response| Client
+    ErrorLogger -.->|writes| LogFile["logs/error.log"]
 ```
 
 ---
 
-### 1. MVC Component Definitions in this Application
+## 🔌 REST API Endpoints
 
-| Component | Responsibility in this Application | Implementation Details |
-| :--- | :--- | :--- |
-| **Model (M)** | Manages application data, schema structure, constraints, and business state. | In-memory `users` array in `server.js` holding User/Alumni records (`id`, `name`, `surname`, `age`, `birthday`), with validation logic enforcing field types and presence. |
-| **View (V)** | Presents information to the end user and client applications. | Static web pages (`index.html`, `about.html`), interactive API documentation interface (`swagger.html`), and formatted JSON data returned to API clients. |
-| **Controller (C)** | Accepts input, parses HTTP requests, coordinates with the Model, and determines the appropriate View/response. | HTTP server routing and request handlers in `server.js` that handle CRUD operations (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) on `/api/users`, static file serving, and utility routes. |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/users` | List all alumni |
+| GET | `/api/users/:id` | Get a single alumnus by ID |
+| POST | `/api/users` | Create a new alumnus |
+| PUT | `/api/users/:id` | Full update (all fields required) |
+| PATCH | `/api/users/:id` | Partial update |
+| DELETE | `/api/users/:id` | Delete an alumnus |
+| GET | `/api/swagger` | Interactive Swagger UI |
+| GET | `/api/swagger.json` | OpenAPI 3.0 spec |
+| GET | `/api/health` | Health check |
+
+## 🌐 Web UI Routes
+
+| Method | URL | Description |
+|--------|-----|-------------|
+| GET | `/users` | Alumni directory + registration form |
+| POST | `/users` | Submit registration form |
+| GET | `/users/:id` | View alumnus profile |
+| GET | `/users/:id/edit` | Edit form (pre-filled) |
+| POST | `/users/:id/edit` | Submit edit form |
+| POST | `/users/:id/delete` | Delete via form submit |
 
 ---
 
-### 2. Current Project Structure & MVC File Mapping
+## 🔧 Middleware
 
-The current repository layout and how each file maps to MVC principles:
-
-```text
-alumni/
-├── controllers/
-│   ├── apiAnnouncementController.js # [CONTROLLER] REST API controller for announcements (JSON)
-│   ├── apiUserController.js         # [CONTROLLER] REST API controller handling JSON requests & responses
-│   ├── announcementController.js    # [CONTROLLER] Web UI controller rendering announcement HTML views
-│   └── userController.js            # [CONTROLLER] Web UI controller rendering HTML views & managing pages
-├── routes/
-│   ├── apiAnnouncementRoutes.js     # [ROUTER] Maps /api/announcements to ApiAnnouncementController
-│   ├── apiUserRoutes.js             # [ROUTER] Maps /api/users endpoints to ApiUserController
-│   ├── announcementRoutes.js        # [ROUTER] Maps /announcements to AnnouncementController
-│   └── userRoutes.js                # [ROUTER] Maps /users endpoints to UserController
-├── models/
-│   ├── announcementModel.js         # [MODEL] In-memory Announcement data model with full CRUD & validation
-│   └── userModel.js                 # [MODEL] In-memory User data model with full CRUD functions & validation
-├── views/
-│   ├── announcement-detail.html     # [VIEW] Single announcement detail page
-│   ├── announcement-edit.html       # [VIEW] Announcement edit form page
-│   ├── announcements.html           # [VIEW] Announcement management table & posting form
-│   ├── user-detail.html             # [VIEW] Single alumni profile card
-│   ├── user-edit.html               # [VIEW] Alumni edit form
-│   └── users.html                   # [VIEW] Alumni Directory table & user registration form template
-├── index.html                       # [VIEW] Home page UI for users
-├── about.html                       # [VIEW] About us page UI
-├── swagger.html                     # [VIEW] Swagger UI documentation presentation
-├── swagger.json                     # [VIEW / CONTRACT] OpenAPI 3.0 API specifications (updated with all endpoints)
-├── server.js                        # [SERVER ENTRY] HTTP server listener and top-level route coordinator
-├── ddd.md                           # [DATA DESIGN] Database schemas, ER diagram, data dictionary & DDL
-├── README.md                        # Project and architectural documentation
-├── .postman/                        # API client configuration
-│   └── resources.yaml               # Postman workspace configuration
-└── postman/                         # API testing definitions
-    └── globals/
-        └── workspace.globals.yaml   # Postman global variables
+### 1. Logger (`middleware/logger.js`)
+Logs **every** HTTP request to the terminal:
 ```
-
-#### Detailed Breakdown of Existing Files:
-
-*   **`ddd.md` (Data Design Documentation)**
-    *   Mezun Takip Sistemi veritabanı mimarisini, Mermaid ER diyagramını, tüm tablo şemalarını (users, academic_records, work_experiences, skills, events, jobs, mentorships vb.), veri sözlüğünü, kısıtları ve PostgreSQL DDL betiklerini içerir.
-
-*   **`models/userModel.js` (Model Layer)**
-    *   Encapsulates the Alumni / User data entity and business state in an in-memory collection without requiring an external database.
-    *   **CRUD Operations:**
-        *   `getAll()` / `findAll()`: Returns all user records.
-        *   `getById(id)` / `findById(id)`: Retrieves a specific user by identifier.
-        *   `create(userData)`: Validates required fields (`name`, `surname`, `age`, `birthday`), auto-increments unique IDs, and stores the record.
-        *   `update(id, updateData)`: Full replacement (PUT) updating all required user fields.
-        *   `patch(id, updateData)` / `partialUpdate(id, updateData)`: Partial update (PATCH) updating only supplied attributes.
-        *   `delete(id)` / `deleteById(id)`: Removes a user from the collection.
-        *   `clear()`: Resets in-memory storage (useful for automated testing).
-    *   **Validation:** Built-in `validate(data, isPartial, operation)` logic ensuring data integrity and meaningful error messages.
-
-*   **`routes/apiUserRoutes.js` and `routes/userRoutes.js` (Routing Layer)**
-    *   Decouples URL matching and HTTP verbs from the core server configuration.
-    *   `apiUserRoutes.js`: Captures all `/api/users*` calls (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) and executes `ApiUserController`.
-    *   `userRoutes.js`: Captures all `/users*` calls (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) and executes `UserController`.
-
-*   **`controllers/apiUserController.js` (REST API Controller)**
-    *   Processes JSON payloads from client applications, mobile apps, or Postman.
-    *   Interacts with `UserModel` to perform CRUD operations and returns standard HTTP status codes (`200 OK`, `201 Created`, `400 Bad Request`, `404 Not Found`).
-    *   Provides `getAll`, `getById`, `create`, `update`, `patch`, and `delete`.
-
-*   **`controllers/userController.js` (Web UI Controller)**
-    *   Renders HTML views and presentation layouts for browser visitors.
-    *   Generates the Alumni Directory table (`GET /users`), individual alumni profile cards (`GET /users/:id`), and handles web form submissions.
-
-*   **`server.js` (Server Entry & Top-Level Coordinator)**
-    *   Initializes the HTTP server on port 8080.
-    *   Acts as the central server entry: delegates domain requests to `handleApiUserRoutes` and `handleUserRoutes`, and serves static pages (`/`, `/about`, `/api/swagger`).
-
-*   **`index.html` (View - Home)**
-    *   Presents the landing page of the Alumni Network with navigation bar, hero banner, feature highlights, and styling.
-
-*   **`about.html` (View - About Us)**
-    *   Presents organizational information, mission statement, vision, and project announcements.
-
-*   **`swagger.html` (View - API Explorer)**
-    *   Embeds Swagger UI bundle to provide an interactive graphical interface for exploring and executing API requests.
-
-*   **`swagger.json` (View / Data Contract)**
-    *   Specifies OpenAPI 3.0 definitions for all `/api/*` endpoints, request schemas, parameters, and status responses.
-
-*   **`postman/` and `.postman/` (Testing & Workspace)**
-    *   Maintains workspace configurations and globals for automated endpoint testing and team collaboration.
-
----
-
-### 3. Recommended Modular MVC Directory Structure
-
-As the application grows, separating `server.js` into modular directories and files enhances maintainability, testability, and adherence to clean code principles:
-
-```text
-alumni/
-│
-├── controllers/                 # [CONTROLLERS] Request handling & business coordination
-│   ├── userController.js        # CRUD logic for /api/users
-│   ├── pageController.js        # Serves HTML pages (index, about)
-│   └── utilController.js        # Health check, hello, and sum helper actions
-│
-├── models/                      # [MODELS] Data models, schemas, and persistence
-│   └── userModel.js             # User data structure, in-memory store / database queries, and validation
-│
-├── views/                       # [VIEWS] Presentation templates and static documents
-│   ├── index.html               # Home page template
-│   ├── about.html               # About page template
-│   └── swagger.html             # Swagger UI documentation page
-│
-├── routes/                      # [ROUTING] Route mapping and endpoint definitions
-│   ├── userRoutes.js            # Routes for /api/users (GET, POST, PUT, PATCH, DELETE)
-│   ├── pageRoutes.js            # Routes for web pages (/, /about)
-│   └── swaggerRoutes.js         # Routes for Swagger documentation (/api/swagger, /api/swagger.json)
-│
-├── docs/                        # API specifications and documentation assets
-│   └── swagger.json             # OpenAPI specification definition
-│
-├── postman/                     # Postman collections and environment variables
-│   ├── resources.yaml
-│   └── globals/
-│       └── workspace.globals.yaml
-│
-├── server.js                    # Application entry point: initializes server, imports routes & middleware
-└── README.md                    # Project documentation
+[2026-11-11 23:40:00] GET     /users 200 12ms - Mozilla/5.0...
 ```
+Color codes: 🟢 2xx · 🟡 3xx · 🔴 4xx · 🟣 5xx
 
-#### Directory Responsibilities in the Modular Structure:
+### 2. Error Logger (`middleware/errorLogger.js`)
+Automatically appends all 4xx/5xx responses to **`logs/error.log`**:
+```
+[2026-11-11T20:40:00.000Z] 404 | GET /users/999
+Error: HTTP 404
+UA: Mozilla/5.0...
+IP: ::1
+---
+```
+Also exposes `logError(req, error, statusCode)` for manual logging.
 
-1.  **`models/` (Data & Logic Layer):**
-    *   Contains data representations and access logic.
-    *   Independent of HTTP request/response objects (`req`, `res`).
-    *   Handles data integrity, sanitization, and database interactions (e.g., PostgreSQL / ORM).
+### 3. 404 Guardian (`middleware/notFoundHandler.js`)
+Handles all unmatched routes with:
+- **Context-aware reasons** (different messages for `/api/*`, `/users/*`, etc.)
+- **Themed HTML page** (`views/404.html`) for browser requests
+- **JSON response** for API requests (`Accept: application/json` or `/api/*`)
 
-2.  **`views/` (Presentation Layer):**
-    *   Contains files directly rendered or sent to the client browser.
-    *   Decoupled from business rules and data queries.
-
-3.  **`controllers/` (Application Logic Layer):**
-    *   Accepts HTTP requests, validates incoming parameters and bodies.
-    *   Invokes appropriate Model functions to retrieve or mutate data.
-    *   Selects the appropriate response view or sends serialized JSON with proper HTTP status codes (`200`, `201`, `400`, `404`, `500`).
-
-4.  **`routes/` (Routing Layer):**
-    *   Maps HTTP verbs (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) and URL paths to specific controller handler functions.
-    *   Organizes endpoints cleanly by domain resource (e.g., users, pages, swagger).
+### 4. 5xx Guardian (`middleware/errorHandler.js`)
+Handles all server errors with:
+- **Sanitized messages** (no stack traces exposed to clients)
+- **Themed HTML page** (`views/5xx.html`) for browser requests
+- **JSON response** for API consumers
 
 ---
 
-### 4. Data Flow Walkthrough (Example: Creating a User)
+## 📋 Validation Rules (see `ddd.md` for full detail)
 
-To illustrate how MVC components interact during execution:
-
-1.  **Request Initiation:** A client sends a `POST /api/users` request with JSON payload:
-    ```json
-    { "name": "Jane", "surname": "Doe", "age": 24, "birthday": "2000-05-15" }
-    ```
-2.  **Routing & Controller:** 
-    *   The server router matches `POST /api/users` and invokes the User Controller.
-    *   The controller reads and parses the request stream body.
-3.  **Model Validation & Storage:**
-    *   The controller passes data to the User Model.
-    *   The model checks required fields (`name`, `surname`, `age`, `birthday`).
-    *   The model generates an `id`, stores the new record, and returns the entity.
-4.  **View / Response Rendering:**
-    *   The controller sets HTTP status `201 Created` and header `Content-Type: application/json`.
-    *   The controller sends the serialized response object `{ message: "User created successfully", user: newUser }` back to the client.
+| Field | Required | Type | Constraints |
+|-------|----------|------|-------------|
+| `name` | ✅ | String | Max 50 chars |
+| `surname` | ✅ | String | Max 50 chars |
+| `age` | ✅ | Number | 0–120, integer |
+| `birthday` | ✅ | String | YYYY-MM-DD format |
 
 ---
 
-## 🌾 Database Migrations, Factories & Seeders
-
-Proje, veritabanı şemalarının versiyonlanması ve test/geliştirme ortamları için zengin sahte veri üretimi adına modern **Factory & Seeder** mimarisini içerir:
-
-### 1. Migrations (`migrations/`)
-* **`migrations/001_create_alumni_schema.sql`:** Kullanıcı ve mezuniyet ilişkisel tabloları.
-* **`migrations/002_create_announcements_schema.sql`:** Duyurular tablosu ve indeksleri.
-* **`migrations/003_seed_initial_data.sql`:** Başlangıç tohum verileri.
-* **`migrations/004_update_job_postings_schema.sql`:** Kariyer ilanları (`job_postings`) ve yetkinlik eşleştirme (`job_skills`) şeması.
-* **`migrations/005_update_job_applications_schema.sql`:** Kariyer başvuruları (`job_applications`) gelişmiş nitelikleri (maaş beklentisi, ihbar süresi, portföy, mülakat tarihi, değerlendirme notları, skor), tekil başvuru (`unique`) kısıtı ve performans indeksleri.
-* **`migrations/006_decouple_user_and_job_postings.sql`:** İş ilanlarını (`job_postings`) kullanıcılardan (`users`) tamamen ayırır (`posted_by` kaldırıldı). Kullanıcılar ile ilanlar arasındaki ilişki doğrudan değil, yalnızca iş başvuruları (`job_applications`) üzerinden kurulur.
-* **`migrations/init.sql`:** Docker PostgreSQL konteyneri başlatıldığında otomatik çalışan tam şema.
-* **Durum Kontrolü:** `npm run migrate`
-
-### 2. Factories (`factories/`)
-Dış bağımlılığa gerek kalmadan (zero-dependency) gerçekçi Türkçe ve uluslararası sahte veriler üretir:
-* **`UserFactory` (`factories/userFactory.js`):** `make()`, `makeMany()`, `create()`, `createMany()`
-* **`AnnouncementFactory` (`factories/announcementFactory.js`):** `make()`, `makeMany()`, `create()`, `createMany()`
-* **`JobPostingFactory` (`factories/jobPostingFactory.js`):** `make()`, `makeMany()`, `create()`, `createMany()`
-
-### 3. Seeders (`seeders/`)
-* **`UserSeeder` (`seeders/userSeeder.js`):** Çekirdek demo hesapları ve rastgele mezunları sisteme yükler.
-* **`AnnouncementSeeder` (`seeders/announcementSeeder.js`):** Haber ve duyuruları yükler.
-* **`JobPostingSeeder` (`seeders/jobPostingSeeder.js`):** Sektör devi şirketlerin kariyer fırsatlarını ve aranan yetkinlikleri (`job_skills`) tohumlar.
-* **`DatabaseSeeder` (`seeders/databaseSeeder.js`):** Tüm tohumlayıcıları koordine eder ve SQL çıktısı üretir.
+## ▶️ Getting Started
 
 ```bash
-# Tüm tabloları (kullanıcılar, duyurular, iş ilanları) tohumlama:
-npm run seed
+# Start the server
+node server.js
 
-# Yalnızca iş ilanları (job-postings) tablosunu tohumlama:
-npm run seed:jobs
-
-# Mevcut verileri sıfırlayıp baştan temiz tohumlama:
-npm run db:seed
+# Access the app
+open http://localhost:8080
+open http://localhost:8080/users
+open http://localhost:8080/api/swagger
 ```
 
 ---
 
-## 🗄️ Database Connection & CRUD Interfaces
+## 📅 Changelog
 
-Sistemdeki tüm CRUD operasyonları (REST API ve Web UI) PostgreSQL veritabanı ile doğrudan entegre çalışacak şekilde güncellenmiştir:
+### Week 7 — November 11, 2026
+- **`ddd.md`** — Added Domain-Driven Design rules & validation documentation (Alumni, Job Posting, Event entities)
+- **`middleware/logger.js`** — Request logger middleware: color-coded terminal output for every request
+- **`middleware/errorLogger.js`** — Error file logger: auto-writes 4xx/5xx requests to `logs/error.log`
+- **`middleware/notFoundHandler.js`** — 404 Guardian: context-aware themed 404 page or JSON
+- **`middleware/errorHandler.js`** — 5xx Guardian: themed server error page or JSON (sanitized)
+- **`views/404.html`** — Themed 404 error page with animations and helpful links
+- **`views/5xx.html`** — Themed 5xx error page with animations and retry option
+- **`logs/.gitkeep`** — Error log directory (tracked in git, log files excluded)
+- **`server.js`** — Integrated all middleware; generic 404 now uses notFoundHandler
+- **`.gitignore`** — Added to exclude log files and OS artifacts
 
-* **Bağlantı Havuzu (`config/db.js`):** Node.js `pg` kütüphanesi ile bağlantı havuzu (`Pool`) yönetilir. `.env` dosyasındaki çevre değişkenleri (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`) otomatik okunur.
-* **Otomatik Tablo Başlatma (`initDb`):** Sunucu başladığında `users` ve `announcements` tablolarını doğrular ve eksikse otomatik oluşturur.
-* **Asenkron Model Mimarisi:** `UserModel` ve `AnnouncementModel` metodları parametreli SQL sorguları (`$1, $2, ...`) ile SQL Injection korumalı olarak çalışır.
-* **Akıllı Fallback Güvencesi:** PostgreSQL servisi kapalı veya erişilemez olduğunda sistem kesintiye uğramadan yerel veri depolamasına geri döner (graceful fallback).
-* **Uçtan Uca Arayüz Desteği:**
-  * **Web UI:** `/users` ve `/announcements` üzerinden tarayıcı formları ile ekleme, güncelleme, silme ve detay görüntüleme.
-  * **REST API:** `/api/users` ve `/api/announcements` üzerinden standart JSON yanıtları ve HTTP durum kodları ile tam CRUD desteği (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`).
+### Week 6
+- Defined full CRUD operations on user route, controller, and view
+- Added `views/user-detail.html` and `views/user-edit.html` templates
+- Implemented edit form (GET/POST `/users/:id/edit`) and delete via form POST
+- Added Actions column (view/edit/delete) to alumni table
+
 
 ---
 
-## 🔗 Direct and Nested REST API Routes
+## 📅 Week 7 — November 11, 2026
 
-Uygulama, RESTful mimari standartlarına uygun **Doğrudan (Direct)** ve **İlişkisel İçiçe (Nested)** rotaları destekler:
+### New: Middleware Layer
 
-### 1. Doğrudan Rotalar (Direct Routes)
-Ana varlıkların (Users, Jobs, Applications, Skills, Announcements) bağımsız CRUD operasyonları:
+| File | Description |
+|------|-------------|
+| `middleware/logger.js` | Terminal request logger — color-coded output for every request (green 2xx, yellow 3xx, red 4xx, magenta 5xx) |
+| `middleware/errorLogger.js` | File logger — auto-writes all 4xx/5xx responses to `logs/error.log` |
+| `middleware/notFoundHandler.js` | 404 Guardian — context-aware themed 404 page or JSON |
+| `middleware/errorHandler.js` | 5xx Guardian — themed server error page or JSON (sanitized messages) |
 
-| HTTP Metodu | Uç Nokta (Endpoint) | Açıklama |
-| :--- | :--- | :--- |
-| `GET` | `/api/users` | Tüm mezunları listeler |
-| `POST` | `/api/users` | Yeni mezun kaydı oluşturur |
-| `GET` / `PUT` / `PATCH` / `DELETE` | `/api/users/:id` | Tekil kullanıcı CRUD işlemleri |
-| `GET` | `/api/jobs` | Tüm iş ilanlarını listeler (`?status=open&category=...` filtreleri desteklenir) |
-| `POST` | `/api/jobs` | Yeni iş ilanı yayınlar |
-| `GET` / `PUT` / `PATCH` / `DELETE` | `/api/jobs/:id` | Tekil iş ilanı detay, güncelleme ve silme |
-| `GET` | `/api/applications` | Tüm iş başvurularını listeler (`?job_id=...&user_id=...&status=...` filtreleri desteklenir) |
-| `POST` | `/api/applications` | Yeni başvuru kaydı oluşturur (mükerrer başvuru engellenir) |
-| `GET` | `/api/applications/:id` | Başvuru detayını, ilan ve aday profiliyle birlikte görüntüler |
-| `PUT` | `/api/applications/:id` | Başvuru kaydını tam günceller |
-| `PATCH` | `/api/applications/:id` | Başvuru alanlarını kısmi günceller |
-| `PATCH` | `/api/applications/:id/status` | Başvuru durumunu günceller (`submitted`, `in_review`, `interview_scheduled`, `shortlisted`, `offered`, `accepted`, `rejected`, `withdrawn`) |
-| `POST` | `/api/applications/:id/interview` | Aday için mülakat tarihi planlar ve not ekler |
-| `DELETE` | `/api/applications/:id` | Başvuruyu siler / geri çeker |
-| `GET` / `POST` | `/api/skills` | Yetkinlik listeleme ve yeni yetkinlik ekleme |
-| `GET` / `POST` | `/api/announcements` | Duyurular listesi ve yeni duyuru oluşturma |
+### New: Themed Error Pages
 
-### 2. İçiçe Rotalar (Nested Routes)
-İlişkisel bağımlılıkları ve üst-alt varlık hiyerarşisini temsil eden rotalar:
+| File | Description |
+|------|-------------|
+| `views/404.html` | Animated 404 page with context-aware reason, project design theme, and helpful navigation |
+| `views/5xx.html` | Animated 5xx page with error code, reason placeholder, and retry button |
 
-| Üst Varlık (Parent) | Alt Varlık (Child) | HTTP Metodu | Uç Nokta (Nested Endpoint) | Açıklama |
-| :--- | :--- | :--- | :--- | :--- |
-| **User** | **Applications** | `GET` | `/api/users/:userId/applications` | Belirli bir mezunun yaptığı tüm iş başvurularını listeler |
-| **User** | **Applications** | `POST` | `/api/users/:userId/applications` | Belirli bir mezun adına otomatik bağlı yeni iş başvurusu gönderir |
-| **User** | **Skills** | `GET` | `/api/users/:userId/skills` | Belirli bir mezunun sahip olduğu yetkinlikleri listeler |
-| **Job** | **Applications** | `GET` | `/api/jobs/:jobId/applications` | Belirli bir ilana gelen tüm başvuruları ve aday profillerini listeler |
-| **Job** | **Applications** | `POST` | `/api/jobs/:jobId/applications` | Belirli bir iş ilanına yeni başvuru gönderir (`job_id` otomatik bağlanır) |
-| **Job** | **Skills** | `GET` | `/api/jobs/:jobId/skills` | Belirli bir ilanın aradığı zorunlu/tercih yetkinlikleri listeler |
-| **Job** | **Skills** | `POST` | `/api/jobs/:jobId/skills` | Belirli bir ilana yeni yetkinlik bağlar (`skill_id`, `is_mandatory`) |
-| **Job** | **Skills** | `DELETE` | `/api/jobs/:jobId/skills/:skillId` | İlandan yetkinlik bağlantısını kaldırır |
+### New: Error Logging
 
+- `logs/` directory created (tracked via `.gitkeep`, log files gitignored)
+- All 4xx/5xx requests are automatically appended to `logs/error.log`
+
+### Updated: `server.js`
+
+- Integrated all 4 middleware layers on every request
+- Generic 404 fallback now uses themed `notFoundHandler` instead of plain text
+- All file-read errors bubble to `errorHandler` (500)
+
+### New: `ddd.md` additions
+
+- Updated with Job Posting and Event entity validation rules
+- Added validation summary table, aggregates, and bounded context definitions

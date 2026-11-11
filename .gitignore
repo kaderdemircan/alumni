@@ -9,8 +9,9 @@ node_modules/
 # Local data / persistence
 data/
 
-# Logs
-*.log
+# Logs (keep the directory, ignore log files)
+logs/*.log
+logs/*.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -18,3 +19,7 @@ yarn-error.log*
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Editor
+.vscode/
+*.swp
