@@ -70,6 +70,34 @@ const server = http.createServer((req, res) => {
             });
         }
 
+        // ── Jobs Board ────────────────────────────────────────────────────────
+        if (req.url === '/jobs' && req.method === 'GET') {
+            return fs.readFile(path.join(__dirname, 'views', 'jobs.html'), (err, content) => {
+                if (err) return errorHandler(req, res, err, 500);
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                res.end(content);
+            });
+        }
+
+        // ── Job Detail (static preview) ───────────────────────────────────────
+        const jobDetailMatch = req.url.match(/^\/jobs\/(\d+)$/);
+        if (jobDetailMatch && req.method === 'GET') {
+            return fs.readFile(path.join(__dirname, 'views', 'job-detail.html'), (err, content) => {
+                if (err) return errorHandler(req, res, err, 500);
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                res.end(content);
+            });
+        }
+
+        // ── Mentorship Hub ────────────────────────────────────────────────────
+        if (req.url === '/mentorship' && req.method === 'GET') {
+            return fs.readFile(path.join(__dirname, 'views', 'mentorship.html'), (err, content) => {
+                if (err) return errorHandler(req, res, err, 500);
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                res.end(content);
+            });
+        }
+
         // ── Legacy route kept for backwards compatibility ─────────────────────
         if (req.url === '/alumni' && (req.method === 'GET' || req.method === 'POST')) {
             res.writeHead(200, { 'Content-Type': 'text/plain' });

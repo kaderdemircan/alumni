@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Opportunity Details — Alumni Tracking System</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-forest-ink: #111111;
+            --color-ink: #111111;
+            --color-sage-mist: #fef08a;
+            --color-keylime-wash: #fef9e7;
+            --color-mint-veil: #fae588;
+            --color-slate-hush: #b6ced5;
+            --color-cream-paper: #fffefc;
+            --color-charcoal: #222222;
+            --color-border-mist: #efeeeb;
+
+            --font-faire-octave: 'Cormorant Garamond', 'Faire Octave', Georgia, serif;
+            --font-suisse-intl: 'Inter', 'Suisse Intl', system-ui, -apple-system, sans-serif;
+
+            --text-body: 14px;
+            --leading-body: 1.6;
+            --text-heading: 42px;
+
+            --spacing-7: 7px;
+            --spacing-9: 9px;
+            --spacing-14: 14px;
+            --spacing-18: 18px;
+            --spacing-21: 21px;
+            --spacing-28: 28px;
+            --spacing-35: 35px;
+            --spacing-42: 42px;
+            --spacing-70: 70px;
+            --spacing-99: 99px;
+
+            --page-max-width: 1200px;
+            --radius-nav: 7px;
+            --radius-cards: 14px;
+            --radius-badges: 999px;
+            --radius-buttons: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-suisse-intl);
+            background-color: var(--color-cream-paper);
+            color: var(--color-charcoal);
+            line-height: var(--leading-body);
+            font-size: var(--text-body);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .ease-nav-wrapper {
+            background-color: var(--color-cream-paper);
+            border-bottom: 1px solid var(--color-border-mist);
+            padding: var(--spacing-18) var(--spacing-28);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .ease-nav-container {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .ease-brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-9);
+            text-decoration: none;
+            color: var(--color-ink);
+        }
+        .ease-brand-mark {
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-ink);
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .ease-brand-text {
+            font-family: var(--font-suisse-intl);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+        .ease-nav-links {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+        .ease-nav-item {
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            color: var(--color-charcoal);
+            text-decoration: none;
+            padding: var(--spacing-7) var(--spacing-14);
+            border-radius: var(--radius-nav);
+            transition: background-color 0.15s ease;
+        }
+        .ease-nav-item:hover { background-color: var(--color-keylime-wash); }
+        .ease-nav-item.active { font-weight: 600; color: var(--color-ink); }
+
+        .ease-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-7);
+            background-color: var(--color-forest-ink);
+            color: var(--color-cream-paper);
+            text-decoration: none;
+            font-size: var(--text-body);
+            padding: var(--spacing-9) var(--spacing-18);
+            border-radius: var(--radius-buttons);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .ease-btn-primary:hover { transform: translateY(-1px); }
+
+        .ease-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--color-cream-paper);
+            color: var(--color-forest-ink);
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: var(--radius-badges);
+            border: 1px solid var(--color-border-mist);
+            text-decoration: none;
+        }
+
+        .ease-eyebrow {
+            font-family: var(--font-suisse-intl);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+            display: block;
+        }
+
+        /* ── Main Layout ────────────────────────────────────────── */
+        .detail-main {
+            max-width: 900px;
+            margin: var(--spacing-42) auto var(--spacing-99);
+            padding: 0 var(--spacing-21);
+        }
+        .detail-shell {
+            background-color: var(--color-keylime-wash);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+        }
+        .detail-white-card {
+            background-color: var(--color-cream-paper);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+        }
+        .job-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--color-border-mist);
+            padding-bottom: var(--spacing-28);
+            margin-bottom: var(--spacing-28);
+        }
+        .job-title-lg {
+            font-family: var(--font-faire-octave);
+            font-size: var(--text-heading);
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-7);
+            line-height: 1.15;
+        }
+        .company-subtitle {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--color-forest-ink);
+        }
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-14);
+            margin-bottom: var(--spacing-28);
+        }
+        .spec-box {
+            background-color: var(--color-keylime-wash);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-14) var(--spacing-18);
+        }
+        .spec-lbl {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-forest-ink);
+            display: block;
+            margin-bottom: var(--spacing-4);
+        }
+        .spec-val {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--color-forest-ink);
+        }
+        .desc-text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--color-charcoal);
+            margin-bottom: var(--spacing-35);
+        }
+
+        /* Application Form */
+        .apply-box {
+            background-color: var(--color-slate-hush);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-28);
+            margin-top: var(--spacing-28);
+        }
+        .apply-box h3 {
+            font-family: var(--font-faire-octave);
+            font-size: 24px;
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+        }
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-14);
+            margin-bottom: var(--spacing-14);
+        }
+        .input-control {
+            width: 100%;
+            background-color: var(--color-cream-paper);
+            border: 1px solid var(--color-border-mist);
+            border-radius: var(--radius-buttons);
+            padding: var(--spacing-11) var(--spacing-14);
+            font-family: var(--font-suisse-intl);
+            font-size: 14px;
+        }
+
+        /* Footer */
+        .ease-footer {
+            background-color: var(--color-cream-paper);
+            border-top: 1px solid var(--color-border-mist);
+            padding: var(--spacing-70) var(--spacing-28) var(--spacing-42);
+            margin-top: var(--spacing-99);
+        }
+        .ease-footer-container {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: var(--spacing-42);
+        }
+        .footer-col-header {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-forest-ink);
+            display: block;
+            margin-bottom: var(--spacing-18);
+        }
+        .footer-links-list { list-style: none; }
+        .footer-links-list li { margin-bottom: var(--spacing-11); }
+        .footer-links-list a { color: var(--color-charcoal); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <!-- ── Header Component ────────────────────────────────────────────── -->
+    <header class="ease-nav-wrapper">
+        <div class="ease-nav-container">
+            <a href="/" class="ease-brand-lockup">
+                <span class="ease-brand-mark"></span>
+                <span class="ease-brand-text">Alumni Tracking System</span>
+            </a>
+
+            <nav class="ease-nav-links">
+                <a href="/" class="ease-nav-item">Home</a>
+                <a href="/about" class="ease-nav-item">About Us</a>
+                <a href="/users" class="ease-nav-item">Alumni Directory</a>
+                <a href="/announcements" class="ease-nav-item">Announcements</a>
+                <a href="/jobs" class="ease-nav-item active">Careers</a>
+                <a href="/mentorship" class="ease-nav-item">Mentorship</a>
+                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
+            </nav>
+
+            <div class="ease-nav-cta">
+                <a href="/jobs" class="ease-btn-primary">
+                    <span>← All Opportunities</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="detail-main">
+        <span class="ease-eyebrow">VERIFIED CAREER DISPATCH</span>
+
+        <div class="detail-shell">
+            <div class="detail-white-card">
+                <div class="job-header-flex">
+                    <div>
+                        <h1 class="job-title-lg" id="jobTitle">Staff Cloud Architect</h1>
+                        <span class="company-subtitle" id="jobCompany">Teknoloji A.Ş. • Istanbul, Turkey / Remote</span>
+                    </div>
+                    <span class="ease-tag-pill" id="jobCategory">Full-Time</span>
+                </div>
+
+                <div class="spec-grid">
+                    <div class="spec-box">
+                        <span class="spec-lbl">POSTING ID</span>
+                        <span class="spec-val" id="jobId">#101</span>
+                    </div>
+                    <div class="spec-box">
+                        <span class="spec-lbl">REFERRAL ALUMNUS</span>
+                        <span class="spec-val">Kader Demircan ('20)</span>
+                    </div>
+                    <div class="spec-box">
+                        <span class="spec-lbl">VERIFICATION</span>
+                        <span class="spec-val" style="color:var(--color-forest-ink);">Official Alumni Partner</span>
+                    </div>
+                </div>
+
+                <div class="desc-text" id="jobDesc">
+                    We are seeking a senior systems architect to drive our cloud platform engineering efforts. Responsibilities include building resilient distributed data ingestion pipelines, defining microservice communication standards, and collaborating with our cross-border engineering squads.
+                </div>
+
+                <div class="apply-box">
+                    <h3>Submit Application via Alumni Referral</h3>
+                    <p style="font-size:13px; color:#555; margin-bottom:14px;">Your profile and curriculum vitae will be forwarded directly to the verified alumnus contact for priority internal review.</p>
+
+                    <form onsubmit="handleApply(event)">
+                        <div class="form-grid-2">
+                            <input type="text" class="input-control" placeholder="Your Full Name" required>
+                            <input type="email" class="input-control" placeholder="Your Email Address" required>
+                        </div>
+                        <div class="form-grid-2">
+                            <input type="text" class="input-control" placeholder="Graduation Year & Cohort" required>
+                            <input type="url" class="input-control" placeholder="LinkedIn Profile / Portfolio Link" required>
+                        </div>
+                        <div style="text-align: right; margin-top:14px;">
+                            <button type="submit" class="ease-btn-primary">
+                                <span>Submit for Referral Review</span>
+                                <span>→</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div style="margin-top:28px; display:flex; justify-content:space-between; align-items:center;">
+                    <a href="/jobs" class="ease-tag-pill">← Back to All Roles</a>
+                    <a href="/mentorship" class="card-link" style="color:var(--color-forest-ink); font-weight:600;">Request Mentorship Consultation →</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ── Footer ──────────────────────────────────────────────────────── -->
+    <footer class="ease-footer">
+        <div class="ease-footer-container">
+            <div>
+                <div class="ease-brand-lockup" style="margin-bottom:14px;">
+                    <span class="ease-brand-mark"></span>
+                    <span class="ease-brand-text">Alumni Tracking System</span>
+                </div>
+                <p style="color:#666; font-size:14px; max-width:420px;">An editorial-grade alumni connection platform fostering lifelong engagement between graduates, students, and faculties.</p>
+            </div>
+            <div>
+                <span class="footer-col-header">PLATFORM</span>
+                <ul class="footer-links-list">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/users">Alumni Directory</a></li>
+                    <li><a href="/announcements">Announcements</a></li>
+                    <li><a href="/jobs">Careers</a></li>
+                </ul>
+            </div>
+            <div>
+                <span class="footer-col-header">DEVELOPER APIS</span>
+                <ul class="footer-links-list">
+                    <li><a href="/api/swagger">Interactive Swagger</a></li>
+                    <li><a href="/api/health">System Health Check</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function handleApply(e) {
+            e.preventDefault();
+            alert('Your alumni referral application has been registered and forwarded to the hiring team.');
+            e.target.reset();
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const pathParts = window.location.pathname.split('/');
+            const id = pathParts[2];
+            if (id) {
+                try {
+                    const res = await fetch('/api/jobs/' + id);
+                    if (res.ok) {
+                        const j = await res.json();
+                        document.getElementById('jobTitle').textContent = j.title;
+                        document.getElementById('jobCompany').textContent = j.company_name;
+                        document.getElementById('jobId').textContent = '#' + j.id;
+                        document.getElementById('jobCategory').textContent = j.category || 'Full-Time';
+                        if (j.description) document.getElementById('jobDesc').textContent = j.description;
+                    }
+                } catch(e) {}
+            }
+        });
+    </script>
+</body>
+</html>

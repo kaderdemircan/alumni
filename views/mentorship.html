@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentorship Program Hub — Alumni Tracking System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ease-cream: #fffefc;
+            --ease-white: #ffffff;
+            --ease-keylime: #fef9e7;
+            --ease-yellow-mist: #fef08a;
+            --ease-yellow-core: #f1c40f;
+            --ease-slate-hush: #b6ced5;
+            --ease-blue-core: #3498db;
+            --ease-black: #111111;
+            --ease-graphite: #2b2b2b;
+            --ease-muted: #555555;
+            --ease-border: #111111;
+            --ease-border-soft: rgba(17, 17, 17, 0.12);
+
+            --font-serif: 'Cormorant Garamond', Georgia, serif;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+            --radius-card: 14px;
+            --radius-pill: 999px;
+            --radius-nav: 7px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            box-shadow: none !important;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--ease-cream);
+            color: var(--ease-black);
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Top Announcement Bar ── */
+        .top-banner {
+            background-color: var(--ease-black);
+            color: var(--ease-cream);
+            padding: 8px 24px;
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+        .top-banner a {
+            color: var(--ease-yellow-mist);
+            text-decoration: underline;
+        }
+
+        /* ── Navigation Header ── */
+        header {
+            position: sticky;
+            top: 0;
+            background-color: var(--ease-cream);
+            border-bottom: 1px solid var(--ease-border-soft);
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+        .nav-container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo-lockup {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--ease-black);
+        }
+        .logo-pill {
+            background: var(--ease-black);
+            color: var(--ease-cream);
+            padding: 5px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
+        .logo-title {
+            font-family: var(--font-serif);
+            font-size: 21px;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+        }
+        nav.nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        nav.nav-links a {
+            color: var(--ease-black);
+            text-decoration: none;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: var(--radius-nav);
+            transition: background 0.15s ease;
+        }
+        nav.nav-links a:hover {
+            background-color: var(--ease-keylime);
+        }
+        nav.nav-links a.active {
+            background-color: var(--ease-keylime);
+            border: 1px solid var(--ease-border-soft);
+            font-weight: 600;
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-header {
+            background-color: var(--ease-black);
+            color: var(--ease-cream);
+            border: 1px solid var(--ease-black);
+            padding: 8px 18px;
+            border-radius: var(--radius-card);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn-header:hover {
+            background-color: var(--ease-graphite);
+        }
+
+        /* ── Hero Section ── */
+        .hero-section {
+            border-bottom: 1px solid var(--ease-border-soft);
+            padding: 72px 24px 60px;
+            background: linear-gradient(180deg, var(--ease-keylime) 0%, var(--ease-cream) 100%);
+        }
+        .hero-inner {
+            max-width: 1240px;
+            margin: 0 auto;
+        }
+        .eyebrow {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            color: var(--ease-muted);
+            margin-bottom: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .eyebrow::before {
+            content: "";
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: var(--ease-blue-core);
+        }
+        h1.hero-title {
+            font-family: var(--font-serif);
+            font-size: 54px;
+            line-height: 1.08;
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            color: var(--ease-black);
+            max-width: 900px;
+            margin-bottom: 22px;
+        }
+        p.hero-lead {
+            font-size: 17px;
+            line-height: 1.6;
+            color: var(--ease-graphite);
+            max-width: 760px;
+            margin-bottom: 36px;
+            font-weight: 300;
+        }
+        .hero-cta-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            background-color: var(--ease-black);
+            color: var(--ease-cream);
+            border: 1px solid var(--ease-black);
+            padding: 12px 26px;
+            border-radius: var(--radius-card);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--ease-graphite);
+        }
+        .btn-secondary {
+            background-color: var(--ease-white);
+            color: var(--ease-black);
+            border: 1px solid var(--ease-border);
+            padding: 12px 24px;
+            border-radius: var(--radius-card);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary:hover {
+            background-color: var(--ease-keylime);
+        }
+
+        /* ── Key Metrics Bar ── */
+        .metrics-strip {
+            margin-top: 56px;
+            padding-top: 36px;
+            border-top: 1px solid var(--ease-border-soft);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+        .metric-block {
+            border-left: 2px solid var(--ease-black);
+            padding-left: 16px;
+        }
+        .metric-value {
+            font-family: var(--font-serif);
+            font-size: 32px;
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .metric-label {
+            font-size: 12px;
+            color: var(--ease-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Container Layout ── */
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 56px 24px;
+        }
+        .section-header {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 300;
+            letter-spacing: -0.015em;
+            margin-top: 6px;
+        }
+        .section-lead {
+            font-size: 15px;
+            color: var(--ease-muted);
+            max-width: 680px;
+            margin-top: 8px;
+        }
+
+        /* ── Tracks Grid ── */
+        .tracks-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 64px;
+        }
+        .track-card {
+            background-color: var(--ease-white);
+            border: 1px solid var(--ease-border-soft);
+            border-radius: var(--radius-card);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .track-card.active-track {
+            border-color: var(--ease-black);
+            background-color: var(--ease-keylime);
+        }
+        .track-number {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--ease-muted);
+            margin-bottom: 12px;
+        }
+        .track-title {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 300;
+            line-height: 1.25;
+            margin-bottom: 12px;
+        }
+        .track-desc {
+            font-size: 13px;
+            color: var(--ease-graphite);
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+        .track-badge {
+            display: inline-block;
+            background-color: var(--ease-slate-hush);
+            color: var(--ease-black);
+            padding: 3px 9px;
+            border-radius: var(--radius-pill);
+            font-size: 11px;
+            font-weight: 600;
+            align-self: flex-start;
+        }
+
+        /* ── Mentors Roster Grid ── */
+        .mentors-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 64px;
+        }
+        .mentor-card {
+            background-color: var(--ease-white);
+            border: 1px solid var(--ease-border-soft);
+            border-radius: var(--radius-card);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+        .mentor-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .mentor-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-pill);
+            background-color: var(--ease-slate-hush);
+            color: var(--ease-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 500;
+            border: 1px solid var(--ease-border);
+            flex-shrink: 0;
+        }
+        .mentor-meta h3 {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 1.2;
+            color: var(--ease-black);
+        }
+        .mentor-meta .mentor-role {
+            font-size: 12px;
+            color: var(--ease-muted);
+            margin-top: 2px;
+        }
+        .mentor-bio {
+            font-size: 13px;
+            color: var(--ease-graphite);
+            margin-bottom: 18px;
+            flex-grow: 1;
+            line-height: 1.5;
+        }
+        .mentor-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+        .tag-pill {
+            background-color: var(--ease-keylime);
+            border: 1px solid var(--ease-border-soft);
+            padding: 3px 9px;
+            border-radius: var(--radius-pill);
+            font-size: 11px;
+            color: var(--ease-black);
+        }
+        .mentor-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 14px;
+            border-top: 1px solid var(--ease-border-soft);
+        }
+        .slots-indicator {
+            font-size: 12px;
+            color: var(--ease-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .slots-indicator::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--ease-yellow-core);
+            display: inline-block;
+        }
+        .btn-request {
+            background-color: var(--ease-black);
+            color: var(--ease-cream);
+            border: none;
+            padding: 6px 14px;
+            border-radius: var(--radius-card);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-request:hover {
+            background-color: var(--ease-graphite);
+        }
+
+        /* ── How It Works (4 Stages) ── */
+        .process-strip {
+            background-color: var(--ease-keylime);
+            border: 1px solid var(--ease-border-soft);
+            border-radius: var(--radius-card);
+            padding: 40px;
+            margin-bottom: 64px;
+        }
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 28px;
+            margin-top: 24px;
+        }
+        .step-item {
+            position: relative;
+        }
+        .step-number {
+            font-family: var(--font-serif);
+            font-size: 28px;
+            font-weight: 300;
+            color: var(--ease-blue-core);
+            margin-bottom: 8px;
+        }
+        .step-heading {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ease-black);
+            margin-bottom: 6px;
+        }
+        .step-desc {
+            font-size: 13px;
+            color: var(--ease-graphite);
+            line-height: 1.5;
+        }
+
+        /* ── Application Form Section ── */
+        .application-panel {
+            background-color: var(--ease-white);
+            border: 1px solid var(--ease-border);
+            border-radius: var(--radius-card);
+            padding: 40px;
+            margin-bottom: 64px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 24px;
+        }
+        .form-full {
+            grid-column: 1 / -1;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            color: var(--ease-black);
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--ease-border);
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            background-color: var(--ease-cream);
+            color: var(--ease-black);
+            outline: none;
+        }
+        .form-control:focus {
+            border-color: var(--ease-blue-core);
+            background-color: var(--ease-white);
+        }
+        textarea.form-control {
+            min-height: 110px;
+            resize: vertical;
+        }
+        .form-submit-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--ease-border-soft);
+        }
+
+        /* ── FAQ Section ── */
+        .faq-accordion {
+            background-color: var(--ease-white);
+            border: 1px solid var(--ease-border-soft);
+            border-radius: var(--radius-card);
+            overflow: hidden;
+            margin-bottom: 64px;
+        }
+        .faq-item {
+            border-bottom: 1px solid var(--ease-border-soft);
+            padding: 20px 24px;
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        .faq-question {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--ease-black);
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .faq-answer {
+            font-size: 13.5px;
+            color: var(--ease-graphite);
+            line-height: 1.6;
+        }
+
+        /* ── Footer ── */
+        footer {
+            background-color: var(--ease-black);
+            color: var(--ease-cream);
+            padding: 60px 24px 36px;
+            border-top: 1px solid var(--ease-border);
+        }
+        .footer-inner {
+            max-width: 1240px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 48px;
+        }
+        .footer-brand p {
+            font-size: 13px;
+            color: #999;
+            margin-top: 12px;
+            max-width: 340px;
+        }
+        .footer-col h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+            color: var(--ease-yellow-mist);
+        }
+        .footer-col ul {
+            list-style: none;
+        }
+        .footer-col ul li {
+            margin-bottom: 8px;
+        }
+        .footer-col ul li a {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.15s ease;
+        }
+        .footer-col ul li a:hover {
+            color: var(--ease-cream);
+        }
+        .footer-bottom {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* ── Toast notification ── */
+        .toast-banner {
+            display: none;
+            background-color: var(--ease-yellow-mist);
+            border: 1px solid var(--ease-border);
+            padding: 14px 20px;
+            border-radius: var(--radius-card);
+            margin-bottom: 24px;
+            font-size: 13.5px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 900px) {
+            .tracks-grid, .mentors-grid, .process-grid, .metrics-strip {
+                grid-template-columns: 1fr;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-inner {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Announcement Bar -->
+    <div class="top-banner">
+        <span>Cohort 2026 Spring Matching: Applications close Friday, March 27</span>
+        <span>Official Initiative of <a href="/about">Alumni Tracking System</a></span>
+    </div>
+
+    <!-- Navigation Header -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo-lockup">
+                <span class="logo-pill">ATS</span>
+                <span class="logo-title">Alumni Tracking System</span>
+            </a>
+            <nav class="nav-links">
+                <a href="/">Home</a>
+                <a href="/users">Directory</a>
+                <a href="/announcements">Announcements</a>
+                <a href="/jobs">Careers</a>
+                <a href="/mentorship" class="active">Mentorship</a>
+                <a href="/about">About</a>
+                <a href="/api/swagger">API Docs</a>
+            </nav>
+            <div class="nav-actions">
+                <a href="#apply" class="btn-header">Join Cohort</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-inner">
+            <div class="eyebrow">1-on-1 Alumni Mentorship Initiative</div>
+            <h1 class="hero-title">Connect with clinical mentors, engineering fellows, and founders across the alumni cohort.</h1>
+            <p class="hero-lead">
+                Our peer and senior mentorship tracks pair emerging graduates with experienced alumni in technology, medicine, research, and venture leadership for 6-month guided matching cycles.
+            </p>
+            <div class="hero-cta-group">
+                <a href="#apply" class="btn-primary">Apply as Mentee</a>
+                <a href="#apply" class="btn-secondary">Register as a Mentor</a>
+                <a href="#roster" class="btn-secondary">Browse Roster</a>
+            </div>
+
+            <!-- Metrics -->
+            <div class="metrics-strip">
+                <div class="metric-block">
+                    <div class="metric-value">420+</div>
+                    <div class="metric-label">Active 1:1 Pairings</div>
+                </div>
+                <div class="metric-block">
+                    <div class="metric-value">94%</div>
+                    <div class="metric-label">Match Satisfaction Rate</div>
+                </div>
+                <div class="metric-block">
+                    <div class="metric-value">48</div>
+                    <div class="metric-label">Global Chapters</div>
+                </div>
+                <div class="metric-block">
+                    <div class="metric-value">2 Wks</div>
+                    <div class="metric-label">Average Match Turnaround</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+
+        <!-- Specialized Mentorship Tracks -->
+        <div class="section-header">
+            <div class="eyebrow">Specialized Cohort Tracks</div>
+            <h2 class="section-title">Four dedicated pathways designed for career transition & clinical mastery</h2>
+            <p class="section-lead">Choose a specialized focus track or participate in cross-disciplinary venture matching.</p>
+        </div>
+
+        <div class="tracks-grid">
+            <div class="track-card active-track">
+                <div class="track-number">TRACK 01</div>
+                <h3 class="track-title">Software & AI Engineering</h3>
+                <p class="track-desc">System architecture, ML deployment pipelines, engineering leadership, and interview prep with Principal Alumni.</p>
+                <span class="track-badge">135 Mentors</span>
+            </div>
+            <div class="track-card">
+                <div class="track-number">TRACK 02</div>
+                <h3 class="track-title">Clinical & Health Systems</h3>
+                <p class="track-desc">Hospital administration, diagnostic systems, residency guidance, and medical technology integration.</p>
+                <span class="track-badge">94 Mentors</span>
+            </div>
+            <div class="track-card">
+                <div class="track-number">TRACK 03</div>
+                <h3 class="track-title">Venture & Startup Incubation</h3>
+                <p class="track-desc">Seed pitching, term sheet negotiation, early customer discovery, and founder office hours.</p>
+                <span class="track-badge">78 Mentors</span>
+            </div>
+            <div class="track-card">
+                <div class="track-number">TRACK 04</div>
+                <h3 class="track-title">Postgrad & Academic Research</h3>
+                <p class="track-desc">Grant writing, PhD fellowship placement, publication peer review, and academic tenure track strategy.</p>
+                <span class="track-badge">62 Mentors</span>
+            </div>
+        </div>
+
+        <!-- Featured Mentors Roster -->
+        <div id="roster" class="section-header">
+            <div class="eyebrow">Available Mentors</div>
+            <h2 class="section-title">Featured alumni currently accepting new mentees</h2>
+            <p class="section-lead">All mentors commit to minimum 2 hours per month of structured 1-on-1 coaching.</p>
+        </div>
+
+        <div class="mentors-grid">
+            <!-- Mentor 1 -->
+            <div class="mentor-card">
+                <div class="mentor-top">
+                    <div class="mentor-avatar">JD</div>
+                    <div class="mentor-meta">
+                        <h3>Jane Doe</h3>
+                        <div class="mentor-role">Staff Bioinformatician, Genentech (Class '18)</div>
+                    </div>
+                </div>
+                <p class="mentor-bio">Specializing in genomic data pipelines, Python/R clinical tool development, and transitioning from academic biology to industry biotech roles.</p>
+                <div class="mentor-tags">
+                    <span class="tag-pill">Bioinformatics</span>
+                    <span class="tag-pill">Python</span>
+                    <span class="tag-pill">Biotech Industry</span>
+                </div>
+                <div class="mentor-footer">
+                    <span class="slots-indicator">2 slots open</span>
+                    <button class="btn-request" onclick="selectMentor('Jane Doe')">Select</button>
+                </div>
+            </div>
+
+            <!-- Mentor 2 -->
+            <div class="mentor-card">
+                <div class="mentor-top">
+                    <div class="mentor-avatar">MC</div>
+                    <div class="mentor-meta">
+                        <h3>Dr. Marcus Chen</h3>
+                        <div class="mentor-role">VP of AI Clinical Systems, Stanford (Class '14)</div>
+                    </div>
+                </div>
+                <p class="mentor-bio">Guiding MD and computer science graduates on FDA-regulated AI models, clinical trial validation, and healthcare software architecture.</p>
+                <div class="mentor-tags">
+                    <span class="tag-pill">Clinical AI</span>
+                    <span class="tag-pill">FDA Compliance</span>
+                    <span class="tag-pill">Healthcare</span>
+                </div>
+                <div class="mentor-footer">
+                    <span class="slots-indicator">1 slot open</span>
+                    <button class="btn-request" onclick="selectMentor('Dr. Marcus Chen')">Select</button>
+                </div>
+            </div>
+
+            <!-- Mentor 3 -->
+            <div class="mentor-card">
+                <div class="mentor-top">
+                    <div class="mentor-avatar">ER</div>
+                    <div class="mentor-meta">
+                        <h3>Elena Rostova</h3>
+                        <div class="mentor-role">Principal Infra Architect, Cloudflare (Class '16)</div>
+                    </div>
+                </div>
+                <p class="mentor-bio">Focused on distributed backend networks, Rust/Go systems, edge computing, and navigating staff/principal career ladders in tech.</p>
+                <div class="mentor-tags">
+                    <span class="tag-pill">Distributed Systems</span>
+                    <span class="tag-pill">Rust</span>
+                    <span class="tag-pill">Staff Ladder</span>
+                </div>
+                <div class="mentor-footer">
+                    <span class="slots-indicator">3 slots open</span>
+                    <button class="btn-request" onclick="selectMentor('Elena Rostova')">Select</button>
+                </div>
+            </div>
+
+            <!-- Mentor 4 -->
+            <div class="mentor-card">
+                <div class="mentor-top">
+                    <div class="mentor-avatar">KD</div>
+                    <div class="mentor-meta">
+                        <h3>Kader Demircan</h3>
+                        <div class="mentor-role">Senior Systems Architect & ATS Fellow (Class '15)</div>
+                    </div>
+                </div>
+                <p class="mentor-bio">Architectural rigor, Node.js zero-dependency platforms, database performance optimization, and international engineering relocation guidance.</p>
+                <div class="mentor-tags">
+                    <span class="tag-pill">System Architecture</span>
+                    <span class="tag-pill">Database Tuning</span>
+                    <span class="tag-pill">Leadership</span>
+                </div>
+                <div class="mentor-footer">
+                    <span class="slots-indicator">2 slots open</span>
+                    <button class="btn-request" onclick="selectMentor('Kader Demircan')">Select</button>
+                </div>
+            </div>
+
+            <!-- Mentor 5 -->
+            <div class="mentor-card">
+                <div class="mentor-top">
+                    <div class="mentor-avatar">DK</div>
+                    <div class="mentor-meta">
+                        <h3>David Kim</h3>
+                        <div class="mentor-role">Director of Product, Apple Health (Class '17)</div>
+                    </div>
+                </div>
+                <p class="mentor-bio">Product management excellence in regulated consumer health apps, user discovery, stakeholder management, and hardware-software synergy.</p>
+                <div class="mentor-tags">
+                    <span class="tag-pill">Product Management</span>
+                    <span class="tag-pill">HealthTech</span>
+                    <span class="tag-pill">Mobile</span>
+                </div>
+                <div class="mentor-footer">
+                    <span class="slots-indicator">2 slots open</span>
+                    <button class="btn-request" onclick="selectMentor('David Kim')">Select</button>
+                </div>
+            </div>
+
+            <!-- Mentor 6 -->
+            <div class="mentor-card">
+                <div class="mentor-top">
+                    <div class="mentor-avatar">PP</div>
+                    <div class="mentor-meta">
+                        <h3>Dr. Priya Patel</h3>
+                        <div class="mentor-role">Chief Medical Officer, Horizon Care (Class '12)</div>
+                    </div>
+                </div>
+                <p class="mentor-bio">Hospital operational leadership, residency matching strategy, healthcare equity, and mentoring underrepresented alumni in clinical specialties.</p>
+                <div class="mentor-tags">
+                    <span class="tag-pill">Clinical Ops</span>
+                    <span class="tag-pill">Residency Strategy</span>
+                    <span class="tag-pill">Executive</span>
+                </div>
+                <div class="mentor-footer">
+                    <span class="slots-indicator">1 slot open</span>
+                    <button class="btn-request" onclick="selectMentor('Dr. Priya Patel')">Select</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="process-strip">
+            <div class="eyebrow">Program Architecture</div>
+            <h2 class="section-title">How the 6-Month Matching Cycle Works</h2>
+            <div class="process-grid">
+                <div class="step-item">
+                    <div class="step-number">01</div>
+                    <div class="step-heading">Intake & Diagnostic</div>
+                    <div class="step-desc">Submit your current career stage, 3 specific technical or leadership goals, and preferred timezone.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">02</div>
+                    <div class="step-heading">Curated Matching</div>
+                    <div class="step-desc">ATS committee and algorithm pair you with a compatible alumni mentor based on trajectory and track.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">03</div>
+                    <div class="step-heading">Introductory Sync</div>
+                    <div class="step-desc">A 45-minute chemistry check to establish meeting frequency, NDA terms, and milestones.</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">04</div>
+                    <div class="step-heading">Milestone Check-ins</div>
+                    <div class="step-desc">Bi-weekly 1:1 sessions supplemented with ATS quarterly review sheets and capstone evaluations.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Form -->
+        <div id="apply" class="application-panel">
+            <div class="eyebrow">Cohort Intake Form</div>
+            <h2 class="section-title">Apply for Mentorship or Register as a Mentor</h2>
+            <p class="section-lead">Applications are reviewed on a rolling basis. All active alumni are eligible.</p>
+
+            <div id="toastSuccess" class="toast-banner">
+                🎉 Thank you! Your mentorship application has been logged into the ATS Registry. You will receive an email confirmation within 48 hours.
+            </div>
+
+            <form id="mentorshipForm" onsubmit="handleFormSubmit(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="fullName">Full Legal / Professional Name *</label>
+                        <input type="text" id="fullName" class="form-control" placeholder="e.g. Elena Rostova" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Institutional or Personal Email *</label>
+                        <input type="email" id="email" class="form-control" placeholder="e.g. elena@alumni.edu" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Participation Intent *</label>
+                        <select id="role" class="form-control" required>
+                            <option value="mentee">I am applying as a Mentee (Seeking guidance)</option>
+                            <option value="mentor">I am registering as an Alumni Mentor (Offering guidance)</option>
+                            <option value="both">Open to both peer mentorship & offering guidance</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="track">Preferred Cohort Track *</label>
+                        <select id="track" class="form-control" required>
+                            <option value="software">Track 01: Software & AI Engineering</option>
+                            <option value="clinical">Track 02: Clinical & Health Systems</option>
+                            <option value="venture">Track 03: Venture & Startup Incubation</option>
+                            <option value="research">Track 04: Postgrad & Academic Research</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="preferredMentor">Preferred Mentor (Optional)</label>
+                        <input type="text" id="preferredMentor" class="form-control" placeholder="e.g. Jane Doe or Dr. Marcus Chen">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cadence">Preferred Cadence</label>
+                        <select id="cadence" class="form-control">
+                            <option value="biweekly">Bi-weekly (2 sessions/month - Recommended)</option>
+                            <option value="monthly">Monthly (1 session/month)</option>
+                            <option value="weekly">Weekly intensive (4 sessions/month)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group form-full">
+                        <label for="linkedin">LinkedIn, GitHub or Portfolio URL</label>
+                        <input type="url" id="linkedin" class="form-control" placeholder="https://linkedin.com/in/username">
+                    </div>
+
+                    <div class="form-group form-full">
+                        <label for="goals">Key Objectives & What You Hope to Achieve *</label>
+                        <textarea id="goals" class="form-control" placeholder="Describe your 3 core goals for the next 6 months (e.g. transitioning from junior engineer to tech lead, publishing clinical paper, preparing seed pitch deck)..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-submit-row">
+                    <span style="font-size: 12px; color: var(--ease-muted);">All mentorship communications are confidential under ATS Alumni Charter.</span>
+                    <button type="submit" class="btn-primary">Submit Application</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- FAQ Accordion -->
+        <div class="section-header">
+            <div class="eyebrow">Frequently Asked Questions</div>
+            <h2 class="section-title">Everything you need to know about ATS Mentorship</h2>
+        </div>
+
+        <div class="faq-accordion">
+            <div class="faq-item">
+                <div class="faq-question">What is the expected time commitment for mentors and mentees?</div>
+                <div class="faq-answer">Mentors and mentees typically meet for 45 to 60 minutes every two weeks over a 6-month cycle. In total, expect approximately 2 to 3 hours per month including brief prep and milestone check-ins.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Is there any fee to join the mentorship program?</div>
+                <div class="faq-answer">No. The ATS Mentorship Initiative is entirely free of charge and fully sponsored by the Alumni Tracking System and University Alumni Endowment.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can alumni located outside the United States participate?</div>
+                <div class="faq-answer">Yes, absolutely. Over 40% of our alumni mentors and mentees reside across Europe, Asia-Pacific, Latin America, and the Middle East. Sessions are conducted virtually via Google Meet or Zoom.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">Can I switch mentors if the alignment does not fit?</div>
+                <div class="faq-answer">Yes. After the initial 30-day trial period, either party may request a rematch with zero friction through the ATS committee coordinator.</div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <a href="/" class="logo-lockup" style="color: var(--ease-cream);">
+                    <span class="logo-pill" style="background: var(--ease-cream); color: var(--ease-black);">ATS</span>
+                    <span class="logo-title" style="color: var(--ease-cream);">Alumni Tracking System</span>
+                </a>
+                <p>A rigorous, clinical-grade alumni registry and professional advancement network connecting graduates across disciplines and decades.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/users">Alumni Directory</a></li>
+                    <li><a href="/announcements">Dispatches & Bulletins</a></li>
+                    <li><a href="/jobs">Career Opportunities</a></li>
+                    <li><a href="/mentorship">Mentorship Hub</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="/about">About the System</a></li>
+                    <li><a href="/api/swagger">API Documentation</a></li>
+                    <li><a href="/api/swagger.json">OpenAPI Spec (JSON)</a></li>
+                    <li><a href="/api/health">System Health</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Standards</h4>
+                <ul>
+                    <li><a href="/about#governance">Design Tokens</a></li>
+                    <li><a href="/about#governance">Alumni Charter</a></li>
+                    <li><a href="/about#governance">Privacy Policy</a></li>
+                    <li><a href="/about#governance">Security & HIPAA</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 Alumni Tracking System. Ease Health Edition. All rights reserved.</span>
+            <span>Zero External Dependencies &bull; Standards Compliant</span>
+        </div>
+    </footer>
+
+    <script>
+        function selectMentor(name) {
+            document.getElementById('preferredMentor').value = name;
+            document.getElementById('apply').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('fullName').value;
+            const toast = document.getElementById('toastSuccess');
+            toast.style.display = 'block';
+            toast.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('mentorshipForm').reset();
+        }
+    </script>
+</body>
+</html>

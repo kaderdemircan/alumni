@@ -3,201 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Page Not Found - Alumni Network</title>
+    <title>404 — Page Not Found — Alumni Tracking System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --clr-green: #2ecc71;
-            --clr-yellow: #f1c40f;
-            --clr-black: #111111;
-            --clr-blue: #3498db;
-            --clr-white: #ffffff;
-            --clr-bg: #f8f9fa;
-            --clr-danger: #e74c3c;
+            --ease-cream: #fffefc;
+            --ease-white: #ffffff;
+            --ease-keylime: #fef9e7;
+            --ease-yellow-mist: #fef08a;
+            --ease-yellow-core: #f1c40f;
+            --ease-slate-hush: #b6ced5;
+            --ease-blue-core: #3498db;
+            --ease-black: #111111;
+            --ease-graphite: #2b2b2b;
+            --ease-muted: #555555;
+            --ease-border: #111111;
+            --ease-border-soft: rgba(17, 17, 17, 0.12);
+            --font-serif: 'Cormorant Garamond', Georgia, serif;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --radius-card: 14px;
+            --radius-pill: 999px;
+            --radius-nav: 7px;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; box-shadow: none !important; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--clr-bg);
-            color: var(--clr-black);
-        }
-        header {
-            background: var(--clr-black);
-            color: var(--clr-white);
-            padding: 1.5rem 0;
-            text-align: center;
-            border-bottom: 5px solid var(--clr-blue);
-        }
-        header h2 { margin: 0; font-size: 2rem; letter-spacing: 1px; }
-        nav {
-            background: var(--clr-blue);
+            font-family: var(--font-sans);
+            background-color: var(--ease-cream);
+            color: var(--ease-black);
+            font-size: 14px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
-            padding: 0.8rem;
+            flex-direction: column;
         }
-        nav a {
-            color: var(--clr-white);
+        /* ── Navigation ── */
+        header {
+            background-color: var(--ease-cream);
+            border-bottom: 1px solid var(--ease-border-soft);
+        }
+        .nav-container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo-lockup {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             text-decoration: none;
-            padding: 0.6rem 1.2rem;
-            margin: 0 0.5rem;
-            border-radius: 4px;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            color: var(--ease-black);
         }
-        nav a:hover {
-            background: var(--clr-yellow);
-            color: var(--clr-black);
+        .logo-pill {
+            background: var(--ease-black);
+            color: var(--ease-cream);
+            padding: 5px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
         }
-        .error-container {
-            max-width: 700px;
-            margin: 4rem auto;
-            padding: 3rem 2rem;
+        .logo-title {
+            font-family: var(--font-serif);
+            font-size: 21px;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+        }
+        nav.nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        nav.nav-links a {
+            color: var(--ease-black);
+            text-decoration: none;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: var(--radius-nav);
+            transition: background 0.15s ease;
+        }
+        nav.nav-links a:hover {
+            background-color: var(--ease-keylime);
+        }
+
+        /* ── Error Container ── */
+        .error-stage {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 24px;
+        }
+        .error-panel {
+            max-width: 620px;
+            width: 100%;
             text-align: center;
-            background: var(--clr-white);
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-            border-top: 6px solid var(--clr-danger);
         }
         .error-code {
-            font-size: 8rem;
-            font-weight: 900;
-            color: var(--clr-danger);
-            margin: 0;
+            font-family: var(--font-serif);
+            font-size: 120px;
+            font-weight: 300;
+            letter-spacing: -0.03em;
             line-height: 1;
-            animation: pulse 2s ease-in-out infinite;
+            color: var(--ease-black);
+            margin-bottom: 8px;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.02); }
+        .error-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            color: var(--ease-muted);
+            margin-bottom: 28px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        .error-icon {
-            font-size: 4rem;
-            margin-bottom: 0.5rem;
-            animation: bounce 1.5s ease infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .error-label::before {
+            content: "";
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: var(--ease-yellow-core);
         }
         .error-title {
-            font-size: 1.8rem;
-            color: var(--clr-black);
-            margin: 0.5rem 0;
-            font-weight: 700;
+            font-family: var(--font-serif);
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: -0.015em;
+            margin-bottom: 16px;
         }
         .error-reason {
-            font-size: 1.1rem;
-            color: #555;
-            margin: 1.5rem 0;
+            background-color: var(--ease-keylime);
+            border: 1px solid var(--ease-border-soft);
+            border-radius: var(--radius-card);
+            padding: 16px 20px;
+            font-size: 13.5px;
+            color: var(--ease-graphite);
             line-height: 1.6;
-            padding: 1rem 1.5rem;
-            background: #fef9e7;
-            border-left: 4px solid var(--clr-yellow);
-            border-radius: 4px;
             text-align: left;
+            margin-bottom: 24px;
         }
         .error-url {
-            font-size: 0.9rem;
-            color: #888;
-            margin: 1rem 0;
-            font-family: 'Courier New', monospace;
-            background: var(--clr-bg);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
+            font-size: 12px;
+            color: var(--ease-muted);
+            margin-bottom: 32px;
             word-break: break-all;
         }
-        .error-actions {
-            margin-top: 2rem;
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
+        .error-url code {
+            background-color: var(--ease-white);
+            border: 1px solid var(--ease-border-soft);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
         }
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            border-radius: 5px;
-            font-weight: bold;
+        .btn-home {
+            background-color: var(--ease-black);
+            color: var(--ease-cream);
+            border: 1px solid var(--ease-black);
+            padding: 12px 28px;
+            border-radius: var(--radius-card);
+            font-size: 14px;
+            font-weight: 500;
             text-decoration: none;
-            font-size: 1rem;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s ease;
         }
-        .btn-primary {
-            background: var(--clr-blue);
-            color: white;
+        .btn-home:hover { background-color: var(--ease-graphite); }
+        .btn-outline {
+            background-color: var(--ease-white);
+            color: var(--ease-black);
+            border: 1px solid var(--ease-border);
+            padding: 12px 24px;
+            border-radius: var(--radius-card);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 12px;
+            transition: background 0.2s ease;
         }
-        .btn-primary:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(52,152,219,0.3);
-        }
-        .btn-success {
-            background: var(--clr-green);
-            color: white;
-        }
-        .btn-success:hover {
-            background: #27ae60;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(46,204,113,0.3);
-        }
-        .suggestions {
-            margin-top: 2rem;
-            font-size: 0.95rem;
-            color: #666;
-        }
-        .suggestions ul {
-            list-style: none;
-            padding: 0;
-        }
-        .suggestions li {
-            padding: 0.3rem 0;
-        }
-        .suggestions li::before {
-            content: "→ ";
-            color: var(--clr-blue);
-            font-weight: bold;
+        .btn-outline:hover { background-color: var(--ease-keylime); }
+
+        /* ── Footer ── */
+        footer {
+            background-color: var(--ease-black);
+            color: #999;
+            padding: 24px;
+            text-align: center;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
     <header>
-        <h2>Alumni Network</h2>
+        <div class="nav-container">
+            <a href="/" class="logo-lockup">
+                <span class="logo-pill">ATS</span>
+                <span class="logo-title">Alumni Tracking System</span>
+            </a>
+            <nav class="nav-links">
+                <a href="/">Home</a>
+                <a href="/users">Directory</a>
+                <a href="/announcements">Announcements</a>
+                <a href="/jobs">Careers</a>
+                <a href="/mentorship">Mentorship</a>
+                <a href="/about">About</a>
+            </nav>
+        </div>
     </header>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/about">About Us</a>
-        <a href="/users">Alumni System</a>
-        <a href="/api/swagger">API Docs</a>
-    </nav>
 
-    <div class="error-container">
-        <div class="error-icon">🔍</div>
-        <p class="error-code">404</p>
-        <h1 class="error-title">Page Not Found</h1>
-
-        <div class="error-reason">
-            <!-- ERROR_REASON -->
-        </div>
-
-        <div class="error-url">
-            Requested URL: <!-- REQUESTED_URL -->
-        </div>
-
-        <div class="suggestions">
-            <p>Here are some helpful links:</p>
-            <ul>
-                <li><a href="/">Go to Home Page</a></li>
-                <li><a href="/users">Browse Alumni Directory</a></li>
-                <li><a href="/api/swagger">View API Documentation</a></li>
-            </ul>
-        </div>
-
-        <div class="error-actions">
-            <a href="/" class="btn btn-primary">🏠 Back to Home</a>
-            <a href="/users" class="btn btn-success">🎓 Alumni Directory</a>
+    <div class="error-stage">
+        <div class="error-panel">
+            <div class="error-code">404</div>
+            <div class="error-label">Resource Not Found</div>
+            <h1 class="error-title">The page you are looking for does not exist.</h1>
+            <div class="error-reason">
+                <!-- ERROR_REASON -->
+            </div>
+            <div class="error-url">
+                Requested path: <code><!-- REQUESTED_URL --></code>
+            </div>
+            <a href="/" class="btn-home">← Return Home</a>
+            <a href="/users" class="btn-outline">Alumni Directory</a>
         </div>
     </div>
+
+    <footer>
+        &copy; 2026 Alumni Tracking System. Ease Health Edition.
+    </footer>
 </body>
 </html>

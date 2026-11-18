@@ -3,56 +3,508 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Alumni Network</title>
+    <title>About Us — Alumni Tracking System</title>
+    <!-- Google Fonts: Cormorant Garamond (Faire Octave substitute) & Inter (Suisse Intl substitute) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --clr-green: #2ecc71;
-            --clr-yellow: #f1c40f;
-            --clr-black: #111111;
-            --clr-blue: #3498db;
-            --clr-white: #ffffff;
-            --clr-bg: #f8f9fa;
+            /* Strict Ease Health Palette: Black, White, Yellow, Blue */
+            --color-forest-ink: #111111;
+            --color-ink: #111111;
+            --color-sage-mist: #fef08a;
+            --color-keylime-wash: #fef9e7;
+            --color-mint-veil: #fae588;
+            --color-slate-hush: #b6ced5;
+            --color-cream-paper: #fffefc;
+            --color-charcoal: #222222;
+            --color-border-mist: #efeeeb;
+            --color-blue-ink: #2980b9;
+
+            --font-faire-octave: 'Cormorant Garamond', 'Faire Octave', Georgia, serif;
+            --font-suisse-intl: 'Inter', 'Suisse Intl', system-ui, -apple-system, sans-serif;
+
+            --text-body: 14px;
+            --leading-body: 1.5;
+            --text-heading: 40px;
+            --leading-heading: 1.35;
+            --text-heading-lg: 56px;
+            --leading-heading-lg: 1.2;
+
+            --spacing-7: 7px;
+            --spacing-9: 9px;
+            --spacing-14: 14px;
+            --spacing-18: 18px;
+            --spacing-21: 21px;
+            --spacing-28: 28px;
+            --spacing-35: 35px;
+            --spacing-42: 42px;
+            --spacing-70: 70px;
+            --spacing-99: 99px;
+
+            --page-max-width: 1200px;
+            --radius-nav: 7px;
+            --radius-cards: 14px;
+            --radius-badges: 999px;
+            --radius-buttons: 14px;
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: var(--clr-bg); color: var(--clr-black); }
-        header { background: var(--clr-black); color: var(--clr-white); padding: 1.5rem 0; text-align: center; border-bottom: 5px solid var(--clr-green); }
-        header h2 { margin: 0; font-size: 2rem; letter-spacing: 1px; }
-        nav { background: var(--clr-blue); display: flex; justify-content: center; padding: 0.8rem; }
-        nav a { color: var(--clr-white); text-decoration: none; padding: 0.6rem 1.2rem; margin: 0 0.5rem; border-radius: 4px; font-weight: bold; transition: all 0.3s ease; }
-        nav a:hover { background: var(--clr-yellow); color: var(--clr-black); }
-        .page-header { background: var(--clr-black); color: var(--clr-white); padding: 3rem 2rem; text-align: center; }
-        .page-header h1 { font-size: 2.2rem; margin: 0; color: var(--clr-green); }
-        .container { max-width: 900px; margin: 2rem auto; padding: 3rem; background: var(--clr-white); box-shadow: 0 8px 15px rgba(0,0,0,0.05); border-radius: 8px; border-top: 6px solid var(--clr-blue); }
-        h2 { color: var(--clr-blue); border-bottom: 2px solid var(--clr-yellow); padding-bottom: 0.5rem; display: inline-block; }
-        p { font-size: 1.1rem; line-height: 1.8; color: #444; }
-        .info-box { background: rgba(52, 152, 219, 0.1); border-left: 5px solid var(--clr-blue); padding: 1.5rem; margin-top: 2rem; border-radius: 0 8px 8px 0; }
-        .info-box p { margin: 0; font-weight: 500; }
-        .highlight { color: var(--clr-green); font-weight: bold; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-suisse-intl);
+            background-color: var(--color-cream-paper);
+            color: var(--color-charcoal);
+            line-height: var(--leading-body);
+            font-size: var(--text-body);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Header & Navigation ─────────────────────────────────────────── */
+        .ease-nav-wrapper {
+            background-color: var(--color-cream-paper);
+            border-bottom: 1px solid var(--color-border-mist);
+            padding: var(--spacing-18) var(--spacing-28);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .ease-nav-container {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .ease-brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-9);
+            text-decoration: none;
+            color: var(--color-ink);
+        }
+        .ease-brand-mark {
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-ink);
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .ease-brand-text {
+            font-family: var(--font-suisse-intl);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+        .ease-nav-links {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+        .ease-nav-item {
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            color: var(--color-charcoal);
+            text-decoration: none;
+            padding: var(--spacing-7) var(--spacing-14);
+            border-radius: var(--radius-nav);
+            transition: background-color 0.15s ease;
+        }
+        .ease-nav-item:hover {
+            background-color: var(--color-keylime-wash);
+        }
+        .ease-nav-item.active {
+            font-weight: 600;
+            color: var(--color-ink);
+        }
+
+        .ease-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-7);
+            background-color: var(--color-forest-ink);
+            color: var(--color-cream-paper);
+            text-decoration: none;
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            padding: var(--spacing-9) var(--spacing-18);
+            border-radius: var(--radius-buttons);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        .ease-btn-primary:hover {
+            transform: translateY(-1px);
+        }
+
+        .ease-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--color-cream-paper);
+            color: var(--color-forest-ink);
+            font-size: 13px;
+            padding: var(--spacing-7) var(--spacing-14);
+            border-radius: var(--radius-badges);
+            border: 1px solid var(--color-border-mist);
+            text-decoration: none;
+        }
+
+        .ease-eyebrow {
+            font-family: var(--font-suisse-intl);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+            display: block;
+        }
+
+        /* ── Hero Split Layout ────────────────────────────────────────────── */
+        .about-hero {
+            max-width: var(--page-max-width);
+            margin: var(--spacing-42) auto var(--spacing-70);
+            padding: 0 var(--spacing-21);
+        }
+        .about-hero-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: var(--spacing-21);
+        }
+        .about-hero-panel-left {
+            background-color: var(--color-keylime-wash);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+        }
+        .about-heading {
+            font-family: var(--font-faire-octave);
+            font-size: var(--text-heading-lg);
+            font-weight: 300;
+            line-height: var(--leading-heading-lg);
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-21);
+        }
+        .about-lead {
+            font-size: 15px;
+            line-height: 1.65;
+            color: var(--color-charcoal);
+            margin-bottom: var(--spacing-28);
+        }
+        .about-hero-panel-right {
+            background-color: var(--color-slate-hush);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .quote-box {
+            background-color: var(--color-cream-paper);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-28);
+        }
+        .quote-box p {
+            font-family: var(--font-faire-octave);
+            font-size: 22px;
+            font-weight: 300;
+            line-height: 1.35;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+        }
+        .quote-author {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Mission & Pillars ───────────────────────────────────────────── */
+        .content-section {
+            max-width: var(--page-max-width);
+            margin: 0 auto var(--spacing-99);
+            padding: 0 var(--spacing-21);
+        }
+        .section-title {
+            font-family: var(--font-faire-octave);
+            font-size: var(--text-heading);
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+        }
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-21);
+            margin-top: var(--spacing-28);
+        }
+        .pillar-card {
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-35);
+        }
+        .pillar-card h3 {
+            font-family: var(--font-faire-octave);
+            font-size: 26px;
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+        }
+        .pillar-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--color-charcoal);
+        }
+
+        /* ── Timeline Section ────────────────────────────────────────────── */
+        .timeline-box {
+            background-color: var(--color-keylime-wash);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+            margin-top: var(--spacing-28);
+        }
+        .timeline-row {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: var(--spacing-28);
+            padding: var(--spacing-21) 0;
+            border-bottom: 1px solid var(--color-border-mist);
+        }
+        .timeline-row:last-child {
+            border-bottom: none;
+        }
+        .timeline-year {
+            font-family: var(--font-faire-octave);
+            font-size: 32px;
+            font-weight: 300;
+            color: var(--color-forest-ink);
+        }
+        .timeline-info h4 {
+            font-family: var(--font-faire-octave);
+            font-size: 22px;
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-7);
+        }
+        .timeline-info p {
+            color: var(--color-charcoal);
+            line-height: 1.55;
+        }
+
+        /* ── Footer ──────────────────────────────────────────────────────── */
+        .ease-footer {
+            background-color: var(--color-cream-paper);
+            border-top: 1px solid var(--color-border-mist);
+            padding: var(--spacing-70) var(--spacing-28) var(--spacing-42);
+            margin-top: var(--spacing-99);
+        }
+        .ease-footer-container {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: var(--spacing-42);
+            margin-bottom: var(--spacing-70);
+        }
+        .footer-desc {
+            font-size: var(--text-body);
+            color: #666;
+            line-height: 1.6;
+            max-width: 420px;
+            margin: var(--spacing-14) 0;
+        }
+        .footer-col-header {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-forest-ink);
+            display: block;
+            margin-bottom: var(--spacing-18);
+        }
+        .footer-links-list { list-style: none; }
+        .footer-links-list li { margin-bottom: var(--spacing-11); }
+        .footer-links-list a { color: var(--color-charcoal); text-decoration: none; }
+        .footer-bottom-bar {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            border-top: 1px solid var(--color-border-mist);
+            padding-top: var(--spacing-21);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #777;
+        }
+
+        @media (max-width: 900px) {
+            .about-hero-grid, .pillars-grid, .timeline-row, .ease-footer-container {
+                grid-template-columns: 1fr;
+            }
+            .ease-nav-links { display: none; }
+            .about-heading { font-size: 40px; }
+        }
     </style>
 </head>
 <body>
-    <header>
-        <h2>Alumni Network</h2>
-    </header>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/about">About Us</a>
-        <a href="/users">Alumni System</a>
-        <a href="/announcements">Announcements</a>
-        <a href="/api/swagger">API Docs</a>
-    </nav>
-    <div class="page-header">
-        <h1>About Our Organization</h1>
-    </div>
-    <div class="container">
-        <h2>Who We Are</h2>
-        <p>We are a dedicated community of graduates committed to fostering lifelong connections. Our mission is to build a robust network where <span class="highlight">knowledge</span>, <span class="highlight">experience</span>, and <span class="highlight">opportunities</span> are shared freely among members.</p>
-        
-        <h2>Our Vision</h2>
-        <p>To create a global platform that empowers our alumni to achieve professional excellence while giving back to the community that shaped them.</p>
-        
-        <div class="info-box">
-            <p><strong>Note:</strong> This platform is continuously evolving. We are currently testing new features to ensure a seamless experience for all our members. Stay tuned for upcoming events and mentorship programs!</p>
+
+    <!-- ── Header Component ────────────────────────────────────────────── -->
+    <header class="ease-nav-wrapper">
+        <div class="ease-nav-container">
+            <a href="/" class="ease-brand-lockup">
+                <span class="ease-brand-mark"></span>
+                <span class="ease-brand-text">Alumni Tracking System</span>
+            </a>
+
+            <nav class="ease-nav-links">
+                <a href="/" class="ease-nav-item">Home</a>
+                <a href="/about" class="ease-nav-item active">About Us</a>
+                <a href="/users" class="ease-nav-item">Alumni Directory</a>
+                <a href="/announcements" class="ease-nav-item">Announcements</a>
+                <a href="/jobs" class="ease-nav-item">Careers</a>
+                <a href="/mentorship" class="ease-nav-item">Mentorship</a>
+                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
+            </nav>
+
+            <div class="ease-nav-cta">
+                <a href="/users" class="ease-btn-primary">
+                    <span>Join Network</span>
+                    <span>→</span>
+                </a>
+            </div>
         </div>
-    </div>
+    </header>
+
+    <!-- ── Hero Section ────────────────────────────────────────────────── -->
+    <section class="about-hero">
+        <div class="about-hero-grid">
+            <div class="about-hero-panel-left">
+                <span class="ease-eyebrow">OUR STORY & HERITAGE</span>
+                <h1 class="about-heading">An enduring network built on academic pride.</h1>
+                <p class="about-lead">
+                    The Alumni Tracking System is the official institutional bridge dedicated to preserving graduate relationships, supporting early-career graduates, and accelerating lifelong collaboration across industries.
+                </p>
+                <div style="display:flex; gap:14px; align-items:center;">
+                    <a href="/users" class="ease-btn-primary">Explore Directory →</a>
+                    <a href="/mentorship" class="ease-tag-pill">Mentorship Program</a>
+                </div>
+            </div>
+
+            <div class="about-hero-panel-right">
+                <div class="quote-box">
+                    <p>"The true measure of a university's excellence lies in the lifelong achievements of its graduates and their willingness to lift up the generations that follow."</p>
+                    <span class="quote-author">— Office of Alumni Affairs</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Mission & Pillars ───────────────────────────────────────────── -->
+    <section class="content-section">
+        <span class="ease-eyebrow">FOUNDATIONAL OBJECTIVES</span>
+        <h2 class="section-title">The Four Pillars of Our Network</h2>
+        
+        <div class="pillars-grid">
+            <div class="pillar-card" style="background-color: var(--color-sage-mist);">
+                <span class="ease-eyebrow">CONNECTION</span>
+                <h3>Lifelong Bonds</h3>
+                <p>Ensuring every alumnus stays in touch with classmates, professors, and regional alumni chapters no matter where their career takes them.</p>
+            </div>
+
+            <div class="pillar-card" style="background-color: var(--color-keylime-wash);">
+                <span class="ease-eyebrow">GROWTH</span>
+                <h3>Career Mentorship</h3>
+                <p>Creating direct bridges between experienced executive alumni and recent graduates through structured 1-on-1 advisory programs.</p>
+            </div>
+
+            <div class="pillar-card" style="background-color: var(--color-slate-hush);">
+                <span class="ease-eyebrow">INTEGRITY</span>
+                <h3>Verified Directory</h3>
+                <p>Maintaining accurate, high-fidelity academic cohort records to safeguard community privacy while facilitating verified networking.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Timeline / History ──────────────────────────────────────────── -->
+    <section class="content-section">
+        <span class="ease-eyebrow">MILESTONES & IMPACT</span>
+        <h2 class="section-title">A Decade of Community Evolution</h2>
+
+        <div class="timeline-box">
+            <div class="timeline-row">
+                <div class="timeline-year">2014</div>
+                <div class="timeline-info">
+                    <h4>Alumni Association Inauguration</h4>
+                    <p>The first official gathering of graduate representatives convened to formalize the institution's alumni community charter.</p>
+                </div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="timeline-year">2019</div>
+                <div class="timeline-info">
+                    <h4>Global Mentorship Program Launch</h4>
+                    <p>Initiated the first interdisciplinary mentorship cohorts connecting senior software, engineering, and finance leaders with graduating seniors.</p>
+                </div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="timeline-year">2023</div>
+                <div class="timeline-info">
+                    <h4>48 International Chapter Charters</h4>
+                    <p>Celebrated the establishment of regional alumni chapters across Europe, North America, and Asia, hosting regular networking roundtables.</p>
+                </div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="timeline-year">2026</div>
+                <div class="timeline-info">
+                    <h4>Centralized Alumni Tracking System Deployment</h4>
+                    <p>Rolled out the zero-dependency, open-architected web application to unite directories, jobs, and community announcements into a singular platform.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Footer ──────────────────────────────────────────────────────── -->
+    <footer class="ease-footer">
+        <div class="ease-footer-container">
+            <div>
+                <div class="ease-brand-lockup" style="margin-bottom:14px;">
+                    <span class="ease-brand-mark"></span>
+                    <span class="ease-brand-text">Alumni Tracking System</span>
+                </div>
+                <p class="footer-desc">
+                    An editorial-grade alumni connection platform fostering lifelong engagement between graduates, students, and university faculties.
+                </p>
+                <span class="ease-tag-pill" style="font-size:12px;">Zero-Dependency Node.js MVC</span>
+            </div>
+
+            <div>
+                <span class="footer-col-header">PLATFORM</span>
+                <ul class="footer-links-list">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/users">Alumni Directory</a></li>
+                    <li><a href="/announcements">Announcements</a></li>
+                    <li><a href="/jobs">Careers</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <span class="footer-col-header">DEVELOPER APIS</span>
+                <ul class="footer-links-list">
+                    <li><a href="/api/swagger">Interactive Swagger</a></li>
+                    <li><a href="/api/swagger.json">OpenAPI 3.0 Spec</a></li>
+                    <li><a href="/api/health">System Health Check</a></li>
+                    <li><a href="/api/users">REST Users API</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom-bar">
+            <span>© 2026 Alumni Tracking System. All rights reserved.</span>
+            <span>Ease Health Architectural System • Palette: Black, White, Yellow, Blue</span>
+        </div>
+    </footer>
+
 </body>
 </html>

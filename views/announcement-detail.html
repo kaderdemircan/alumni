@@ -3,151 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><!-- ANNOUNCEMENT_TITLE --> - Announcement Details</title>
+    <title><!-- ANNOUNCEMENT_TITLE --> — Announcement Details</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --clr-green: #2ecc71;
-            --clr-yellow: #f1c40f;
-            --clr-black: #111111;
-            --clr-blue: #3498db;
-            --clr-white: #ffffff;
-            --clr-bg: #f8f9fa;
-            --clr-gray: #e9ecef;
-            --clr-danger: #e74c3c;
-            --clr-warning: #f39c12;
-            --clr-purple: #9b59b6;
+            --color-forest-ink: #111111;
+            --color-ink: #111111;
+            --color-sage-mist: #fef08a;
+            --color-keylime-wash: #fef9e7;
+            --color-mint-veil: #fae588;
+            --color-slate-hush: #b6ced5;
+            --color-cream-paper: #fffefc;
+            --color-charcoal: #222222;
+            --color-border-mist: #efeeeb;
+
+            --font-faire-octave: 'Cormorant Garamond', 'Faire Octave', Georgia, serif;
+            --font-suisse-intl: 'Inter', 'Suisse Intl', system-ui, -apple-system, sans-serif;
+
+            --text-body: 14px;
+            --leading-body: 1.65;
+            --text-heading: 42px;
+
+            --spacing-7: 7px;
+            --spacing-9: 9px;
+            --spacing-14: 14px;
+            --spacing-18: 18px;
+            --spacing-21: 21px;
+            --spacing-28: 28px;
+            --spacing-35: 35px;
+            --spacing-42: 42px;
+            --spacing-70: 70px;
+            --spacing-99: 99px;
+
+            --page-max-width: 1200px;
+            --radius-nav: 7px;
+            --radius-cards: 14px;
+            --radius-badges: 999px;
+            --radius-buttons: 14px;
         }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background-color: var(--clr-bg); 
-            color: var(--clr-black); 
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-suisse-intl);
+            background-color: var(--color-cream-paper);
+            color: var(--color-charcoal);
+            line-height: var(--leading-body);
+            font-size: var(--text-body);
+            -webkit-font-smoothing: antialiased;
         }
-        header { 
-            background: var(--clr-black); 
-            color: var(--clr-white); 
-            padding: 1.5rem 0; 
-            text-align: center; 
-            border-bottom: 5px solid var(--clr-blue); 
+
+        .ease-nav-wrapper {
+            background-color: var(--color-cream-paper);
+            border-bottom: 1px solid var(--color-border-mist);
+            padding: var(--spacing-18) var(--spacing-28);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        header h2 { margin: 0; font-size: 2rem; }
-        nav { 
-            background: var(--clr-blue); 
-            display: flex; 
-            justify-content: center; 
-            padding: 0.8rem; 
-            flex-wrap: wrap;
-        }
-        nav a { 
-            color: var(--clr-white); 
-            text-decoration: none; 
-            padding: 0.6rem 1.2rem; 
-            margin: 0.2rem 0.4rem; 
-            border-radius: 4px; 
-            font-weight: bold; 
-            transition: 0.3s; 
-        }
-        nav a:hover, nav a.active { 
-            background: var(--clr-yellow); 
-            color: var(--clr-black); 
-        }
-        .container { 
-            max-width: 800px; 
-            margin: 3rem auto; 
-            padding: 0 1rem; 
-        }
-        .card {
-            background: var(--clr-white);
-            border-radius: 8px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-            padding: 2.5rem;
-            border-top: 6px solid var(--clr-purple);
-        }
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-right: 0.5rem;
-        }
-        .meta-bar {
+        .ease-nav-container {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            color: #666;
-            font-size: 0.95rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--clr-gray);
-            margin: 1rem 0 1.5rem;
+            align-items: center;
+            justify-content: space-between;
         }
-        .content-box {
-            font-size: 1.1rem;
-            line-height: 1.7;
-            color: #2c3e50;
-            background: #fafbfc;
-            padding: 1.5rem;
-            border-radius: 6px;
-            border-left: 4px solid var(--clr-purple);
-            margin-bottom: 2rem;
-            white-space: pre-wrap;
-        }
-        .actions {
+        .ease-brand-lockup {
             display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-        }
-        .btn {
-            display: inline-block;
-            padding: 0.65rem 1.4rem;
-            border-radius: 4px;
-            font-weight: bold;
+            align-items: center;
+            gap: var(--spacing-9);
             text-decoration: none;
+            color: var(--color-ink);
+        }
+        .ease-brand-mark {
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-ink);
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .ease-brand-text {
+            font-family: var(--font-suisse-intl);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+        .ease-nav-links {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+        .ease-nav-item {
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            color: var(--color-charcoal);
+            text-decoration: none;
+            padding: var(--spacing-7) var(--spacing-14);
+            border-radius: var(--radius-nav);
+            transition: background-color 0.15s ease;
+        }
+        .ease-nav-item:hover { background-color: var(--color-keylime-wash); }
+        .ease-nav-item.active { font-weight: 600; color: var(--color-ink); }
+
+        .ease-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-7);
+            background-color: var(--color-forest-ink);
+            color: var(--color-cream-paper);
+            text-decoration: none;
+            font-size: var(--text-body);
+            padding: var(--spacing-9) var(--spacing-18);
+            border-radius: var(--radius-buttons);
             border: none;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.15s ease;
         }
-        .btn-back { background: #6c757d; color: white; }
-        .btn-back:hover { background: #5a6268; }
-        .btn-edit { background: var(--clr-warning); color: #111; }
-        .btn-edit:hover { background: #e67e22; color: white; }
+        .ease-btn-primary:hover { transform: translateY(-1px); }
+
+        .ease-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--color-cream-paper);
+            color: var(--color-forest-ink);
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: var(--radius-badges);
+            border: 1px solid var(--color-border-mist);
+            text-decoration: none;
+        }
+
+        .ease-eyebrow {
+            font-family: var(--font-suisse-intl);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+            display: block;
+        }
+
+        /* ── Article Shell ───────────────────────────────────────────────── */
+        .article-main {
+            max-width: 860px;
+            margin: var(--spacing-42) auto var(--spacing-99);
+            padding: 0 var(--spacing-21);
+        }
+        .article-shell {
+            background-color: var(--color-keylime-wash);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+        }
+        .article-white-card {
+            background-color: var(--color-cream-paper);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+        }
+        .article-badge-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: var(--spacing-18);
+        }
+        .article-title {
+            font-family: var(--font-faire-octave);
+            font-size: var(--text-heading);
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            line-height: 1.2;
+            margin-bottom: var(--spacing-21);
+        }
+        .article-meta-strip {
+            display: flex;
+            gap: var(--spacing-21);
+            font-size: 13px;
+            color: #666;
+            border-bottom: 1px solid var(--color-border-mist);
+            padding-bottom: var(--spacing-18);
+            margin-bottom: var(--spacing-28);
+            flex-wrap: wrap;
+        }
+        .article-content {
+            font-size: 16px;
+            line-height: 1.75;
+            color: var(--color-charcoal);
+            margin-bottom: var(--spacing-35);
+        }
+        .article-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--color-border-mist);
+            padding-top: var(--spacing-21);
+        }
+
+        /* Footer */
+        .ease-footer {
+            background-color: var(--color-cream-paper);
+            border-top: 1px solid var(--color-border-mist);
+            padding: var(--spacing-70) var(--spacing-28) var(--spacing-42);
+            margin-top: var(--spacing-99);
+        }
+        .ease-footer-container {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: var(--spacing-42);
+        }
+        .footer-col-header {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-forest-ink);
+            display: block;
+            margin-bottom: var(--spacing-18);
+        }
+        .footer-links-list { list-style: none; }
+        .footer-links-list li { margin-bottom: var(--spacing-11); }
+        .footer-links-list a { color: var(--color-charcoal); text-decoration: none; }
     </style>
 </head>
 <body>
-    <header>
-        <h2>Alumni Network</h2>
-    </header>
-    <nav>
-        <a href="/">Home</a>
-        <a href="/about">About Us</a>
-        <a href="/users">Alumni Directory</a>
-        <a href="/announcements" class="active">Announcements</a>
-        <a href="/api/swagger">API Docs</a>
-    </nav>
 
-    <div class="container">
-        <div class="card">
-            <span class="badge" style="background:#e8daf0; color:#6c3483;"><!-- ANNOUNCEMENT_CATEGORY --></span>
-            <span class="badge" style="background:#fef9e7; color:#7d6608;"><!-- ANNOUNCEMENT_PRIORITY --></span>
-            
-            <h1 style="margin: 1rem 0 0.5rem; color: #2c3e50;"><!-- ANNOUNCEMENT_TITLE --></h1>
+    <!-- ── Header Component ────────────────────────────────────────────── -->
+    <header class="ease-nav-wrapper">
+        <div class="ease-nav-container">
+            <a href="/" class="ease-brand-lockup">
+                <span class="ease-brand-mark"></span>
+                <span class="ease-brand-text">Alumni Tracking System</span>
+            </a>
 
-            <div class="meta-bar">
-                <span>👤 <strong>Yayınlayan:</strong> <!-- ANNOUNCEMENT_AUTHOR --></span>
-                <span>📅 <strong>Tarih:</strong> <!-- ANNOUNCEMENT_DATE --></span>
-                <span>🆔 <strong>Duyuru ID:</strong> #<!-- ANNOUNCEMENT_ID --></span>
-            </div>
+            <nav class="ease-nav-links">
+                <a href="/" class="ease-nav-item">Home</a>
+                <a href="/about" class="ease-nav-item">About Us</a>
+                <a href="/users" class="ease-nav-item">Alumni Directory</a>
+                <a href="/announcements" class="ease-nav-item active">Announcements</a>
+                <a href="/jobs" class="ease-nav-item">Careers</a>
+                <a href="/mentorship" class="ease-nav-item">Mentorship</a>
+                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
+            </nav>
 
-            <div class="content-box">
-<!-- ANNOUNCEMENT_CONTENT -->
-            </div>
-
-            <div class="actions">
-                <a href="/announcements" class="btn btn-back">⬅️ Back to Announcements</a>
-                <a href="/announcements/<!-- ANNOUNCEMENT_ID -->/edit" class="btn btn-edit">✏️ Edit Announcement</a>
+            <div class="ease-nav-cta">
+                <a href="/announcements" class="ease-btn-primary">
+                    <span>← All Bulletins</span>
+                </a>
             </div>
         </div>
-    </div>
+    </header>
+
+    <main class="article-main">
+        <span class="ease-eyebrow">OFFICIAL DISPATCH</span>
+
+        <div class="article-shell">
+            <div class="article-white-card">
+                <div class="article-badge-row">
+                    <span class="ease-tag-pill" id="artCat"><!-- ANNOUNCEMENT_CATEGORY --></span>
+                    <span class="ease-tag-pill" id="artPriority" style="background:var(--color-sage-mist);"><!-- ANNOUNCEMENT_PRIORITY --></span>
+                    <span class="ease-tag-pill">ID #<!-- ANNOUNCEMENT_ID --></span>
+                </div>
+
+                <h1 class="article-title" id="artTitle"><!-- ANNOUNCEMENT_TITLE --></h1>
+
+                <div class="article-meta-strip">
+                    <span><strong>Author:</strong> <span id="artAuthor"><!-- ANNOUNCEMENT_AUTHOR --></span></span>
+                    <span><strong>Published:</strong> <span id="artDate"><!-- ANNOUNCEMENT_DATE --></span></span>
+                </div>
+
+                <div class="article-content" id="artContent">
+                    <!-- ANNOUNCEMENT_CONTENT -->
+                </div>
+
+                <div class="article-actions">
+                    <a href="/announcements" class="ease-tag-pill">← Back to Announcements</a>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <a href="/announcements/<!-- ANNOUNCEMENT_ID -->/edit" id="editAnnBtn" class="ease-btn-primary">Edit Announcement</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ── Footer ──────────────────────────────────────────────────────── -->
+    <footer class="ease-footer">
+        <div class="ease-footer-container">
+            <div>
+                <div class="ease-brand-lockup" style="margin-bottom:14px;">
+                    <span class="ease-brand-mark"></span>
+                    <span class="ease-brand-text">Alumni Tracking System</span>
+                </div>
+                <p style="color:#666; font-size:14px; max-width:420px;">An editorial-grade alumni connection platform fostering lifelong engagement between graduates, students, and faculties.</p>
+            </div>
+            <div>
+                <span class="footer-col-header">PLATFORM</span>
+                <ul class="footer-links-list">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/users">Alumni Directory</a></li>
+                    <li><a href="/announcements">Announcements</a></li>
+                </ul>
+            </div>
+            <div>
+                <span class="footer-col-header">DEVELOPER APIS</span>
+                <ul class="footer-links-list">
+                    <li><a href="/api/swagger">Interactive Swagger</a></li>
+                    <li><a href="/api/health">System Health Check</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Client-side script: if template variables were not substituted by backend (e.g. preview mode), fetch from API -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const pathParts = window.location.pathname.split('/');
+            const id = pathParts[2];
+            const titleEl = document.getElementById('artTitle');
+
+            if (id && titleEl && (titleEl.textContent.includes('ANNOUNCEMENT_TITLE') || titleEl.textContent.trim() === '')) {
+                try {
+                    const res = await fetch('/api/announcements/' + id);
+                    if (res.ok) {
+                        const a = await res.json();
+                        titleEl.textContent = a.title;
+                        document.getElementById('artContent').textContent = a.content;
+                        document.getElementById('artAuthor').textContent = a.author;
+                        document.getElementById('artDate').textContent = a.date || 'Recent';
+                        document.getElementById('artCat').textContent = a.category || 'General';
+                        document.getElementById('artPriority').textContent = a.priority || 'Normal';
+                        document.getElementById('editAnnBtn').href = '/announcements/' + a.id + '/edit';
+                    }
+                } catch(e) {}
+            }
+        });
+    </script>
 </body>
 </html>

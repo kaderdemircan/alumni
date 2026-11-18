@@ -3,7 +3,17 @@
  * Connects to PostgreSQL using environment variables from .env
  */
 
-const { Pool } = require('pg');
+let Pool;
+try {
+    Pool = require('pg').Pool;
+} catch (e) {
+    // Graceful fallback dummy class if pg module is not installed in current environment
+    Pool = class {
+        constructor() {}
+        connect(cb) { if (cb) cb(new Error('pg driver not installed in local environment'), null, () => {}); }
+        query() { return Promise.reject(new Error('pg driver not installed')); }
+    };
+}
 const fs = require('fs');
 const path = require('path');
 
