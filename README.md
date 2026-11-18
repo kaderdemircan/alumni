@@ -184,15 +184,27 @@ Handles all server errors with:
 
 ---
 
-## 🎨 Brand & Design System
+## 🎨 Brand Identity Guidelines
 
-The platform follows the official Alumni Network brand identity, color tokens, and UI component standards.
+The platform's visual identity, mission, voice, and strict 4-color palette are documented in:
 
-👉 **Full Reference:** [**Brand Identity & Design System Guide (brand.md)**](brand.md)
+👉 **Anchor Link:** [**`brand.md` — Brand Identity Guidelines**](brand.md)
 
-- **Color Tokens:** Brand Blue (`#1d4ed8`), Emerald Green (`#10b981`), Amber Yellow (`#f59e0b`), Purple (`#8b5cf6`), and Dark Slate (`#0f172a`).
-- **Typography:** Segoe UI & System-UI with accessible contrast ratios.
-- **Component Standards:** `.btn` button variants, `.priority-badge` status pills, elevated cards, and responsive headers.
+- **Brand Title:** Alumni Tracking System
+- **Strict Color Palette:** Black (`#111111`), White (`#ffffff`), Yellow (`#f1c40f`), and Blue (`#3498db`)
+- **Component Standards:** Header, Navigation Menu, Logo, Product Page, Alumni Directory List, and Alumni Profile Card.
+
+---
+
+## 📐 Ease Health Design System
+
+The platform's UI architecture and design tokens follow the **Ease Health Design System** (Refero Styles UUID: `e9f5e976-53f7-42f5-a882-4e63b3c2f734`):
+
+👉 **Anchor Link:** [**`DESIGN.md` — Ease Health Design System Specification**](DESIGN.md)
+
+- **Typography Pairing:** Faire Octave / Cormorant Garamond (Weight 300 Light display serif) paired with Suisse Intl / Inter (Humanist sans with 11px tracked uppercase eyebrows).
+- **Flat Surface Elevation:** Zero drop-shadows (`box-shadow: none`); depth created via layered fills: Cream Paper (`#fffefc`) → Keylime Wash (`#fef9e7`) → Sage Mist (`#fef08a`) → Slate Hush (`#b6ced5`).
+- **Exact Radii:** 14px on cards/buttons, 999px on pill tags, 7px on navigation items.
 
 ---
 
