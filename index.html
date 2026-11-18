@@ -3,33 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alumni Tracking System — Connect, Grow & Lead</title>
+    <title>Alumni Tracking System</title>
+    <!-- Google Fonts: Cormorant Garamond (Faire Octave substitute) & Inter (Suisse Intl substitute) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            /* Strict Brand Colors: Black, White, Yellow, Blue */
-            --clr-black: #111111;
-            --clr-gray-dark: #2c3e50;
-            --clr-white: #ffffff;
-            --clr-blue: #3498db;
-            --clr-blue-dark: #2980b9;
-            --clr-blue-light: #ebf5fb;
-            --clr-yellow: #f1c40f;
-            --clr-yellow-dark: #d4ac0d;
-            --clr-yellow-light: #fef9e7;
-            --clr-bg: #f8f9fa;
-            --clr-border: #e2e8f0;
+            /* Colors — Strict Ease Health Palette with Black, White, Yellow, Blue */
+            --color-forest-ink: #111111;
+            --color-ink: #111111;
+            --color-sage-mist: #fef08a;
+            --color-keylime-wash: #fef9e7;
+            --color-mint-veil: #fae588;
+            --color-slate-hush: #b6ced5;
+            --color-cream-paper: #fffefc;
+            --color-charcoal: #222222;
+            --color-border-mist: #efeeeb;
+            --color-forest-shadow: #000000;
+            --color-blue-ink: #2980b9;
 
-            /* Ease Health Spatial Scale */
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
-            --radius-xl: 28px;
-            --radius-pill: 9999px;
+            /* Typography Families */
+            --font-faire-octave: 'Cormorant Garamond', 'Faire Octave', Georgia, serif;
+            --font-suisse-intl: 'Inter', 'Suisse Intl', system-ui, -apple-system, sans-serif;
 
-            /* Shadows & Transitions */
-            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
-            --shadow-card: 0 6px 24px rgba(0, 0, 0, 0.06);
-            --font-main: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            /* Typography Scale */
+            --text-caption: 10px;
+            --leading-caption: 1.61;
+            --text-eyebrow: 11px;
+            --text-body: 14px;
+            --leading-body: 1.5;
+            --text-subheading: 18px;
+            --leading-subheading: 1.3;
+            --text-heading-sm: 23px;
+            --leading-heading-sm: 1.5;
+            --text-heading: 40px;
+            --leading-heading: 1.35;
+            --tracking-heading: -0.4px;
+            --text-heading-lg: 56px;
+            --leading-heading-lg: 1.2;
+            --tracking-heading-lg: -1.68px;
+            --text-display: 74px;
+            --leading-display: 1.05;
+            --tracking-display: -2.22px;
+
+            /* Spacing Tokens */
+            --spacing-4: 4px;
+            --spacing-7: 7px;
+            --spacing-9: 9px;
+            --spacing-11: 11px;
+            --spacing-14: 14px;
+            --spacing-18: 18px;
+            --spacing-21: 21px;
+            --spacing-28: 28px;
+            --spacing-35: 35px;
+            --spacing-42: 42px;
+            --spacing-49: 49px;
+            --spacing-56: 56px;
+            --spacing-70: 70px;
+            --spacing-76: 76px;
+            --spacing-99: 99px;
+
+            /* Layout & Radii */
+            --page-max-width: 1200px;
+            --radius-nav: 7px;
+            --radius-cards: 14px;
+            --radius-badges: 999px;
+            --radius-buttons: 14px;
+            --radius-full: 9999px;
         }
 
         * {
@@ -39,919 +81,756 @@
         }
 
         body {
-            font-family: var(--font-main);
-            background-color: var(--clr-bg);
-            color: var(--clr-black);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            font-family: var(--font-suisse-intl);
+            background-color: var(--color-cream-paper);
+            color: var(--color-charcoal);
+            line-height: var(--leading-body);
+            font-size: var(--text-body);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        /* ── Top Announcement Strip ─────────────────────────────────────── */
-        .top-strip {
-            background-color: var(--clr-black);
-            color: var(--clr-white);
-            padding: 0.5rem 1rem;
-            text-align: center;
-            font-size: 0.85rem;
-            border-bottom: 2px solid var(--clr-yellow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-        }
-        .top-strip-tag {
-            background-color: var(--clr-yellow);
-            color: var(--clr-black);
-            font-weight: 800;
-            font-size: 0.72rem;
-            padding: 0.15rem 0.55rem;
-            border-radius: var(--radius-pill);
-            text-transform: uppercase;
-        }
-        .top-strip a {
-            color: var(--clr-yellow);
-            text-decoration: underline;
-            font-weight: 600;
-        }
-
-        /* ── Header Component ────────────────────────────────────────────── */
-        .app-header {
-            background: var(--clr-white);
-            border-bottom: 3px solid var(--clr-blue);
+        /* ── Header & Navigation ─────────────────────────────────────────── */
+        .ease-nav-wrapper {
+            background-color: var(--color-cream-paper);
+            border-bottom: 1px solid var(--color-border-mist);
+            padding: var(--spacing-18) var(--spacing-28);
             position: sticky;
             top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            z-index: 100;
         }
-        .header-container {
-            max-width: 1200px;
+        .ease-nav-container {
+            max-width: var(--page-max-width);
             margin: 0 auto;
-            padding: 0.85rem 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
-
-        /* ── Logo Component ──────────────────────────────────────────────── */
-        .brand-logo {
+        .ease-brand-lockup {
             display: flex;
             align-items: center;
-            gap: 0.85rem;
+            gap: var(--spacing-9);
             text-decoration: none;
-            color: var(--clr-black);
+            color: var(--color-ink);
         }
-        .brand-icon-box {
-            width: 42px;
-            height: 42px;
-            background: var(--clr-black);
-            color: var(--clr-yellow);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-bottom: 3px solid var(--clr-blue);
-            transition: transform 0.2s ease;
-        }
-        .brand-logo:hover .brand-icon-box {
-            transform: scale(1.05);
-        }
-        .brand-icon-box svg {
-            width: 24px;
-            height: 24px;
-        }
-        .brand-text h1 {
-            font-size: 1.15rem;
-            font-weight: 800;
-            margin: 0;
-            color: var(--clr-black);
-            line-height: 1.2;
-            letter-spacing: -0.3px;
-        }
-        .brand-text span {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--clr-blue);
-            font-weight: 700;
-            display: block;
-        }
-
-        /* ── Menu / Navigation Component ─────────────────────────────────── */
-        .nav-menu {
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-        .menu-link {
-            color: var(--clr-black);
-            text-decoration: none;
-            font-size: 0.92rem;
-            font-weight: 600;
-            padding: 0.55rem 1rem;
-            border-radius: var(--radius-pill);
-            transition: all 0.2s ease;
-        }
-        .menu-link:hover {
-            background-color: var(--clr-yellow);
-            color: var(--clr-black);
-        }
-        .menu-link.active {
-            background-color: var(--clr-blue);
-            color: var(--clr-white);
-        }
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        /* ── Button Classes ──────────────────────────────────────────────── */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.6rem;
-            border-radius: var(--radius-md);
-            font-weight: 700;
-            font-size: 0.95rem;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-            transition: all 0.25s ease;
-        }
-        .btn-primary {
-            background-color: var(--clr-blue);
-            color: var(--clr-white);
-            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.25);
-        }
-        .btn-primary:hover {
-            background-color: var(--clr-blue-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 14px rgba(52, 152, 219, 0.35);
-            color: var(--clr-white);
-        }
-        .btn-outline {
-            background-color: var(--clr-white);
-            color: var(--clr-black);
-            border: 2px solid var(--clr-black);
-        }
-        .btn-outline:hover {
-            background-color: var(--clr-yellow);
-            border-color: var(--clr-yellow);
-            color: var(--clr-black);
-            transform: translateY(-2px);
-        }
-        .btn-sm {
-            padding: 0.5rem 1.15rem;
-            font-size: 0.85rem;
-            border-radius: var(--radius-sm);
-        }
-
-        /* ── Product Page (Hero & Showcase Shells) ────────────────────────── */
-        .product-section {
-            padding: 3rem 1.5rem 2rem;
-            background: var(--clr-bg);
-        }
-        .hero-shell {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: var(--clr-white);
-            border: 1px solid var(--clr-border);
-            border-radius: var(--radius-xl);
-            padding: 4rem 2.5rem 3rem;
-            text-align: center;
-            border-top: 6px solid var(--clr-blue);
-            box-shadow: var(--shadow-subtle);
-            position: relative;
-        }
-        .ease-pill-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 1.15rem;
-            background: var(--clr-blue-light);
-            color: var(--clr-blue-dark);
-            font-size: 0.82rem;
-            font-weight: 700;
-            border-radius: var(--radius-pill);
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(52, 152, 219, 0.25);
-        }
-        .ease-pill-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--clr-yellow);
+        .ease-brand-mark {
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-ink);
             border-radius: 50%;
             display: inline-block;
         }
-        .hero-title {
-            font-size: 3.1rem;
-            font-weight: 900;
-            color: var(--clr-black);
-            line-height: 1.15;
-            margin-bottom: 1.25rem;
-            letter-spacing: -0.8px;
+        .ease-brand-text {
+            font-family: var(--font-suisse-intl);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
         }
-        .highlight-blue {
-            color: var(--clr-blue);
-        }
-        .hero-subtext {
-            font-size: 1.15rem;
-            color: #4a5568;
-            max-width: 740px;
-            margin: 0 auto 2.2rem;
-            line-height: 1.7;
-        }
-        .hero-cta-group {
+        .ease-nav-links {
             display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 3.5rem;
+            align-items: center;
+            gap: var(--spacing-4);
         }
-        .stats-grid {
+        .ease-nav-item {
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            color: var(--color-charcoal);
+            text-decoration: none;
+            padding: var(--spacing-7) var(--spacing-14);
+            border-radius: var(--radius-nav);
+            transition: background-color 0.15s ease;
+        }
+        .ease-nav-item:hover {
+            background-color: var(--color-keylime-wash);
+        }
+        .ease-nav-item.active {
+            font-weight: 600;
+            color: var(--color-ink);
+        }
+        .ease-nav-cta {
+            display: flex;
+            align-items: center;
+        }
+
+        /* ── Buttons & Pills (Ease Health Standards) ─────────────────────── */
+        .ease-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-7);
+            background-color: var(--color-forest-ink);
+            color: var(--color-cream-paper);
+            text-decoration: none;
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            font-weight: 400;
+            padding: var(--spacing-14) var(--spacing-21);
+            border-radius: var(--radius-buttons);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.15s ease;
+        }
+        .ease-btn-primary:hover {
+            background-color: var(--color-forest-shadow);
+            transform: translateY(-1px);
+        }
+        .ease-btn-sm {
+            padding: var(--spacing-9) var(--spacing-14);
+            border-radius: var(--radius-buttons);
+            font-size: 13px;
+        }
+        .btn-arrow {
+            font-size: 15px;
+            transition: transform 0.15s ease;
+        }
+        .ease-btn-primary:hover .btn-arrow {
+            transform: translateX(2px);
+        }
+
+        .ease-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--color-cream-paper);
+            color: var(--color-forest-ink);
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            font-weight: 400;
+            padding: var(--spacing-9) var(--spacing-14);
+            border-radius: var(--radius-badges);
+            border: 1px solid var(--color-border-mist);
+            text-decoration: none;
+            transition: background-color 0.15s ease;
+        }
+        .ease-tag-pill:hover {
+            background-color: var(--color-keylime-wash);
+        }
+
+        .ease-eyebrow {
+            font-family: var(--font-suisse-intl);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+            display: block;
+        }
+
+        /* ── Product Page (Hero Split Layout) ────────────────────────────── */
+        .ease-hero-container {
+            max-width: var(--page-max-width);
+            margin: var(--spacing-42) auto var(--spacing-70);
+            padding: 0 var(--spacing-21);
+        }
+        .ease-hero-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: var(--spacing-21);
+            align-items: stretch;
+        }
+        .ease-hero-panel-left {
+            background-color: var(--color-keylime-wash);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .ease-hero-heading {
+            font-family: var(--font-faire-octave);
+            font-size: var(--text-heading-lg);
+            font-weight: 300;
+            line-height: var(--leading-heading-lg);
+            letter-spacing: var(--tracking-heading-lg);
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-21);
+        }
+        .ease-hero-body {
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            line-height: 1.6;
+            color: var(--color-charcoal);
+            max-width: 500px;
+            margin-bottom: var(--spacing-35);
+        }
+        .ease-hero-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-14);
+            flex-wrap: wrap;
+        }
+        .ease-hero-panel-right {
+            background-color: var(--color-slate-hush);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .ease-preview-card {
+            background-color: var(--color-cream-paper);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-28);
+            margin-top: var(--spacing-14);
+        }
+        .preview-badge-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-9);
+        }
+        .preview-pill {
+            background: var(--color-keylime-wash);
+            color: var(--color-forest-ink);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: var(--radius-badges);
+        }
+        .preview-count {
+            font-size: 12px;
+            color: #666;
+        }
+        .ease-preview-card h3 {
+            font-family: var(--font-faire-octave);
+            font-size: 24px;
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-7);
+            letter-spacing: -0.2px;
+        }
+        .ease-preview-card p {
+            font-family: var(--font-suisse-intl);
+            font-size: 13px;
+            color: var(--color-charcoal);
+            line-height: 1.5;
+        }
+
+        /* ── Metric Ribbon ───────────────────────────────────────────────── */
+        .ease-metric-strip {
+            max-width: var(--page-max-width);
+            margin: 0 auto var(--spacing-70);
+            padding: 0 var(--spacing-21);
+        }
+        .metric-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1.2rem;
-            border-top: 1px solid var(--clr-border);
-            padding-top: 2.2rem;
+            gap: var(--spacing-21);
+            border-top: 1px solid var(--color-border-mist);
+            border-bottom: 1px solid var(--color-border-mist);
+            padding: var(--spacing-35) 0;
         }
-        .stat-capsule {
-            padding: 1.2rem 1rem;
-            background: var(--clr-bg);
-            border-radius: var(--radius-lg);
-            border-bottom: 3px solid var(--clr-yellow);
-            transition: transform 0.2s;
+        .metric-col h4 {
+            font-family: var(--font-faire-octave);
+            font-size: 44px;
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            line-height: 1;
+            margin-bottom: var(--spacing-7);
         }
-        .stat-capsule:hover {
-            transform: translateY(-3px);
-            background: var(--clr-white);
-            box-shadow: var(--shadow-subtle);
-        }
-        .stat-number {
-            display: block;
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--clr-blue);
-            margin-bottom: 0.2rem;
-        }
-        .stat-title {
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: var(--clr-black);
+        .metric-col span {
+            font-size: 12px;
+            color: #666;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.05em;
         }
 
-        /* ── Main Container ──────────────────────────────────────────────── */
-        .main-container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 2.5rem 1.5rem;
-            width: 100%;
+        /* ── Feature Cards (Layered Tinted Surfaces) ─────────────────────── */
+        .ease-features-container {
+            max-width: var(--page-max-width);
+            margin: 0 auto var(--spacing-99);
+            padding: 0 var(--spacing-21);
         }
-
-        .section-intro {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-        .section-tag {
-            color: var(--clr-blue);
-            font-weight: 700;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: inline-block;
-            margin-bottom: 0.4rem;
-        }
-        .section-title {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: var(--clr-black);
-            margin-bottom: 0.6rem;
-        }
-        .section-desc {
-            color: #555;
-            font-size: 1.05rem;
-            max-width: 650px;
-            margin: 0 auto;
-        }
-
-        /* ── Feature Pillars (Ease Health 3-Box Architectural Grid) ───────── */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.8rem;
-            margin-bottom: 4rem;
+            gap: var(--spacing-21);
+            margin-top: var(--spacing-28);
         }
-        .feature-box {
-            background: var(--clr-white);
-            border: 1px solid var(--clr-border);
-            border-radius: var(--radius-lg);
-            padding: 2.2rem 1.8rem;
-            transition: all 0.3s ease;
+        .feature-card {
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
             display: flex;
             flex-direction: column;
-            border-top: 4px solid var(--clr-blue);
+            justify-content: space-between;
+            min-height: 280px;
         }
-        .feature-box:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-card);
-            border-top-color: var(--clr-yellow);
+        .card-sage {
+            background-color: var(--color-sage-mist);
         }
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: var(--clr-blue-light);
-            color: var(--clr-blue);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.25rem;
+        .card-keylime {
+            background-color: var(--color-keylime-wash);
         }
-        .feature-icon svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
+        .card-slate {
+            background-color: var(--color-slate-hush);
         }
-        .feature-box h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--clr-black);
-            margin-bottom: 0.6rem;
+        .feature-card h3 {
+            font-family: var(--font-faire-octave);
+            font-size: 32px;
+            font-weight: 300;
+            line-height: 1.25;
+            letter-spacing: -0.3px;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
         }
-        .feature-box p {
-            color: #555;
-            font-size: 0.95rem;
+        .feature-card p {
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
             line-height: 1.6;
-            margin-bottom: 1.2rem;
-            flex-grow: 1;
+            color: var(--color-charcoal);
+            margin-bottom: var(--spacing-21);
         }
-        .feature-link {
-            color: var(--clr-blue);
-            font-weight: 700;
+        .card-link {
+            font-family: var(--font-suisse-intl);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-forest-ink);
             text-decoration: none;
-            font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: var(--spacing-4);
         }
-        .feature-link:hover {
-            color: var(--clr-blue-dark);
+        .card-link:hover {
             text-decoration: underline;
         }
 
         /* ── Alumni List Component (Directory Table) ─────────────────────── */
-        .directory-card {
-            background: var(--clr-white);
-            border: 1px solid var(--clr-border);
-            border-radius: var(--radius-xl);
-            padding: 2.5rem;
-            margin-bottom: 4rem;
-            box-shadow: var(--shadow-subtle);
+        .ease-directory-section {
+            max-width: var(--page-max-width);
+            margin: 0 auto var(--spacing-99);
+            padding: 0 var(--spacing-21);
         }
-        .directory-header-row {
+        .ease-directory-shell {
+            background-color: var(--color-keylime-wash);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+        }
+        .directory-top-bar {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
+            margin-bottom: var(--spacing-28);
             flex-wrap: wrap;
-            gap: 1.2rem;
-            margin-bottom: 1.8rem;
-            border-bottom: 2px solid var(--clr-yellow);
-            padding-bottom: 1.2rem;
+            gap: var(--spacing-14);
         }
-        .directory-header-row h2 {
-            margin: 0 0 0.25rem;
-            color: var(--clr-black);
-            font-size: 1.7rem;
+        .directory-title h2 {
+            font-family: var(--font-faire-octave);
+            font-size: var(--text-heading);
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            line-height: 1.15;
+            margin-top: var(--spacing-4);
         }
-        .directory-header-row p {
-            margin: 0;
-            color: #64748b;
-            font-size: 0.92rem;
-        }
-        .search-actions {
+        .directory-controls {
             display: flex;
-            gap: 0.8rem;
             align-items: center;
+            gap: var(--spacing-14);
         }
-        .search-input {
-            padding: 0.65rem 1rem;
-            border: 1px solid var(--clr-border);
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            font-family: inherit;
-            width: 240px;
+        .ease-search-input {
+            background-color: var(--color-cream-paper);
+            border: 1px solid var(--color-border-mist);
+            border-radius: var(--radius-buttons);
+            padding: var(--spacing-11) var(--spacing-18);
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            width: 260px;
         }
-        .search-input:focus {
+        .ease-search-input:focus {
             outline: none;
-            border-color: var(--clr-blue);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+            border-color: var(--color-forest-ink);
         }
-        .table-responsive {
+        .directory-table-wrap {
             overflow-x: auto;
+            background-color: var(--color-cream-paper);
+            border-radius: var(--radius-cards);
+            border: 1px solid var(--color-border-mist);
         }
-        .alumni-table {
+        .ease-alumni-table {
             width: 100%;
             border-collapse: collapse;
+            font-family: var(--font-suisse-intl);
         }
-        .alumni-table th {
-            background-color: var(--clr-black);
-            color: var(--clr-white);
-            padding: 12px 16px;
-            font-size: 0.85rem;
+        .ease-alumni-table th {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: var(--color-forest-ink);
+            padding: var(--spacing-14) var(--spacing-21);
             text-align: left;
+            border-bottom: 1px solid var(--color-border-mist);
+            background-color: var(--color-cream-paper);
         }
-        .alumni-table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--clr-border);
-            font-size: 0.95rem;
+        .ease-alumni-table td {
+            padding: var(--spacing-18) var(--spacing-21);
+            border-bottom: 1px solid var(--color-border-mist);
+            font-size: var(--text-body);
+            color: var(--color-charcoal);
         }
-        .alumni-table tr:hover {
-            background-color: var(--clr-blue-light);
-        }
-        .user-identity {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .avatar-circle {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--clr-blue);
-            color: var(--clr-white);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.82rem;
-        }
-        .user-title {
+        .user-cell-title {
+            font-weight: 600;
+            color: var(--color-forest-ink);
             display: block;
-            font-weight: 700;
-            color: var(--clr-black);
         }
-        .user-dept {
+        .user-cell-dept {
+            font-size: 12px;
+            color: #666;
             display: block;
-            font-size: 0.78rem;
-            color: #64748b;
         }
-        .status-pill {
-            padding: 0.25rem 0.65rem;
-            background: var(--clr-yellow);
-            color: var(--clr-black);
-            border-radius: var(--radius-pill);
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-        .action-link {
-            display: inline-block;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.82rem;
-            font-weight: 700;
+        .table-action-link {
+            color: var(--color-forest-ink);
+            font-weight: 600;
             text-decoration: none;
-            margin-left: 0.3rem;
+            font-size: 13px;
         }
-        .action-view { background: var(--clr-blue); color: var(--clr-white); }
-        .action-edit { background: var(--clr-yellow); color: var(--clr-black); }
-        .action-view:hover { background: var(--clr-blue-dark); color: var(--clr-white); }
-        .action-edit:hover { background: var(--clr-yellow-dark); }
+        .table-action-link:hover {
+            text-decoration: underline;
+        }
 
-        /* ── Alumni Profile Showcase Component ───────────────────────────── */
-        .profile-showcase {
-            background: var(--clr-white);
-            border: 1px solid var(--clr-border);
-            border-radius: var(--radius-xl);
-            overflow: hidden;
-            margin-bottom: 4rem;
-            box-shadow: var(--shadow-card);
+        /* ── Alumni Profile Component (Clinical Showcase Card) ───────────── */
+        .ease-profile-section {
+            max-width: var(--page-max-width);
+            margin: 0 auto var(--spacing-99);
+            padding: 0 var(--spacing-21);
         }
-        .profile-banner {
-            height: 120px;
-            background: linear-gradient(135deg, var(--clr-black) 0%, var(--clr-blue) 100%);
-            position: relative;
-            border-bottom: 4px solid var(--clr-yellow);
+        .profile-container-shell {
+            background-color: var(--color-slate-hush);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
         }
-        .profile-avatar-lg {
-            width: 84px;
-            height: 84px;
-            border-radius: 50%;
-            background: var(--clr-white);
-            border: 4px solid var(--clr-white);
-            color: var(--clr-blue);
-            font-size: 2rem;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: absolute;
-            bottom: -42px;
-            left: 2.5rem;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        .profile-white-card {
+            background-color: var(--color-cream-paper);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
         }
-        .profile-content-area {
-            padding: 3.5rem 2.5rem 2.5rem;
-        }
-        .profile-title-block {
+        .profile-card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            border-bottom: 1px solid var(--clr-border);
-            padding-bottom: 1.2rem;
-            margin-bottom: 1.8rem;
+            border-bottom: 1px solid var(--color-border-mist);
+            padding-bottom: var(--spacing-21);
+            margin-bottom: var(--spacing-28);
         }
-        .profile-title-block h3 {
-            font-size: 1.8rem;
-            margin: 0 0 0.3rem;
-            color: var(--clr-black);
+        .profile-name-lg {
+            font-family: var(--font-faire-octave);
+            font-size: var(--text-heading);
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-4);
         }
-        .profile-profession {
-            color: var(--clr-blue);
-            font-weight: 700;
-            font-size: 0.95rem;
+        .profile-desc-sub {
+            font-size: 14px;
+            color: #555;
         }
-        .profile-grid {
+        .profile-meta-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1.2rem;
-            margin-bottom: 1.8rem;
+            gap: var(--spacing-14);
+            margin-bottom: var(--spacing-28);
         }
-        .profile-box {
-            background: var(--clr-bg);
-            padding: 1.1rem;
-            border-radius: var(--radius-md);
-            border-left: 4px solid var(--clr-blue);
+        .profile-meta-box {
+            background-color: var(--color-keylime-wash);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-14) var(--spacing-18);
         }
-        .profile-box span.lbl {
-            display: block;
-            font-size: 0.75rem;
+        .meta-box-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            font-weight: 700;
-            color: #64748b;
-            margin-bottom: 0.25rem;
+            color: var(--color-forest-ink);
+            display: block;
+            margin-bottom: var(--spacing-4);
         }
-        .profile-box span.val {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: var(--clr-black);
+        .meta-box-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--color-forest-ink);
         }
-        .profile-summary-box {
-            background: var(--clr-blue-light);
-            border: 1px solid rgba(52, 152, 219, 0.25);
-            border-radius: var(--radius-md);
-            padding: 1.4rem;
-            margin-bottom: 1.8rem;
+        .profile-bio-text {
+            font-size: var(--text-body);
+            line-height: 1.65;
+            color: var(--color-charcoal);
+            margin-bottom: var(--spacing-28);
         }
-        .profile-summary-box h4 {
-            margin: 0 0 0.4rem;
-            color: var(--clr-blue-dark);
-        }
-        .profile-summary-box p {
-            margin: 0;
-            color: #334155;
-            line-height: 1.6;
-        }
-        .profile-actions-bar {
+        .profile-footer-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-top: 1px solid var(--clr-border);
-            padding-top: 1.5rem;
+            border-top: 1px solid var(--color-border-mist);
+            padding-top: var(--spacing-21);
         }
 
-        /* ── Announcements Showcase (Yellow/Blue/Black Palette) ───────────── */
-        .announcements-box {
-            background: var(--clr-white);
-            border: 1px solid var(--clr-border);
-            border-radius: var(--radius-xl);
-            padding: 2.5rem;
-            margin-bottom: 4rem;
-            box-shadow: var(--shadow-subtle);
+        /* ── Announcements Component (FAQ / Two-Column Editorial Grid) ──── */
+        .ease-faq-section {
+            max-width: var(--page-max-width);
+            margin: 0 auto var(--spacing-99);
+            padding: 0 var(--spacing-21);
         }
-        .announcements-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid var(--clr-yellow);
-            padding-bottom: 1rem;
-        }
-        .announcements-header h3 {
-            font-size: 1.6rem;
-            color: var(--clr-black);
-            margin: 0;
-        }
-        .news-grid {
+        .faq-row {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
+            grid-template-columns: 1fr 1.2fr;
+            gap: var(--spacing-42);
+            padding: var(--spacing-35) 0;
+            border-bottom: 1px solid var(--color-border-mist);
         }
-        .news-card {
-            background: var(--clr-bg);
-            border: 1px solid var(--clr-border);
-            border-radius: var(--radius-md);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: all 0.2s ease;
+        .faq-row:first-of-type {
+            border-top: 1px solid var(--color-border-mist);
         }
-        .news-card:hover {
-            background: var(--clr-white);
-            border-color: var(--clr-blue);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-subtle);
+        .faq-question {
+            font-family: var(--font-faire-octave);
+            font-size: 30px;
+            font-weight: 300;
+            line-height: 1.25;
+            color: var(--color-forest-ink);
         }
-        .news-meta {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.8rem;
-            font-size: 0.8rem;
+        .faq-answer {
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            line-height: 1.65;
+            color: var(--color-charcoal);
         }
-        .news-card h4 {
-            font-size: 1.1rem;
-            margin-bottom: 0.6rem;
-            color: var(--clr-black);
-            line-height: 1.35;
-        }
-        .news-card p {
-            font-size: 0.9rem;
-            color: #555;
-            line-height: 1.55;
-            margin-bottom: 1.2rem;
-        }
-
-        /* ── System Health Bar ───────────────────────────────────────────── */
-        .system-bar {
-            background: var(--clr-white);
-            border: 1px solid var(--clr-border);
-            border-radius: var(--radius-lg);
-            padding: 1.2rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3rem;
-            box-shadow: var(--shadow-subtle);
-        }
-        .status-dot-pulse {
-            width: 10px;
-            height: 10px;
-            background-color: var(--clr-yellow);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 0.5rem;
-            box-shadow: 0 0 0 3px rgba(241, 196, 15, 0.3);
-        }
-        .status-badge-link {
-            color: var(--clr-blue);
-            text-decoration: none;
-            font-size: 0.88rem;
-            font-weight: 700;
-            padding: 0.35rem 0.85rem;
-            border-radius: var(--radius-sm);
-            background: var(--clr-blue-light);
-            margin-left: 0.6rem;
+        .faq-answer p {
+            margin-bottom: var(--spacing-11);
         }
 
         /* ── Footer Component ────────────────────────────────────────────── */
-        .app-footer {
-            background: var(--clr-black);
-            color: var(--clr-white);
-            border-top: 5px solid var(--clr-blue);
-            margin-top: auto;
+        .ease-footer {
+            background-color: var(--color-cream-paper);
+            border-top: 1px solid var(--color-border-mist);
+            padding: var(--spacing-70) var(--spacing-28) var(--spacing-42);
+            margin-top: var(--spacing-99);
         }
-        .footer-inner {
-            max-width: 1200px;
+        .ease-footer-container {
+            max-width: var(--page-max-width);
             margin: 0 auto;
-            padding: 3.5rem 1.5rem 2rem;
             display: grid;
             grid-template-columns: 2fr 1fr 1fr;
-            gap: 3rem;
+            gap: var(--spacing-42);
+            margin-bottom: var(--spacing-70);
         }
-        .footer-brand {
+        .footer-brand-title {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
+            gap: var(--spacing-7);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
         }
-        .footer-brand h3 {
-            margin: 0;
-            color: var(--clr-white);
-            font-size: 1.25rem;
-        }
-        .footer-inner p {
-            color: #94a3b8;
-            font-size: 0.92rem;
+        .footer-desc {
+            font-size: var(--text-body);
+            color: #666;
             line-height: 1.6;
-            max-width: 400px;
-            margin-bottom: 1.2rem;
+            max-width: 420px;
+            margin-bottom: var(--spacing-21);
         }
-        .footer-col h4 {
-            color: var(--clr-yellow);
-            font-size: 0.95rem;
+        .footer-col-header {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 1.2rem;
+            color: var(--color-forest-ink);
+            display: block;
+            margin-bottom: var(--spacing-18);
         }
-        .footer-col ul {
+        .footer-links-list {
             list-style: none;
-            padding: 0;
-            margin: 0;
         }
-        .footer-col li {
-            margin-bottom: 0.6rem;
+        .footer-links-list li {
+            margin-bottom: var(--spacing-11);
         }
-        .footer-col a {
-            color: #cbd5e1;
+        .footer-links-list a {
+            color: var(--color-charcoal);
             text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
+            font-size: var(--text-body);
+            transition: color 0.15s ease;
         }
-        .footer-col a:hover {
-            color: var(--clr-yellow);
+        .footer-links-list a:hover {
+            color: var(--color-forest-ink);
         }
-        .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1.2rem 1.5rem;
-            font-size: 0.85rem;
-            color: #718096;
-        }
-        .footer-bottom-inner {
-            max-width: 1200px;
+        .footer-bottom-bar {
+            max-width: var(--page-max-width);
             margin: 0 auto;
+            border-top: 1px solid var(--color-border-mist);
+            padding-top: var(--spacing-21);
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 0.8rem;
+            font-size: 12px;
+            color: #777;
         }
 
-        /* ── Responsive Media Queries ────────────────────────────────────── */
+        /* ── Responsive Rules ────────────────────────────────────────────── */
         @media (max-width: 900px) {
-            .features-grid, .news-grid, .profile-grid {
+            .ease-hero-grid,
+            .features-grid,
+            .faq-row,
+            .ease-footer-container,
+            .profile-meta-row {
                 grid-template-columns: 1fr;
             }
-            .stats-grid {
+            .metric-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .footer-inner {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-            .hero-title {
-                font-size: 2.3rem;
-            }
-            .nav-menu {
+            .ease-nav-links {
                 display: none;
+            }
+            .ease-hero-heading {
+                font-size: 40px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- ── Top Announcement Strip ─────────────────────────────────────── -->
-    <div class="top-strip">
-        <span class="top-strip-tag">Notice</span>
-        <span>2026 Global Alumni Convention & Leadership Forum registrations are now open.</span>
-        <a href="/announcements">Learn More →</a>
-    </div>
-
     <!-- ── Header Component ────────────────────────────────────────────── -->
-    <header class="app-header">
-        <div class="header-container">
+    <header class="ease-nav-wrapper">
+        <div class="ease-nav-container">
             <!-- Logo Component -->
-            <a href="/" class="brand-logo">
-                <div class="brand-icon-box">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z"/>
-                    </svg>
-                </div>
-                <div class="brand-text">
-                    <h1>Alumni Tracking System</h1>
-                    <span>Community & Career Network</span>
-                </div>
+            <a href="/" class="ease-brand-lockup">
+                <span class="ease-brand-mark"></span>
+                <span class="ease-brand-text">Alumni Tracking System</span>
             </a>
 
-            <!-- Menu (Navigation) Component -->
-            <nav class="nav-menu">
-                <a href="/" class="menu-link active">Home</a>
-                <a href="/about" class="menu-link">About Us</a>
-                <a href="/users" class="menu-link">Alumni Directory</a>
-                <a href="/announcements" class="menu-link">Announcements</a>
-                <a href="/api/swagger" class="menu-link">API Docs</a>
+            <!-- Menu Component -->
+            <nav class="ease-nav-links">
+                <a href="/" class="ease-nav-item active">Home</a>
+                <a href="/about" class="ease-nav-item">About Us</a>
+                <a href="/users" class="ease-nav-item">Alumni Directory</a>
+                <a href="/announcements" class="ease-nav-item">Announcements</a>
+                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
             </nav>
 
-            <div class="header-actions">
-                <a href="/users" class="btn btn-primary btn-sm">Join Network</a>
+            <!-- Navigation CTA -->
+            <div class="ease-nav-cta">
+                <a href="/users" class="ease-btn-primary ease-btn-sm">
+                    <span>Join Network</span>
+                    <span class="btn-arrow">→</span>
+                </a>
             </div>
         </div>
     </header>
 
-    <!-- ── Product Page (Hero & Showcase Shells) ────────────────────────── -->
-    <section class="product-section">
-        <div class="hero-shell">
-            <div class="ease-pill-badge">
-                <span class="ease-pill-dot"></span>
-                <span>Official Alumni Tracking & Career Management System</span>
+    <!-- ── Product Page (Hero Split Section) ───────────────────────────── -->
+    <section class="ease-hero-container">
+        <div class="ease-hero-grid">
+            <!-- Left Column: Keylime Wash Panel -->
+            <div class="ease-hero-panel-left">
+                <span class="ease-eyebrow">COMMUNITY & CAREER PLATFORM</span>
+                <h1 class="ease-hero-heading">Connecting graduates with lasting purpose.</h1>
+                <p class="ease-hero-body">
+                    The official Alumni Tracking System connects alumni, graduating seniors, and faculty into a unified community. Built to nurture lifelong bonds, discover career postings, and inspire emerging leaders.
+                </p>
+                <div class="ease-hero-actions">
+                    <a href="/users" class="ease-btn-primary">
+                        <span>Explore Directory</span>
+                        <span class="btn-arrow">→</span>
+                    </a>
+                    <a href="/announcements" class="ease-tag-pill">Latest Announcements</a>
+                </div>
             </div>
 
-            <h2 class="hero-title">
-                Connect With Graduates. <br>
-                <span class="highlight-blue">Accelerate Careers</span> Across the Globe.
-            </h2>
+            <!-- Right Column: Slate Hush Panel with Floating UI Cards -->
+            <div class="ease-hero-panel-right">
+                <span class="ease-eyebrow" style="color:#222;">ALUMNI PLATFORM MODULES</span>
 
-            <p class="hero-subtext">
-                Welcome to the centralized platform designed to nurture lifelong relationships between alumni, students, and institutions. Discover verified peers, explore opportunities, and mentor future leaders.
-            </p>
+                <!-- Floating Product Preview Card 1: Directory -->
+                <div class="ease-preview-card">
+                    <div class="preview-badge-row">
+                        <span class="preview-pill">Directory</span>
+                        <span class="preview-count">1,250+ Members</span>
+                    </div>
+                    <h3>Global Alumni Directory</h3>
+                    <p>Instant verified cohort search by graduation year, degree, and current city.</p>
+                </div>
 
-            <div class="hero-cta-group">
-                <a href="/users" class="btn btn-primary">Browse Alumni Directory →</a>
-                <a href="/announcements" class="btn btn-outline">Latest Announcements</a>
-            </div>
-
-            <!-- Metric Capsules -->
-            <div class="stats-grid">
-                <div class="stat-capsule">
-                    <span class="stat-number">1,250+</span>
-                    <span class="stat-title">Active Alumni</span>
-                </div>
-                <div class="stat-capsule">
-                    <span class="stat-number">48</span>
-                    <span class="stat-title">Global Chapters</span>
-                </div>
-                <div class="stat-capsule">
-                    <span class="stat-number">320+</span>
-                    <span class="stat-title">Partner Companies</span>
-                </div>
-                <div class="stat-capsule">
-                    <span class="stat-number">100%</span>
-                    <span class="stat-title">Verified Records</span>
+                <!-- Floating Product Preview Card 2: Mentorship -->
+                <div class="ease-preview-card">
+                    <div class="preview-badge-row">
+                        <span class="preview-pill">Mentorship</span>
+                        <span class="preview-count">320+ Mentors</span>
+                    </div>
+                    <h3>1-on-1 Career Mentorship</h3>
+                    <p>Direct industry advisory sessions connecting seniors with experienced alumni leaders.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ── Main Core Container ─────────────────────────────────────────── -->
-    <main class="main-container">
-
-        <!-- ── Feature Pillars Grid ───────────────────────────────────── -->
-        <div class="section-intro">
-            <span class="section-tag">System Pillars</span>
-            <h2 class="section-title">Engineered For Lasting Connections</h2>
-            <p class="section-desc">A unified digital infrastructure empowering graduates to advance their professional trajectories and give back.</p>
+    <!-- ── Metric Ribbon ───────────────────────────────────────────────── -->
+    <div class="ease-metric-strip">
+        <div class="metric-grid">
+            <div class="metric-col">
+                <h4>1,250+</h4>
+                <span>Active Alumni</span>
+            </div>
+            <div class="metric-col">
+                <h4>48</h4>
+                <span>Global Chapters</span>
+            </div>
+            <div class="metric-col">
+                <h4>320+</h4>
+                <span>Hiring Partners</span>
+            </div>
+            <div class="metric-col">
+                <h4>100%</h4>
+                <span>Verified Records</span>
+            </div>
         </div>
+    </div>
 
+    <!-- ── Feature Cards (Layered Tinted Surfaces) ─────────────────────── -->
+    <section class="ease-features-container">
+        <span class="ease-eyebrow">SYSTEM HIGHLIGHTS</span>
         <div class="features-grid">
-            <div class="feature-box">
-                <div class="feature-icon">
-                    <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 3s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+            <!-- Sage Card -->
+            <div class="feature-card card-sage">
+                <div>
+                    <span class="ease-eyebrow">NETWORKING</span>
+                    <h3>Verified Peer Community</h3>
+                    <p>Connect with classmates across graduation cohorts, faculties, and professional sectors worldwide.</p>
                 </div>
-                <h3>Verified Alumni Directory</h3>
-                <p>Search and connect with graduates across cohort years, faculties, and industries with instant profile lookups.</p>
-                <a href="/users" class="feature-link">Explore Directory →</a>
+                <a href="/users" class="card-link">Browse Cohorts →</a>
             </div>
 
-            <div class="feature-box">
-                <div class="feature-icon">
-                    <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>
+            <!-- Keylime Card -->
+            <div class="feature-card card-keylime">
+                <div>
+                    <span class="ease-eyebrow">CAREERS</span>
+                    <h3>Curated Job Opportunities</h3>
+                    <p>Access exclusive career opportunities and referrals shared directly by verified alumni leaders.</p>
                 </div>
-                <h3>Career & Opportunities</h3>
-                <p>Exclusive career postings, mentorship programs, and referrals shared directly by verified alumni leaders.</p>
-                <a href="/api/swagger" class="feature-link">View Opportunities →</a>
+                <a href="/api/swagger" class="card-link">View Board →</a>
             </div>
 
-            <div class="feature-box">
-                <div class="feature-icon">
-                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z"/></svg>
+            <!-- Slate Card -->
+            <div class="feature-card card-slate">
+                <div>
+                    <span class="ease-eyebrow">DEVELOPERS</span>
+                    <h3>REST API Infrastructure</h3>
+                    <p>Seamlessly integrate alumni records and event pipelines with our interactive Swagger specification.</p>
                 </div>
-                <h3>Official Announcements</h3>
-                <p>Stay informed on university milestones, reunions, regional chapter meetups, and academic achievements.</p>
-                <a href="/announcements" class="feature-link">Read Updates →</a>
+                <a href="/api/swagger" class="card-link">Explore Swagger →</a>
             </div>
         </div>
+    </section>
 
-        <!-- ── Alumni List Component (Directory Table) ────────────────── -->
-        <div class="directory-card">
-            <div class="directory-header-row">
-                <div>
+    <!-- ── Alumni List Component (Directory Table) ─────────────────────── -->
+    <section class="ease-directory-section">
+        <div class="ease-directory-shell">
+            <div class="directory-top-bar">
+                <div class="directory-title">
+                    <span class="ease-eyebrow">VERIFIED MEMBERS</span>
                     <h2>Alumni Directory</h2>
-                    <p>Verified alumni members registered in the Alumni Tracking System</p>
                 </div>
-                <div class="search-actions">
-                    <input type="text" id="directorySearchInput" class="search-input" placeholder="Search alumnus..." onkeyup="filterAlumniTable()">
-                    <a href="/users" class="btn btn-primary btn-sm">+ Add Alumnus</a>
+                <div class="directory-controls">
+                    <input type="text" id="alumniSearch" class="ease-search-input" placeholder="Search alumnus by name..." onkeyup="filterDirectory()">
+                    <a href="/users" class="ease-btn-primary ease-btn-sm">+ Register Alumnus</a>
                 </div>
             </div>
 
-            <div class="table-responsive">
-                <table class="alumni-table" id="alumniTable">
+            <div class="directory-table-wrap">
+                <table class="ease-alumni-table" id="directoryTable">
                     <thead>
                         <tr>
                             <th># ID</th>
@@ -959,197 +838,142 @@
                             <th>Age</th>
                             <th>Birth Date</th>
                             <th>Status</th>
-                            <th style="text-align: right;">Actions</th>
+                            <th style="text-align: right;">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="alumniTableBody">
+                    <tbody>
                         <tr>
                             <td><strong>#101</strong></td>
                             <td>
-                                <div class="user-identity">
-                                    <div class="avatar-circle">JD</div>
-                                    <div>
-                                        <span class="user-title">Jane Doe</span>
-                                        <span class="user-dept">Computer Engineering</span>
-                                    </div>
-                                </div>
+                                <span class="user-cell-title">Jane Doe</span>
+                                <span class="user-cell-dept">Computer Engineering</span>
                             </td>
                             <td>28</td>
                             <td>1998-04-12</td>
-                            <td><span class="status-pill">Active Alum</span></td>
+                            <td><span class="ease-tag-pill" style="padding:4px 10px; font-size:12px;">Active Alum</span></td>
                             <td style="text-align: right;">
-                                <a href="/users/1" class="action-link action-view">View</a>
-                                <a href="/users/1/edit" class="action-link action-edit">Edit</a>
+                                <a href="/users/1" class="table-action-link">View Profile →</a>
                             </td>
                         </tr>
                         <tr>
                             <td><strong>#102</strong></td>
                             <td>
-                                <div class="user-identity">
-                                    <div class="avatar-circle" style="background:var(--clr-black);">MC</div>
-                                    <div>
-                                        <span class="user-title">Marcus Chen</span>
-                                        <span class="user-dept">Business Administration</span>
-                                    </div>
-                                </div>
+                                <span class="user-cell-title">Marcus Chen</span>
+                                <span class="user-cell-dept">Business Administration</span>
                             </td>
                             <td>31</td>
                             <td>1995-09-24</td>
-                            <td><span class="status-pill">Mentor</span></td>
+                            <td><span class="ease-tag-pill" style="padding:4px 10px; font-size:12px;">Mentor</span></td>
                             <td style="text-align: right;">
-                                <a href="/users/2" class="action-link action-view">View</a>
-                                <a href="/users/2/edit" class="action-link action-edit">Edit</a>
+                                <a href="/users/2" class="table-action-link">View Profile →</a>
                             </td>
                         </tr>
                         <tr>
                             <td><strong>#103</strong></td>
                             <td>
-                                <div class="user-identity">
-                                    <div class="avatar-circle">ER</div>
-                                    <div>
-                                        <span class="user-title">Elena Rostova</span>
-                                        <span class="user-dept">Data Science</span>
-                                    </div>
-                                </div>
+                                <span class="user-cell-title">Elena Rostova</span>
+                                <span class="user-cell-dept">Data Science</span>
                             </td>
                             <td>26</td>
                             <td>2000-01-18</td>
-                            <td><span class="status-pill">Active Alum</span></td>
+                            <td><span class="ease-tag-pill" style="padding:4px 10px; font-size:12px;">Active Alum</span></td>
                             <td style="text-align: right;">
-                                <a href="/users/3" class="action-link action-view">View</a>
-                                <a href="/users/3/edit" class="action-link action-edit">Edit</a>
+                                <a href="/users/3" class="table-action-link">View Profile →</a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+    </section>
 
-        <!-- ── Alumni Profile Showcase Component ──────────────────────── -->
-        <div class="section-intro">
-            <span class="section-tag">Featured Alumnus</span>
-            <h2 class="section-title">Alumni Profile Spotlight</h2>
-            <p class="section-desc">Sample profile showcase rendering the clinical card layout specified in the Ease Health design system.</p>
-        </div>
-
-        <div class="profile-showcase">
-            <div class="profile-banner">
-                <div class="profile-avatar-lg">JD</div>
-            </div>
-            <div class="profile-content-area">
-                <div class="profile-title-block">
+    <!-- ── Alumni Profile Component (Clinical Showcase Card) ───────────── -->
+    <section class="ease-profile-section">
+        <span class="ease-eyebrow">FEATURED ALUMNUS</span>
+        <div class="profile-container-shell">
+            <div class="profile-white-card">
+                <div class="profile-card-header">
                     <div>
-                        <h3>Jane Doe</h3>
-                        <span class="profile-profession">Lead Software Architect at TechCorp • Class of 2020</span>
+                        <h2 class="profile-name-lg">Jane Doe</h2>
+                        <span class="profile-desc-sub">Lead Software Architect at TechCorp • Class of 2020</span>
                     </div>
-                    <span class="status-pill">Verified Mentor</span>
+                    <span class="ease-tag-pill">Verified Mentor</span>
                 </div>
 
-                <div class="profile-grid">
-                    <div class="profile-box">
-                        <span class="lbl">Alumni ID</span>
-                        <span class="val">#101</span>
+                <div class="profile-meta-row">
+                    <div class="profile-meta-box">
+                        <span class="meta-box-label">ALUMNI ID</span>
+                        <span class="meta-box-value">#101</span>
                     </div>
-                    <div class="profile-box">
-                        <span class="lbl">Age</span>
-                        <span class="val">28 Years</span>
+                    <div class="profile-meta-box">
+                        <span class="meta-box-label">AGE</span>
+                        <span class="meta-box-value">28 Years</span>
                     </div>
-                    <div class="profile-box">
-                        <span class="lbl">Birthday</span>
-                        <span class="val">1998-04-12</span>
+                    <div class="profile-meta-box">
+                        <span class="meta-box-label">BIRTHDAY</span>
+                        <span class="meta-box-value">1998-04-12</span>
                     </div>
-                    <div class="profile-box">
-                        <span class="lbl">Faculty</span>
-                        <span class="val">Computer Engineering</span>
+                    <div class="profile-meta-box">
+                        <span class="meta-box-label">FACULTY</span>
+                        <span class="meta-box-value">Computer Engineering</span>
                     </div>
                 </div>
 
-                <div class="profile-summary-box">
-                    <h4>Professional Biography</h4>
-                    <p>Jane is an active mentor in the Alumni Tracking System network. She specializes in distributed systems, guides graduating seniors through technical interview prep, and coordinates annual regional alumni tech panels.</p>
+                <div class="profile-bio-text">
+                    Jane specializes in high-throughput distributed systems and cloud database architectures. Since graduating with high honors, she has delivered guest lectures for senior cohorts and actively mentors engineering graduates entering the software industry.
                 </div>
 
-                <div class="profile-actions-bar">
-                    <a href="/users" class="btn btn-outline btn-sm">← Back to Full Directory</a>
-                    <a href="/users" class="btn btn-primary btn-sm">Connect with Jane</a>
+                <div class="profile-footer-row">
+                    <a href="/users" class="ease-tag-pill">← Back to Full Directory</a>
+                    <a href="/users" class="ease-btn-primary ease-btn-sm">Connect with Jane →</a>
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- ── Announcements Showcase Component ───────────────────────── -->
-        <div class="announcements-box">
-            <div class="announcements-header">
-                <div>
-                    <h3>Recent Announcements</h3>
-                </div>
-                <a href="/announcements" class="btn btn-outline btn-sm">All News →</a>
-            </div>
-
-            <div class="news-grid">
-                <div class="news-card">
-                    <div class="news-meta">
-                        <span class="status-pill">Important</span>
-                        <span style="color:#888;">Nov 2026</span>
-                    </div>
-                    <h4>Annual Alumni Homecoming Gala</h4>
-                    <p>Join fellow graduates and faculty for an evening celebrating distinguished alumni award recipients with keynote speeches.</p>
-                    <a href="/announcements" class="feature-link">Read Details →</a>
-                </div>
-                <div class="news-card">
-                    <div class="news-meta">
-                        <span class="status-pill">Urgent</span>
-                        <span style="color:#888;">Nov 2026</span>
-                    </div>
-                    <h4>Winter Mentorship Cohort Enrollment</h4>
-                    <p>Applications are now being accepted for mentors and mentees in engineering, finance, and healthcare.</p>
-                    <a href="/announcements" class="feature-link">Apply Now →</a>
-                </div>
-                <div class="news-card">
-                    <div class="news-meta">
-                        <span class="status-pill">Notice</span>
-                        <span style="color:#888;">Nov 2026</span>
-                    </div>
-                    <h4>Graduate Startup Innovation Seed Fund</h4>
-                    <p>The Alumni Foundation has announced the launch of a new grant fund for alumni-founded technology ventures.</p>
-                    <a href="/announcements" class="feature-link">Learn More →</a>
-                </div>
+    <!-- ── Announcements Component (FAQ / Editorial Row) ───────────────── -->
+    <section class="ease-faq-section">
+        <span class="ease-eyebrow">ANNOUNCEMENTS & UPDATES</span>
+        <div class="faq-row">
+            <h3 class="faq-question">Annual Alumni Homecoming Gala 2026</h3>
+            <div class="faq-answer">
+                <p>Registration is now officially open for our premier annual event celebrating distinguished alumni award recipients with keynote speeches and alumni networking.</p>
+                <a href="/announcements" class="card-link">Read Announcement →</a>
             </div>
         </div>
-
-        <!-- ── System Health Bar ───────────────────────────────────────── -->
-        <div class="system-bar">
-            <div>
-                <span class="status-dot-pulse"></span>
-                <strong>Alumni Tracking System API:</strong>
-                <span id="healthLabel" style="color:var(--clr-blue); font-weight:700; margin-left:0.3rem;">Operational</span>
-            </div>
-            <div>
-                <a href="/api/health" class="status-badge-link" target="_blank">/api/health</a>
-                <a href="/api/swagger" class="status-badge-link">Swagger OpenAPI 3.0</a>
+        <div class="faq-row">
+            <h3 class="faq-question">Winter Mentorship Cohort Enrollment</h3>
+            <div class="faq-answer">
+                <p>Applications are now being accepted for mentors and mentees across engineering, finance, and design disciplines. Spaces are limited for this cohort.</p>
+                <a href="/announcements" class="card-link">Apply to Mentor →</a>
             </div>
         </div>
-
-    </main>
+        <div class="faq-row">
+            <h3 class="faq-question">Graduate Innovation & Venture Grant</h3>
+            <div class="faq-answer">
+                <p>The Alumni Foundation has announced new seed funding rounds for alumni-founded technological and social ventures.</p>
+                <a href="/announcements" class="card-link">Learn More →</a>
+            </div>
+        </div>
+    </section>
 
     <!-- ── Footer Component ────────────────────────────────────────────── -->
-    <footer class="app-footer">
-        <div class="footer-inner">
+    <footer class="ease-footer">
+        <div class="ease-footer-container">
             <div>
-                <div class="footer-brand">
-                    <div class="brand-icon-box" style="width:34px;height:34px;">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                            <path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z"/>
-                        </svg>
-                    </div>
-                    <h3>Alumni Tracking System</h3>
+                <div class="footer-brand-title">
+                    <span class="ease-brand-mark"></span>
+                    <span>Alumni Tracking System</span>
                 </div>
-                <p>The centralized hub dedicated to nurturing lifelong relationships among graduates, faculty, and industry leaders.</p>
-                <span style="color:var(--clr-yellow); font-size:0.8rem; font-weight:700;">Zero-Dependency Node.js MVC Architecture</span>
+                <p class="footer-desc">
+                    An editorial-grade alumni connection platform fostering lifelong engagement between graduates, students, and university faculties.
+                </p>
+                <span class="ease-tag-pill" style="font-size:12px;">Zero-Dependency Node.js MVC</span>
             </div>
 
-            <div class="footer-col">
-                <h4>Navigation</h4>
-                <ul>
+            <div>
+                <span class="footer-col-header">PLATFORM</span>
+                <ul class="footer-links-list">
                     <li><a href="/">Home</a></li>
                     <li><a href="/about">About Us</a></li>
                     <li><a href="/users">Alumni Directory</a></li>
@@ -1157,57 +981,33 @@
                 </ul>
             </div>
 
-            <div class="footer-col">
-                <h4>Developer API</h4>
-                <ul>
-                    <li><a href="/api/swagger">Swagger Documentation</a></li>
-                    <li><a href="/api/swagger.json">OpenAPI 3.0 Schema</a></li>
+            <div>
+                <span class="footer-col-header">DEVELOPER APIS</span>
+                <ul class="footer-links-list">
+                    <li><a href="/api/swagger">Interactive Swagger</a></li>
+                    <li><a href="/api/swagger.json">OpenAPI 3.0 Spec</a></li>
                     <li><a href="/api/health">System Health Check</a></li>
-                    <li><a href="/api/users">JSON Users API</a></li>
+                    <li><a href="/api/users">REST Users API</a></li>
                 </ul>
             </div>
         </div>
 
-        <div class="footer-bottom">
-            <div class="footer-bottom-inner">
-                <span>© 2026 Alumni Tracking System. All rights reserved.</span>
-                <span>Designed with Ease Health Architectural System • Strict Palette: Black, White, Yellow, Blue</span>
-            </div>
+        <div class="footer-bottom-bar">
+            <span>© 2026 Alumni Tracking System. All rights reserved.</span>
+            <span>Ease Health Architectural System • Palette: Black, White, Yellow, Blue</span>
         </div>
     </footer>
 
     <!-- ── Interactive Client Script ───────────────────────────────────── -->
     <script>
-        // Simple instant filter for the Alumni Table
-        function filterAlumniTable() {
-            const input = document.getElementById('directorySearchInput');
-            const filter = input.value.toLowerCase();
-            const table = document.getElementById('alumniTable');
-            const tr = table.getElementsByTagName('tr');
-
-            for (let i = 1; i < tr.length; i++) {
-                const text = tr[i].textContent.toLowerCase();
-                tr[i].style.display = text.includes(filter) ? '' : 'none';
-            }
+        function filterDirectory() {
+            const query = document.getElementById('alumniSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#directoryTable tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
         }
-
-        // Live Health Status Checker
-        async function checkApiHealth() {
-            const label = document.getElementById('healthLabel');
-            try {
-                const res = await fetch('/api/health');
-                if (res.ok) {
-                    const data = await res.json();
-                    label.textContent = 'Online (' + (data.status || 'OK') + ')';
-                } else {
-                    label.textContent = 'Degraded';
-                }
-            } catch(e) {
-                label.textContent = 'Static Preview Mode';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', checkApiHealth);
     </script>
 </body>
 </html>
