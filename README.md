@@ -2,6 +2,8 @@
 
 A comprehensive Alumni Tracking System designed to manage, connect, and engage with university/school alumni. The platform provides a centralized hub for tracking alumni data, fostering networking opportunities, and maintaining strong relationships between the institution and its graduates.
 
+> 📖 **Documentation Links:** [Domain-Driven Design (DDD)](ddd.md) · [🎨 Brand Identity (brand.md)](brand.md) · [📐 Ease Health Design System (DESIGN.md)](DESIGN.md) · [🔌 Swagger UI Docs](#-rest-api-endpoints)
+
 ## 🚀 Technologies Used
 
 - **Backend:** Node.js (built-in `http` module — no external frameworks)
@@ -51,6 +53,8 @@ alumni/
 ├── swagger.html                # Swagger UI
 ├── swagger.json                # OpenAPI 3.0 spec
 ├── server.js                   # Entry point — HTTP server + middleware wiring
+├── brand.md                    # Brand identity & design system guide
+├── DESIGN.md                   # Ease Health architectural design specification
 ├── ddd.md                      # Domain-Driven Design rules & validation
 ├── README.md                   # This file
 └── .gitignore
@@ -177,6 +181,18 @@ Handles all server errors with:
 | `surname` | ✅ | String | Max 50 chars |
 | `age` | ✅ | Number | 0–120, integer |
 | `birthday` | ✅ | String | YYYY-MM-DD format |
+
+---
+
+## 🎨 Brand & Design System
+
+The platform follows the official Alumni Network brand identity, color tokens, and UI component standards.
+
+👉 **Full Reference:** [**Brand Identity & Design System Guide (brand.md)**](brand.md)
+
+- **Color Tokens:** Brand Blue (`#1d4ed8`), Emerald Green (`#10b981`), Amber Yellow (`#f59e0b`), Purple (`#8b5cf6`), and Dark Slate (`#0f172a`).
+- **Typography:** Segoe UI & System-UI with accessible contrast ratios.
+- **Component Standards:** `.btn` button variants, `.priority-badge` status pills, elevated cards, and responsive headers.
 
 ---
 
