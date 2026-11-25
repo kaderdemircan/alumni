@@ -280,6 +280,7 @@ class ApiJobController {
             const body = await parseJsonBody(req);
             // Bind job_id from nested URL parameter
             body.job_id = numericId;
+            body.user_id = req.session.userId;
 
             const result = await JobApplicationModel.create(body);
             if (!result.success) {

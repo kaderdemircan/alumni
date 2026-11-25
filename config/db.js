@@ -70,6 +70,7 @@ async function query(text, params) {
     const start = Date.now();
     try {
         const res = await pool.query(text, params);
+        isConnected = true;
         const duration = Date.now() - start;
         if (process.env.NODE_ENV === 'development') {
             console.log('executed query', { text: text.slice(0, 80), duration, rows: res.rowCount });
@@ -100,6 +101,8 @@ async function initDb() {
                 updated_at TIMESTAMPTZ DEFAULT NOW()
             );
         `);
+
+        await query(fs.readFileSync(path.join(__dirname, '..', 'migrations', '007_add_user_auth.sql'), 'utf8'));
 
         // 2. Announcements table
         await query(`

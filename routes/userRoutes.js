@@ -15,6 +15,7 @@
  *   DELETE /users/:id          → UserController.delete()    - Delete (API-style)
  */
 
+const { workspace } = require('../config/roles');
 const UserController = require('../controllers/userController');
 
 /**
@@ -26,6 +27,18 @@ const UserController = require('../controllers/userController');
 function handleUserRoutes(req, res) {
     const url = req.url.split('?')[0]; // Strip query string for matching
     const method = req.method;
+    if (url === '/api/auth/session' && method === 'GET') {
+        const { isLoggedIn, role } = req.session;
+        const page = workspace(role);
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+        res.end(JSON.stringify(isLoggedIn ? { isLoggedIn, role, path: page.path, title: page.title } : { isLoggedIn }));
+        return true;
+    }
+    const hubs = { '/student': 'student', '/alumni-hub': 'alumni', '/staff': 'staff' };
+    if (method === 'GET' && Object.hasOwn(hubs, url)) {
+        UserController.workspace(req, res, hubs[url]);
+        return true;
+    }
 
     // GET /login - Render Login Page
     if (url === '/login' && method === 'GET') {
@@ -39,15 +52,15 @@ function handleUserRoutes(req, res) {
         return true;
     }
 
-    // GET /logout - Clear session and redirect home
-    if (url === '/logout' && method === 'GET') {
+    // POST /logout - Clear session and redirect home
+    if (url === '/logout' && method === 'POST') {
         UserController.handleLogout(req, res);
         return true;
     }
 
     // GET /profile - View own profile (requires login)
     if (url === '/profile' && method === 'GET') {
-        UserController.profile(req, res);
+        UserController.workspace(req, res);
         return true;
     }
 

@@ -7,6 +7,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const renderNavigation = require('../views/renderNavigation');
+const escapeHtml = require('../views/escapeHtml');
 
 const ERROR_VIEW = path.join(__dirname, '..', 'views', '5xx.html');
 
@@ -79,13 +81,13 @@ function errorHandler(req, res, error, statusCode = 500) {
         }
 
         let html = template.replace(/<!-- ERROR_CODE -->/g, code);
-        html = html.replace('<!-- ERROR_REASON -->', message);
-        html = html.replace(/<!-- REQUESTED_URL -->/g, url);
+        html = html.replace('<!-- ERROR_REASON -->', () => escapeHtml(message));
+        html = html.replace(/<!-- REQUESTED_URL -->/g, () => escapeHtml(url));
 
         if (!res.headersSent) {
             res.writeHead(code, { 'Content-Type': 'text/html; charset=utf-8' });
         }
-        res.end(html);
+        res.end(renderNavigation(html, req));
     });
 }
 

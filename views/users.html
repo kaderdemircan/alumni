@@ -60,21 +60,6 @@
         }
 
         /* ── Header & Navigation ─────────────────────────────────────────── */
-        .ease-nav-wrapper {
-            background-color: var(--color-cream-paper);
-            border-bottom: 1px solid var(--color-border-mist);
-            padding: var(--spacing-18) var(--spacing-28);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .ease-nav-container {
-            max-width: var(--page-max-width);
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
         .ease-brand-lockup {
             display: flex;
             align-items: center;
@@ -94,27 +79,6 @@
             font-size: 15px;
             font-weight: 600;
             letter-spacing: -0.2px;
-        }
-        .ease-nav-links {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-        }
-        .ease-nav-item {
-            font-family: var(--font-suisse-intl);
-            font-size: var(--text-body);
-            color: var(--color-charcoal);
-            text-decoration: none;
-            padding: var(--spacing-7) var(--spacing-14);
-            border-radius: var(--radius-nav);
-            transition: background-color 0.15s ease;
-        }
-        .ease-nav-item:hover {
-            background-color: var(--color-keylime-wash);
-        }
-        .ease-nav-item.active {
-            font-weight: 600;
-            color: var(--color-ink);
         }
 
         .ease-btn-primary {
@@ -354,40 +318,16 @@
 
         @media (max-width: 900px) {
             .form-grid-inputs, .ease-footer-container { grid-template-columns: 1fr; }
-            .ease-nav-links { display: none; }
             .page-title { font-size: 40px; }
         }
+        [data-admin-only][hidden] { display: none !important; }
     </style>
+    <link rel="stylesheet" href="/nav.css">
 </head>
 <body>
 
     <!-- ── Header Component ────────────────────────────────────────────── -->
-    <header class="ease-nav-wrapper">
-        <div class="ease-nav-container">
-            <a href="/" class="ease-brand-lockup">
-                <span class="ease-brand-mark"></span>
-                <span class="ease-brand-text">Alumni Tracking System</span>
-            </a>
-
-            <nav class="ease-nav-links">
-                <a href="/" class="ease-nav-item">Home</a>
-                <a href="/about" class="ease-nav-item">About Us</a>
-                <a href="/users" class="ease-nav-item active">Alumni Directory</a>
-                <a href="/announcements" class="ease-nav-item">Announcements</a>
-                <a href="/jobs" class="ease-nav-item">Careers</a>
-                <a href="/mentorship" class="ease-nav-item">Mentorship</a>
-                <a href="/register" class="ease-nav-item">Register</a>
-                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
-            </nav>
-
-            <div class="ease-nav-cta">
-                <a href="/register" class="ease-btn-primary">
-                    <span>Register Account</span>
-                    <span>→</span>
-                </a>
-            </div>
-        </div>
-    </header>
+    <!-- SITE_NAVIGATION -->
 
     <!-- ── Directory Main ──────────────────────────────────────────────── -->
     <main class="directory-main">
@@ -403,7 +343,7 @@
         <!-- ALERT_MESSAGE -->
 
         <!-- 1. Registration Form Panel -->
-        <div class="form-card" id="register-section">
+        <div class="form-card" id="register-section" data-admin-only hidden>
             <div class="form-inner-white">
                 <span class="ease-eyebrow">NEW REGISTRATION</span>
                 <h2 class="form-title">Register an Alumnus</h2>
@@ -541,7 +481,7 @@
                                     <td>${u.birthday}</td>
                                     <td style="text-align: right;">
                                         <a href="/users/${u.id}" class="action-link-btn">View →</a>
-                                        <a href="/users/${u.id}/edit" class="action-link-btn">Edit →</a>
+                                        <a href="/users/${u.id}/edit" class="action-link-btn" data-admin-only hidden>Edit →</a>
                                     </td>
                                 </tr>
                             `).join('');
@@ -563,5 +503,6 @@
             }
         });
     </script>
+    <script src="/nav.js"></script>
 </body>
 </html>

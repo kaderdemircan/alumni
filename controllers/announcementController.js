@@ -16,6 +16,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const renderNavigation = require('../views/renderNavigation');
+const escapeHtml = require('../views/escapeHtml');
 const AnnouncementModel = require('../models/announcementModel');
 
 // Paths to View Layer templates
@@ -122,15 +124,15 @@ function renderAnnouncementTableRows(announcements) {
     return announcements.map(a => `
         <tr>
             <td><strong>#${a.id}</strong></td>
-            <td><strong>${a.title}</strong></td>
-            <td><span class="badge ${getCategoryBadgeClass(a.category)}">${a.category}</span></td>
-            <td>${a.author}</td>
-            <td>${a.date}</td>
-            <td><span class="${getPriorityClass(a.priority)}">${a.priority || 'Normal'}</span></td>
+            <td><strong>${escapeHtml(a.title)}</strong></td>
+            <td><span class="badge ${getCategoryBadgeClass(a.category)}">${escapeHtml(a.category)}</span></td>
+            <td>${escapeHtml(a.author)}</td>
+            <td>${escapeHtml(a.date)}</td>
+            <td><span class="${getPriorityClass(a.priority)}">${escapeHtml(a.priority || 'Normal')}</span></td>
             <td>
                 <a href="/announcements/${a.id}" class="action-link view" title="View Detail">👁️</a>
-                <a href="/announcements/${a.id}/edit" class="action-link edit" title="Edit">✏️</a>
-                <form action="/announcements/${a.id}/delete" method="POST" style="display:inline;" onsubmit="return confirm('Duyuru #${a.id} silinsin mi?');">
+                <a href="/announcements/${a.id}/edit" class="action-link edit" data-admin-only hidden title="Edit">✏️</a>
+                <form action="/announcements/${a.id}/delete" data-admin-only hidden method="POST" style="display:inline;" onsubmit="return confirm('Duyuru #${a.id} silinsin mi?');">
                     <button type="submit" class="action-link delete" title="Delete">🗑️</button>
                 </form>
             </td>
@@ -158,11 +160,11 @@ class AnnouncementController {
                 alertHtml = '<div class="alert alert-success">✅ Duyuru başarıyla silindi!</div>';
             }
 
-            let html = template.replace('<!-- ANNOUNCEMENTS_TABLE_ROWS -->', tableRows);
+            let html = template.replace('<!-- ANNOUNCEMENTS_TABLE_ROWS -->', () => tableRows);
             html = html.replace('<!-- ALERT_MESSAGE -->', alertHtml);
 
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(html);
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+            res.end(renderNavigation(html, req));
         } catch (error) {
             res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end(`Sunucu Hatası: ${error.message}`);
@@ -184,11 +186,11 @@ class AnnouncementController {
                 const tableRows = renderAnnouncementTableRows(announcements);
                 const alertHtml = `<div class="alert alert-danger">⚠️ Hata: ${result.error}</div>`;
 
-                let html = template.replace('<!-- ANNOUNCEMENTS_TABLE_ROWS -->', tableRows);
+                let html = template.replace('<!-- ANNOUNCEMENTS_TABLE_ROWS -->', () => tableRows);
                 html = html.replace('<!-- ALERT_MESSAGE -->', alertHtml);
 
-                res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
-                return res.end(html);
+                res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+                return res.end(renderNavigation(html, req));
             }
 
             // PRG (Post/Redirect/Get)
@@ -219,16 +221,16 @@ class AnnouncementController {
 
         try {
             let template = await readTemplate(ANNOUNCEMENT_DETAIL_VIEW_PATH);
-            template = template.replace(/<!-- ANNOUNCEMENT_ID -->/g, announcement.id);
-            template = template.replace(/<!-- ANNOUNCEMENT_TITLE -->/g, announcement.title);
-            template = template.replace(/<!-- ANNOUNCEMENT_CONTENT -->/g, announcement.content);
-            template = template.replace(/<!-- ANNOUNCEMENT_AUTHOR -->/g, announcement.author);
-            template = template.replace(/<!-- ANNOUNCEMENT_CATEGORY -->/g, announcement.category);
-            template = template.replace(/<!-- ANNOUNCEMENT_DATE -->/g, announcement.date);
-            template = template.replace(/<!-- ANNOUNCEMENT_PRIORITY -->/g, announcement.priority || 'Normal');
+            template = template.replace(/<!-- ANNOUNCEMENT_ID -->/g, () => escapeHtml(announcement.id));
+            template = template.replace(/<!-- ANNOUNCEMENT_TITLE -->/g, () => escapeHtml(announcement.title));
+            template = template.replace(/<!-- ANNOUNCEMENT_CONTENT -->/g, () => escapeHtml(announcement.content));
+            template = template.replace(/<!-- ANNOUNCEMENT_AUTHOR -->/g, () => escapeHtml(announcement.author));
+            template = template.replace(/<!-- ANNOUNCEMENT_CATEGORY -->/g, () => escapeHtml(announcement.category));
+            template = template.replace(/<!-- ANNOUNCEMENT_DATE -->/g, () => escapeHtml(announcement.date));
+            template = template.replace(/<!-- ANNOUNCEMENT_PRIORITY -->/g, () => escapeHtml(announcement.priority || 'Normal'));
 
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(template);
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+            res.end(renderNavigation(template, req));
         } catch (error) {
             res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end(`Sunucu Hatası: ${error.message}`);
@@ -254,11 +256,11 @@ class AnnouncementController {
 
         try {
             let template = await readTemplate(ANNOUNCEMENT_EDIT_VIEW_PATH);
-            template = template.replace(/<!-- ANNOUNCEMENT_ID -->/g, announcement.id);
-            template = template.replace(/<!-- ANNOUNCEMENT_TITLE -->/g, announcement.title);
-            template = template.replace(/<!-- ANNOUNCEMENT_CONTENT -->/g, announcement.content);
-            template = template.replace(/<!-- ANNOUNCEMENT_AUTHOR -->/g, announcement.author);
-            template = template.replace(/<!-- ANNOUNCEMENT_DATE -->/g, announcement.date);
+            template = template.replace(/<!-- ANNOUNCEMENT_ID -->/g, () => escapeHtml(announcement.id));
+            template = template.replace(/<!-- ANNOUNCEMENT_TITLE -->/g, () => escapeHtml(announcement.title));
+            template = template.replace(/<!-- ANNOUNCEMENT_CONTENT -->/g, () => escapeHtml(announcement.content));
+            template = template.replace(/<!-- ANNOUNCEMENT_AUTHOR -->/g, () => escapeHtml(announcement.author));
+            template = template.replace(/<!-- ANNOUNCEMENT_DATE -->/g, () => escapeHtml(announcement.date));
             template = template.replace('<!-- ALERT_MESSAGE -->', '');
 
             // Options selection
@@ -274,8 +276,8 @@ class AnnouncementController {
             ).join('');
             template = template.replace('<!-- PRIORITY_OPTIONS -->', priorityOptions);
 
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(template);
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+            res.end(renderNavigation(template, req));
         } catch (error) {
             res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end(`Sunucu Hatası: ${error.message}`);

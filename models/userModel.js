@@ -13,6 +13,7 @@ const db = require('../config/db');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const DATA_FILE = path.join(DATA_DIR, 'users.json');
+const registrationRoles = ['student', 'alumni', 'staff'];
 
 class UserModel {
     constructor() {
@@ -82,7 +83,7 @@ class UserModel {
     async getAll() {
         try {
             const res = await db.query(
-                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city FROM users ORDER BY id ASC;"
+                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, role, status, phone, bio FROM users ORDER BY id ASC;"
             );
             return res.rows.map(r => ({
                 id: Number(r.id),
@@ -91,7 +92,8 @@ class UserModel {
                 age: Number(r.age),
                 birthday: r.birthday || '',
                 email: r.email || '',
-                city: r.city || ''
+                city: r.city || '',
+                role: r.role, status: r.status, phone: r.phone, bio: r.bio
             }));
         } catch (error) {
             return this.users.map(({ password_hash, ...u }) => ({ ...u }));
@@ -138,7 +140,7 @@ class UserModel {
 
         try {
             const res = await db.query(
-                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, status, password_hash FROM users WHERE LOWER(email) = $1 LIMIT 1;",
+                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, role, status, password_hash FROM users WHERE LOWER(email) = $1 LIMIT 1;",
                 [normalized]
             );
             if (res.rows.length > 0) {
@@ -158,6 +160,7 @@ class UserModel {
             }
             return null;
         } catch (e) {
+            if (db.isConnected) throw e;
             const user = this.users.find(u => (u.email || '').toLowerCase() === normalized);
             return user ? { ...user } : null;
         }
@@ -168,8 +171,10 @@ class UserModel {
      * @param {Object} userData
      * @returns {Promise<{ success: boolean, user?: Object, error?: string }>}
      */
-    async register(userData) {
-        if (!userData || typeof userData !== 'object') {
+    async register(userData, { admin = false } = {}) {
+        if (!userData || typeof userData !== 'object' ||
+            ['name', 'surname', 'email', 'password', 'confirmPassword', 'birthday', 'city', 'role', 'bio', 'phone']
+                .some(key => userData[key] != null && typeof userData[key] !== 'string')) {
             return { success: false, error: 'Invalid registration payload' };
         }
 
@@ -182,6 +187,9 @@ class UserModel {
         let age = userData.age !== undefined && userData.age !== '' ? Number(userData.age) : null;
         const city = (userData.city || '').trim();
         const role = (userData.role || 'alumni').trim().toLowerCase();
+        if (!registrationRoles.includes(role) && !(admin && role === 'admin')) {
+            return { success: false, error: 'Choose a valid account type' };
+        }
         const bio = (userData.bio || '').trim();
         const phone = (userData.phone || '').trim();
 
@@ -202,6 +210,7 @@ class UserModel {
         if (!password) {
             return { success: false, error: 'Password is required' };
         }
+        if (password.length > 256) return { success: false, error: 'Password must be at most 256 characters long' };
         if (password.length < 6) {
             return { success: false, error: 'Password must be at least 6 characters long' };
         }
@@ -215,7 +224,7 @@ class UserModel {
                 return { success: false, error: 'Birthday must follow YYYY-MM-DD format' };
             }
             const bDate = new Date(birthday);
-            if (isNaN(bDate.getTime())) {
+            if (isNaN(bDate.getTime()) || bDate.toISOString().slice(0, 10) !== birthday) {
                 return { success: false, error: 'Birthday must be a valid calendar date' };
             }
             if (bDate > new Date()) {
@@ -239,7 +248,7 @@ class UserModel {
             birthday = `${birthYear}-01-01`;
         }
 
-        if (age < 0 || age > 120) {
+        if (!Number.isInteger(age) || age < 0 || age > 120) {
             return { success: false, error: 'Age must be between 0 and 120' };
         }
 
@@ -250,18 +259,16 @@ class UserModel {
         }
 
         // 4. Role and Status determination
-        const allowedRoles = ['alumni', 'student', 'mentor', 'mentee', 'employer'];
-        const assignedRole = allowedRoles.includes(role) ? role : 'alumni';
-        const status = 'active';
+        const status = admin && userData.status === 'inactive' ? 'inactive' : 'active';
         const password_hash = this.hashPassword(password);
 
         // 5. Database persistence
         try {
             const res = await db.query(
-                `INSERT INTO users (name, surname, age, birthday, email, password_hash, city, phone, bio, status)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                `INSERT INTO users (name, surname, age, birthday, email, password_hash, city, phone, bio, status, role)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
                  RETURNING id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, status;`,
-                [name, surname, age, birthday, email, password_hash, city, phone, bio, status]
+                [name, surname, age, birthday, email, password_hash, city, phone, bio, status, role]
             );
 
             if (res.rows.length > 0) {
@@ -274,18 +281,20 @@ class UserModel {
                     birthday: r.birthday,
                     email: r.email,
                     city: r.city || '',
-                    role: assignedRole,
+                    role,
                     status: r.status
                 };
-                this.users.push({ ...newUser, password_hash });
-                this._saveFallback();
                 return { success: true, user: newUser };
             }
         } catch (e) {
-            console.warn('DB register fallback:', e.message);
+            if (e.code === '23505') return { success: false, error: 'An account with this email address already exists' };
+            if (db.isConnected) throw e;
         }
 
-        // 6. In-memory / Fallback file persistence
+        // Another registration may have completed while the database connection failed.
+        if (this.users.some(u => u.email?.toLowerCase() === email)) {
+            return { success: false, error: 'An account with this email address already exists' };
+        }
         const newUser = {
             id: this.currentId++,
             name,
@@ -294,8 +303,8 @@ class UserModel {
             birthday,
             email,
             city,
-            role: assignedRole,
-            status,
+            role,
+            status, phone, bio,
             created_at: new Date().toISOString()
         };
 
@@ -303,6 +312,24 @@ class UserModel {
         this._saveFallback();
 
         return { success: true, user: { ...newUser } };
+    }
+
+    async updateAccount(id, changes) {
+        const fields = ['name', 'surname', 'email', 'age', 'birthday', 'city', 'phone', 'bio', 'role', 'status', 'password_hash'];
+        const entries = fields.filter(key => changes[key] !== undefined).map(key => [key, changes[key]]);
+        if (!entries.length) return false;
+        try {
+            const set = entries.map(([key], index) => `${key} = $${index + 2}`).join(', ');
+            const result = await db.query(`UPDATE users SET ${set}, updated_at = NOW() WHERE id = $1`, [id, ...entries.map(([, value]) => value)]);
+            return result.rowCount === 1;
+        } catch (error) {
+            if (db.isConnected) throw error;
+            const user = this.users.find(candidate => candidate.id === Number(id));
+            if (!user) return false;
+            Object.assign(user, Object.fromEntries(entries));
+            this._saveFallback();
+            return true;
+        }
     }
 
     async findAll() {
@@ -320,7 +347,7 @@ class UserModel {
 
         try {
             const res = await db.query(
-                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city FROM users WHERE id = $1 LIMIT 1;",
+                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, role, status, phone, bio FROM users WHERE id = $1 LIMIT 1;",
                 [numericId]
             );
             if (res.rows.length > 0) {
@@ -332,13 +359,16 @@ class UserModel {
                     age: Number(r.age),
                     birthday: r.birthday || '',
                     email: r.email || '',
-                    city: r.city || ''
+                    city: r.city || '',
+                    role: r.role, status: r.status, phone: r.phone, bio: r.bio
                 };
             }
             return null;
         } catch (error) {
             const user = this.users.find(u => u.id === numericId);
-            return user ? { ...user } : null;
+            if (!user) return null;
+            const { password_hash, ...profile } = user;
+            return profile;
         }
     }
 
@@ -441,7 +471,7 @@ class UserModel {
                     city: r.city
                 };
                 const idx = this.users.findIndex(u => u.id === numericId);
-                if (idx !== -1) this.users[idx] = updatedUser;
+                if (idx !== -1) this.users[idx] = { ...this.users[idx], ...updatedUser };
                 this._saveFallback();
                 return { success: true, user: updatedUser };
             } else {
@@ -457,6 +487,7 @@ class UserModel {
         }
 
         const updatedUser = {
+            ...this.users[index],
             id: numericId,
             name: updateData.name.trim(),
             surname: updateData.surname.trim(),
@@ -468,7 +499,8 @@ class UserModel {
 
         this.users[index] = updatedUser;
         this._saveFallback();
-        return { success: true, user: { ...updatedUser } };
+        const { password_hash, ...profile } = updatedUser;
+        return { success: true, user: profile };
     }
 
     /**
@@ -518,7 +550,7 @@ class UserModel {
                     city: r.city
                 };
                 const idx = this.users.findIndex(u => u.id === numericId);
-                if (idx !== -1) this.users[idx] = updatedUser;
+                if (idx !== -1) this.users[idx] = { ...this.users[idx], ...updatedUser };
                 this._saveFallback();
                 return { success: true, user: updatedUser };
             }
@@ -543,7 +575,8 @@ class UserModel {
 
         this.users[index] = localUser;
         this._saveFallback();
-        return { success: true, user: { ...localUser } };
+        const { password_hash, ...profile } = localUser;
+        return { success: true, user: profile };
     }
 
     async partialUpdate(id, updateData) {
@@ -582,7 +615,8 @@ class UserModel {
 
         const [deletedUser] = this.users.splice(index, 1);
         this._saveFallback();
-        return { success: true, user: deletedUser };
+        const { password_hash, ...profile } = deletedUser;
+        return { success: true, user: profile };
     }
 
     async deleteById(id) {

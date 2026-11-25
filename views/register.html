@@ -67,26 +67,11 @@
             line-height: var(--leading-body);
             font-size: var(--text-body);
             -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
 
         /* ── Header & Navigation ─────────────────────────────────────────── */
-        .ease-nav-wrapper {
-            background-color: var(--color-cream-paper);
-            border-bottom: 1px solid var(--color-border-mist);
-            padding: var(--spacing-18) var(--spacing-28);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
 
-        .ease-nav-container {
-            max-width: var(--page-max-width);
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
 
         .ease-brand-lockup {
             display: flex;
@@ -111,36 +96,10 @@
             letter-spacing: -0.2px;
         }
 
-        .ease-nav-links {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-        }
 
-        .ease-nav-item {
-            font-family: var(--font-suisse-intl);
-            font-size: var(--text-body);
-            color: var(--color-charcoal);
-            text-decoration: none;
-            padding: var(--spacing-7) var(--spacing-14);
-            border-radius: var(--radius-nav);
-            transition: background-color 0.15s ease;
-        }
 
-        .ease-nav-item:hover {
-            background-color: var(--color-keylime-wash);
-        }
 
-        .ease-nav-item.active {
-            font-weight: 600;
-            color: var(--color-ink);
-        }
 
-        .ease-nav-cta {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-11);
-        }
 
         /* ── Buttons & Tags ──────────────────────────────────────────────── */
         .ease-btn-primary {
@@ -512,40 +471,14 @@
             .form-group-row {
                 grid-template-columns: 1fr;
             }
-            .ease-nav-links {
-                display: none;
-            }
         }
     </style>
+    <link rel="stylesheet" href="/nav.css">
 </head>
 <body>
 
     <!-- ── Header Component ────────────────────────────────────────────── -->
-    <header class="ease-nav-wrapper">
-        <div class="ease-nav-container">
-            <a href="/" class="ease-brand-lockup">
-                <span class="ease-brand-mark"></span>
-                <span class="ease-brand-text">Alumni Tracking System</span>
-            </a>
-
-            <nav class="ease-nav-links">
-                <a href="/" class="ease-nav-item">Home</a>
-                <a href="/about" class="ease-nav-item">About Us</a>
-                <a href="/users" class="ease-nav-item">Alumni Directory</a>
-                <a href="/announcements" class="ease-nav-item">Announcements</a>
-                <a href="/jobs" class="ease-nav-item">Careers</a>
-                <a href="/mentorship" class="ease-nav-item">Mentorship</a>
-                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
-            </nav>
-
-            <div class="ease-nav-cta" id="nav-cta">
-                <a href="/login" class="ease-btn-secondary ease-btn-sm" style="margin-right:8px;">Login</a>
-                <a href="/register" class="ease-btn-primary" style="background-color: var(--color-ink); color: #fff;">
-                    <span>Register</span>
-                    <span>→</span>
-                </a>
-            </div>        </div>
-    </header>
+    <!-- SITE_NAVIGATION -->
 
     <!-- ── Main Content ────────────────────────────────────────────────── -->
     <main class="register-main">
@@ -555,7 +488,7 @@
             <div class="register-header-text">
                 <span class="ease-eyebrow">ACADEMIC COMMUNITY ONBOARDING</span>
                 <h1>Join the Alumni Network</h1>
-                <p>Register your verified member credentials to connect with peers, discover career vacancies, access structured mentorship programs, and attend academic reunions.</p>
+                <p>Create a student, alumni, or university staff account to connect with the university community.</p>
             </div>
             <div>
                 <span class="ease-tag-pill">● SECURE REGISTRATION</span>
@@ -584,8 +517,8 @@
 
                     <div class="form-group">
                         <label class="form-label" for="email">Institutional or Personal Email <span class="req">*</span></label>
-                        <input type="email" id="email" name="email" class="form-input" placeholder="e.g. kader.demircan@alumni.edu" required autocomplete="email">
-                        <span class="input-hint">Used for system authentication, password resets, and verified notifications.</span>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="you@example.edu" required autocomplete="email">
+                        <span class="input-hint">Use this email address to sign in.</span>
                     </div>
 
                     <div class="form-group-row">
@@ -659,15 +592,13 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="role">Registration Intent / Role <span class="req">*</span></label>
+                        <label class="form-label" for="role">Account Type <span class="req">*</span></label>
                         <select id="role" name="role" class="form-select" required>
-                            <option value="alumni" selected>Alumnus / Verified Graduate (Default)</option>
-                            <option value="student">Current Undergrad / Pre-Alumni Candidate</option>
-                            <option value="mentor">Alumni Mentor (Experienced Leader offering guidance)</option>
-                            <option value="mentee">Alumni Mentee (Seeking career coaching & advisory)</option>
-                            <option value="employer">Corporate Partner / Talent Recruiter</option>
+                            <option value="student">Student</option>
+                            <option value="alumni">Alumni</option>
+                            <option value="staff">University Staff</option>
                         </select>
-                        <span class="input-hint">Role governs your authorization permissions across directory, career, and mentorship modules.</span>
+                        <span class="input-hint">Your account type determines which hub opens when you sign in.</span>
                     </div>
 
                     <div class="form-group">
@@ -685,7 +616,7 @@
 
                     <div style="margin-top: var(--spacing-28); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
                         <button type="submit" id="submitBtn" class="ease-btn-primary">
-                            <span id="btnText">Create Alumni Account</span>
+                            <span id="btnText">Create Account</span>
                             <span id="btnArrow">→</span>
                         </button>
                         <a href="/users" style="font-size: 13px; color: var(--color-forest-ink); text-decoration: underline;">Already have an account? View Directory</a>
@@ -699,7 +630,7 @@
                     <p id="successSummary" style="color: var(--color-charcoal); margin-bottom: var(--spacing-21);"></p>
                     <div class="dossier-pill-row">
                         <span class="ease-tag-pill" id="dossierId">MEMBER #</span>
-                        <span class="ease-tag-pill" id="dossierRole">ROLE: ALUMNI</span>
+                        <span class="ease-tag-pill" id="dossierRole">ACCOUNT TYPE</span>
                         <span class="ease-tag-pill" id="dossierEmail">EMAIL</span>
                     </div>
                     <div style="display: flex; justify-content: center; gap: 14px; margin-top: var(--spacing-28);">
@@ -707,7 +638,7 @@
                             <span>Browse Alumni Directory</span>
                             <span>→</span>
                         </a>
-                        <a id="viewProfileBtn" href="/users" class="ease-btn-secondary">View Profile Dossier</a>
+                        <a href="/login?registered=true" class="ease-btn-secondary">Sign In</a>
                     </div>
                 </div>
             </div>
@@ -716,12 +647,12 @@
             <div class="side-info-panel">
                 
                 <div class="info-card slate">
-                    <span class="ease-eyebrow">EXCLUSIVE ALUMNI ADVANTAGES</span>
+                    <span class="ease-eyebrow">NETWORK BENEFITS</span>
                     <h3>Why Register?</h3>
                     <ul>
                         <li>
                             <span>●</span>
-                            <span><strong>Lifelong Directory Access:</strong> Search and connect with verified graduates worldwide across faculties.</span>
+                            <span><strong>Lifelong Directory Access:</strong> Find students, alumni, and staff in the member directory.</span>
                         </li>
                         <li>
                             <span>●</span>
@@ -740,9 +671,9 @@
 
                 <div class="info-card amber">
                     <span class="ease-eyebrow">IDENTITY & ACCREDITATION</span>
-                    <h3>Verification Process</h3>
+                    <h3>After Registration</h3>
                     <p style="font-size: 13px; line-height: 1.6; color: var(--color-forest-ink);">
-                        All newly registered profiles are automatically cross-referenced with university registrar records. Once matched, your profile receives the verified graduate badge, unlocking full dossier visibility and corporate networking privileges.
+                        After creating your account, sign in to open your hub and explore the network.
                     </p>
                 </div>
 
@@ -915,21 +846,18 @@
 
                     const u = data.user || {};
                     document.getElementById('dossierId').textContent = 'MEMBER #' + (u.id || '');
-                    document.getElementById('dossierRole').textContent = 'ROLE: ' + (u.role || 'ALUMNI').toUpperCase();
+                    document.getElementById('dossierRole').textContent = 'ACCOUNT TYPE: ' + document.getElementById('role').selectedOptions[0].textContent;
                     document.getElementById('dossierEmail').textContent = u.email || payload.email;
                     document.getElementById('successSummary').textContent = 
-                        'Congratulations ' + u.name + ' ' + u.surname + '! Your alumni account has been initialized and registered into the system.';
+                        'Your account is ready, ' + u.name + '. Sign in to continue.';
                     
-                    if (u.id) {
-                        document.getElementById('viewProfileBtn').href = '/users/' + u.id;
-                    }
 
                     successDossier.style.display = 'block';
 
                 } catch (err) {
                     showAlert(err.message, 'danger');
                     submitBtn.disabled = false;
-                    btnText.textContent = 'Create Alumni Account';
+                    btnText.textContent = 'Create Account';
                 }
             });
 
@@ -942,6 +870,5 @@
 
         })();
     </script>
-    <script src="/nav.js"></script>
 </body>
 </html>

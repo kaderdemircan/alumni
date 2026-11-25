@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "auth:grant-admin": "node scripts/grant-admin.js",
     "migrate": "node scripts/migrate.js",
     "seed": "node scripts/seed.js",
     "seed:jobs": "node scripts/seed.js --jobs",

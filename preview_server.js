@@ -1,11 +1,14 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const renderNavigation = require('./views/renderNavigation');
 
 const PORT = 3000;
 
 // ── Route Map: clean URL → HTML file path ──
 const ROUTE_MAP = {
+    '/nav.css':                 'public/nav.css',
+    '/nav.js':                  'public/nav.js',
     '/':                        'index.html',
     '/about':                   'about.html',
     '/users':                   'views/users.html',
@@ -44,14 +47,14 @@ function getMime(filePath) {
     return MIME[path.extname(filePath).toLowerCase()] || 'text/plain';
 }
 
-function serveFile(res, filePath, statusCode = 200) {
+function serveFile(req, res, filePath, statusCode = 200) {
     fs.readFile(filePath, (err, content) => {
         if (err) {
             res.writeHead(500, { 'Content-Type': 'text/plain' });
             return res.end('Error loading file');
         }
         res.writeHead(statusCode, { 'Content-Type': getMime(filePath) });
-        res.end(content);
+        res.end(path.extname(filePath) === '.html' ? renderNavigation(content.toString('utf8'), req) : content);
     });
 }
 
@@ -60,20 +63,20 @@ const server = http.createServer((req, res) => {
 
     // 1. Check static route map first
     if (ROUTE_MAP[cleanUrl]) {
-        return serveFile(res, path.join(__dirname, ROUTE_MAP[cleanUrl]));
+        return serveFile(req, res, path.join(__dirname, ROUTE_MAP[cleanUrl]));
     }
 
     // 2. Check dynamic route patterns
     for (const route of DYNAMIC_ROUTES) {
         if (route.pattern.test(cleanUrl)) {
-            return serveFile(res, path.join(__dirname, route.file));
+            return serveFile(req, res, path.join(__dirname, route.file));
         }
     }
 
     // 3. Try serving static files (css, js, images, etc.)
     const staticPath = path.join(__dirname, cleanUrl);
     if (fs.existsSync(staticPath) && fs.statSync(staticPath).isFile()) {
-        return serveFile(res, staticPath);
+        return serveFile(req, res, staticPath);
     }
 
     // 4. API endpoints — simple proxies for preview
@@ -85,7 +88,7 @@ const server = http.createServer((req, res) => {
     if (cleanUrl === '/api/swagger.json') {
         const swaggerPath = path.join(__dirname, 'swagger.json');
         if (fs.existsSync(swaggerPath)) {
-            return serveFile(res, swaggerPath);
+            return serveFile(req, res, swaggerPath);
         }
     }
 
@@ -101,7 +104,7 @@ const server = http.createServer((req, res) => {
                 'The page you requested does not exist or has been moved. Use the navigation above to find what you need.');
             html = html.replace(/<!-- REQUESTED_URL -->/g, cleanUrl);
             res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(html);
+            res.end(renderNavigation(html, req));
         });
     } else {
         res.writeHead(404, { 'Content-Type': 'text/plain' });

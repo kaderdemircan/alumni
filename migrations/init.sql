@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     birthday DATE,
     email VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255),
+    role VARCHAR(20) NOT NULL DEFAULT 'alumni',
     phone VARCHAR(30),
     profile_image_url VARCHAR(500),
     city VARCHAR(100),

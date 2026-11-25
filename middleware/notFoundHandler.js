@@ -7,6 +7,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const renderNavigation = require('../views/renderNavigation');
+const escapeHtml = require('../views/escapeHtml');
 
 const NOT_FOUND_VIEW = path.join(__dirname, '..', 'views', '404.html');
 
@@ -69,10 +71,10 @@ function notFoundHandler(req, res) {
         }
 
         let html = template.replace('<!-- ERROR_REASON -->', reason);
-        html = html.replace(/<!-- REQUESTED_URL -->/g, url);
+        html = html.replace(/<!-- REQUESTED_URL -->/g, () => escapeHtml(url));
 
         res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end(html);
+        res.end(renderNavigation(html, req));
     });
 }
 

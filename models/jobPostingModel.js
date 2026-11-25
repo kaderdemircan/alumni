@@ -305,8 +305,8 @@ class JobPostingModel {
                 data.company_name.trim(), data.company_logo_url || null, data.title.trim(), data.category || 'Genel',
                 data.description.trim(), data.requirements || null, data.benefits || null, data.employment_type || 'full-time',
                 data.workplace_type || 'hybrid', data.experience_level || 'mid', data.location.trim(),
-                data.salary_min !== undefined ? Number(data.salary_min) : null,
-                data.salary_max !== undefined ? Number(data.salary_max) : null,
+                data.salary_min != null ? Number(data.salary_min) : null,
+                data.salary_max != null ? Number(data.salary_max) : null,
                 data.currency || 'TRY', Boolean(data.is_salary_visible),
                 data.application_url || null, data.contact_email || null, data.deadline || null,
                 data.status || 'open', Boolean(data.is_featured), numericId

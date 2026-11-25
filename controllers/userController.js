@@ -16,7 +16,13 @@
 
 const fs = require('fs');
 const path = require('path');
+const renderNavigation = require('../views/renderNavigation');
 const UserModel = require('../models/userModel');
+const session = require('../middleware/session');
+const { requireRole } = require('../middleware/auth');
+const { workspace } = require('../config/roles');
+const escapeHtml = require('../views/escapeHtml');
+const errorHandler = require('../middleware/errorHandler');
 
 // Paths to View Layer templates
 const USERS_VIEW_PATH = path.join(__dirname, '..', 'views', 'users.html');
@@ -81,14 +87,14 @@ function renderUserTableRows(users) {
     return users.map(u => `
         <tr>
             <td><strong>#${u.id}</strong></td>
-            <td>${u.name}</td>
-            <td>${u.surname}</td>
-            <td><span class="badge">${u.age}</span></td>
-            <td>${u.birthday}</td>
+            <td>${escapeHtml(u.name)}</td>
+            <td>${escapeHtml(u.surname)}</td>
+            <td><span class="badge">${escapeHtml(u.age)}</span></td>
+            <td>${escapeHtml(u.birthday)}</td>
             <td>
                 <a href="/users/${u.id}" class="action-link view" title="View">👁️</a>
-                <a href="/users/${u.id}/edit" class="action-link edit" title="Edit">✏️</a>
-                <form action="/users/${u.id}/delete" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete #${u.id} ${u.name} ${u.surname}?');">
+                <a href="/users/${u.id}/edit" class="action-link edit" data-admin-only hidden title="Edit">✏️</a>
+                <form action="/users/${u.id}/delete" data-admin-only hidden method="POST" style="display:inline;" onsubmit="return confirm('Delete this member record?');">
                     <button type="submit" class="action-link delete" title="Delete">🗑️</button>
                 </form>
             </td>
@@ -177,7 +183,7 @@ class UserController {
             }
             let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
             res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(html);
+            res.end(renderNavigation(html, req));
         } catch (error) {
             res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end(`Server Error: ${error.message}`);
@@ -207,7 +213,7 @@ class UserController {
                 const alertHtml = `<div class="alert-box alert-danger">⚠️ Registration Failed: ${result.error}</div>`;
                 let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
                 res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
-                return res.end(html);
+                return res.end(renderNavigation(html, req));
             }
 
             if (isJson) {
@@ -215,8 +221,8 @@ class UserController {
                 return res.end(JSON.stringify({ success: true, message: 'Registration successful', user: result.user }));
             }
 
-            // Post/Redirect/Get pattern: redirect to user profile with success notice
-            res.writeHead(303, { 'Location': `/users/${result.user.id}?registered=true` });
+            // Redirect to sign-in after creating the account.
+            res.writeHead(303, { 'Location': '/login?registered=true' });
             res.end();
         } catch (error) {
             res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
@@ -244,11 +250,11 @@ class UserController {
                 alertHtml = '<div class="alert alert-success">✅ Alumnus record deleted successfully!</div>';
             }
 
-            let html = template.replace('<!-- USERS_TABLE_ROWS -->', tableRows);
+            let html = template.replace('<!-- USERS_TABLE_ROWS -->', () => tableRows);
             html = html.replace('<!-- ALERT_MESSAGE -->', alertHtml);
 
             res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(html);
+            res.end(renderNavigation(html, req));
         } catch (error) {
             res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end(`Sunucu Hatası: ${error.message}`);
@@ -272,11 +278,11 @@ class UserController {
                 const tableRows = renderUserTableRows(users);
                 const alertHtml = `<div class="alert alert-danger">⚠️ Kayıt Başarısız: ${result.error}</div>`;
 
-                let html = template.replace('<!-- USERS_TABLE_ROWS -->', tableRows);
+                let html = template.replace('<!-- USERS_TABLE_ROWS -->', () => tableRows);
                 html = html.replace('<!-- ALERT_MESSAGE -->', alertHtml);
 
                 res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
-                return res.end(html);
+                return res.end(renderNavigation(html, req));
             }
 
             // Post/Redirect/Get (PRG) pattern: redirect back to /users with success flag
@@ -308,17 +314,17 @@ class UserController {
 
             // Replace all template placeholders with user data
             template = template.replace(/<!-- USER_ID -->/g, user.id);
-            template = template.replace(/<!-- USER_NAME -->/g, user.name);
-            template = template.replace(/<!-- USER_SURNAME -->/g, user.surname);
-            template = template.replace(/<!-- USER_AGE -->/g, user.age);
-            template = template.replace(/<!-- USER_BIRTHDAY -->/g, user.birthday);
+            template = template.replace(/<!-- USER_NAME -->/g, () => escapeHtml(user.name));
+            template = template.replace(/<!-- USER_SURNAME -->/g, () => escapeHtml(user.surname));
+            template = template.replace(/<!-- USER_AGE -->/g, () => escapeHtml(user.age));
+            template = template.replace(/<!-- USER_BIRTHDAY -->/g, () => escapeHtml(user.birthday));
 
             res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(template);
+            res.end(renderNavigation(template, req));
         } catch (error) {
             // Fallback to inline HTML if template file is missing
             const content = `
-                <h2>🎓 Mezun Profili: ${user.name} ${user.surname}</h2>
+                <h2>🎓 Mezun Profili: ${escapeHtml(user.name)} ${escapeHtml(user.surname)}</h2>
                 <div style="background: #fdfdfd; padding: 1.5rem; border-left: 4px solid var(--clr-blue); margin: 1rem 0;">
                     <p><strong>ID:</strong> #${user.id}</p>
                     <p><strong>İsim:</strong> ${user.name}</p>
@@ -329,7 +335,7 @@ class UserController {
                 <a href="/users/${user.id}/edit" class="btn" style="background:#f39c12;">✏️ Edit</a>
                 <a href="/users" class="btn">⬅️ Back to Directory</a>
             `;
-            renderHtmlPage(res, 200, `${user.name} ${user.surname}`, content);
+            renderHtmlPage(res, 200, `${escapeHtml(user.name)} ${escapeHtml(user.surname)}`, content);
         }
     }
 
@@ -352,14 +358,14 @@ class UserController {
             let template = await readTemplate(USER_EDIT_VIEW_PATH);
 
             template = template.replace(/<!-- USER_ID -->/g, user.id);
-            template = template.replace(/<!-- USER_NAME -->/g, user.name);
-            template = template.replace(/<!-- USER_SURNAME -->/g, user.surname);
-            template = template.replace(/<!-- USER_AGE -->/g, user.age);
-            template = template.replace(/<!-- USER_BIRTHDAY -->/g, user.birthday);
+            template = template.replace(/<!-- USER_NAME -->/g, () => escapeHtml(user.name));
+            template = template.replace(/<!-- USER_SURNAME -->/g, () => escapeHtml(user.surname));
+            template = template.replace(/<!-- USER_AGE -->/g, () => escapeHtml(user.age));
+            template = template.replace(/<!-- USER_BIRTHDAY -->/g, () => escapeHtml(user.birthday));
             template = template.replace('<!-- ALERT_MESSAGE -->', '');
 
             res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(template);
+            res.end(renderNavigation(template, req));
         } catch (error) {
             renderHtmlPage(res, 500, 'Error', `<p>Edit form template could not be loaded: ${error.message}</p>`);
         }
@@ -393,14 +399,14 @@ class UserController {
                         const alertHtml = `<div class="alert alert-danger">⚠️ Güncelleme Başarısız: ${result.error}</div>`;
 
                         template = template.replace(/<!-- USER_ID -->/g, user.id);
-                        template = template.replace(/<!-- USER_NAME -->/g, body.name || user.name);
-                        template = template.replace(/<!-- USER_SURNAME -->/g, body.surname || user.surname);
-                        template = template.replace(/<!-- USER_AGE -->/g, body.age !== undefined ? body.age : user.age);
-                        template = template.replace(/<!-- USER_BIRTHDAY -->/g, body.birthday || user.birthday);
+                        template = template.replace(/<!-- USER_NAME -->/g, () => escapeHtml(body.name || user.name));
+                        template = template.replace(/<!-- USER_SURNAME -->/g, () => escapeHtml(body.surname || user.surname));
+                        template = template.replace(/<!-- USER_AGE -->/g, () => escapeHtml(body.age !== undefined ? body.age : user.age));
+                        template = template.replace(/<!-- USER_BIRTHDAY -->/g, () => escapeHtml(body.birthday || user.birthday));
                         template = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
 
                         res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
-                        return res.end(template);
+                        return res.end(renderNavigation(template, req));
                     } catch (e) {
                         // fallback
                     }
@@ -473,154 +479,67 @@ class UserController {
     index(req, res) { return this.getAll(req, res); }
     show(req, res, id) { return this.getById(req, res, id); }
 
-    /**
-     * GET /login
-     * Renders the login page.
-     */
-    async renderLogin(req, res) {
+    async renderLogin(req, res, status = 200, message = '') {
         try {
-            // If already logged in, redirect to profile
-            if (req.session && req.session.isLoggedIn) {
-                res.writeHead(302, { Location: '/profile' });
+            if (status === 200 && req.session.isLoggedIn) {
+                res.writeHead(303, { Location: workspace(req.session.role).path });
                 return res.end();
             }
             const template = await readTemplate(path.join(__dirname, '..', 'views', 'login.html'));
-            let html = template.replace('<!-- ALERT_MESSAGE -->', '');
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(html);
-        } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'text/plain' });
-            res.end('Server error: ' + err.message);
+            const registered = new URL(req.url, 'http://localhost').searchParams.get('registered') === 'true';
+            const alert = message ? `<div class="alert-box alert-danger" role="alert">${escapeHtml(message)}</div>` :
+                registered ? '<p role="status">Account created. Sign in to continue.</p>' : '';
+            res.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+            res.end(renderNavigation(template.replace('<!-- ALERT_MESSAGE -->', () => alert), req));
+        } catch (error) {
+            errorHandler(req, res, error);
         }
     }
 
-    /**
-     * POST /login
-     * Authenticates the user and sets session cookies.
-     * Supports roles: student, alumni, staff
-     */
     async handleLogin(req, res) {
         try {
             const body = await parseRequestBody(req);
-            const email = (body.email || '').trim().toLowerCase();
-            const password = body.password || '';
-
-            if (!email || !password) {
-                const template = await readTemplate(path.join(__dirname, '..', 'views', 'login.html'));
-                const alertHtml = '<div class="alert-box alert-danger">⚠️ Email and password are required.</div>';
-                let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
-                res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
-                return res.end(html);
+            if (!body || typeof body.email !== 'string' || typeof body.password !== 'string' ||
+                !body.email.trim() || !body.password || body.password.length > 256) {
+                return this.renderLogin(req, res, 400, 'Enter a valid email address and password.');
             }
-
-            const user = await UserModel.findByEmail(email);
-            if (!user) {
-                const template = await readTemplate(path.join(__dirname, '..', 'views', 'login.html'));
-                const alertHtml = '<div class="alert-box alert-danger">⚠️ No account found with that email address.</div>';
-                let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
-                res.writeHead(401, { 'Content-Type': 'text/html; charset=utf-8' });
-                return res.end(html);
+            const user = await UserModel.findByEmail(body.email);
+            if (!user || user.status === 'inactive' || !UserModel.verifyPassword(body.password, user.password_hash)) {
+                return this.renderLogin(req, res, 401, 'The email address or password is incorrect, or this account is inactive.');
             }
-
-            const valid = UserModel.verifyPassword(password, user.password_hash || '');
-            if (!valid) {
-                const template = await readTemplate(path.join(__dirname, '..', 'views', 'login.html'));
-                const alertHtml = '<div class="alert-box alert-danger">⚠️ Incorrect password. Please try again.</div>';
-                let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
-                res.writeHead(401, { 'Content-Type': 'text/html; charset=utf-8' });
-                return res.end(html);
-            }
-
-            // Determine effective role (registered role or hint)
-            const role = user.role || body.roleHint || 'alumni';
-            const allowedRoles = ['student', 'alumni', 'staff', 'mentor', 'mentee', 'employer'];
-            const effectiveRole = allowedRoles.includes(role) ? role : 'alumni';
-
-            const displayName = encodeURIComponent(`${user.name} ${user.surname}`);
-            const cookieOpts = 'HttpOnly; Path=/; SameSite=Strict; Max-Age=86400'; // 1 day
-
-            res.writeHead(303, {
-                'Location': '/profile',
-                'Set-Cookie': [
-                    `userId=${user.id}; ${cookieOpts}`,
-                    `userRole=${effectiveRole}; HttpOnly; Path=/; SameSite=Strict; Max-Age=86400`,
-                    `userName=${displayName}; Path=/; SameSite=Strict; Max-Age=86400`
-                ]
-            });
+            session.start(req, res, user);
+            res.writeHead(303, { Location: workspace(user.role).path });
             res.end();
-        } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'text/plain' });
-            res.end('Server error: ' + err.message);
+        } catch (error) {
+            errorHandler(req, res, error);
         }
     }
 
-    /**
-     * GET /logout
-     * Clears session cookies and redirects to home.
-     */
     handleLogout(req, res) {
-        const expire = 'HttpOnly; Path=/; SameSite=Strict; Max-Age=0';
-        res.writeHead(303, {
-            'Location': '/',
-            'Set-Cookie': [
-                `userId=; ${expire}`,
-                `userRole=; ${expire}`,
-                `userName=; ${expire}`
-            ]
-        });
+        session.end(req, res);
+        res.writeHead(303, { Location: '/', 'Cache-Control': 'no-store' });
         res.end();
     }
 
-    /**
-     * GET /profile
-     * Shows the currently logged-in user's profile.
-     * Requires authentication; redirects to /login if not logged in.
-     */
-    async profile(req, res) {
-        if (!req.session || !req.session.isLoggedIn) {
-            res.writeHead(302, { Location: '/login' });
-            return res.end();
+    async workspace(req, res, role) {
+        if (role) {
+            if (!requireRole(req, res, role, 'admin')) return;
         }
-
-        const userId = parseInt(req.session.userId, 10);
-        const user = await UserModel.getById(userId);
-        if (!user) {
-            res.writeHead(302, { Location: '/login' });
-            return res.end();
-        }
-
         try {
-            let template = await readTemplate(USER_DETAIL_VIEW_PATH);
-            template = template.replace(/<!-- USER_ID -->/g, user.id);
-            template = template.replace(/<!-- USER_NAME -->/g, user.name);
-            template = template.replace(/<!-- USER_SURNAME -->/g, user.surname);
-            template = template.replace(/<!-- USER_AGE -->/g, user.age || '—');
-            template = template.replace(/<!-- USER_BIRTHDAY -->/g, user.birthday || '—');
-            template = template.replace(/<!-- USER_EMAIL -->/g, user.email || '—');
-            template = template.replace(/<!-- USER_ROLE -->/g, user.role || req.session.role || 'alumni');
-            template = template.replace(/<!-- USER_CITY -->/g, user.city || '—');
-            template = template.replace(/<!-- USER_BIO -->/g, user.bio || '—');
-            // Inject logout button if template has placeholder
-            const logoutBtn = `<a href="/logout" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#111;color:#fff;border-radius:12px;text-decoration:none;font-size:13px;font-weight:500;margin-top:16px;">Logout →</a>`;
-            template = template.replace(/<!-- LOGOUT_BUTTON -->/g, logoutBtn);
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(template);
-        } catch (err) {
-            // Inline fallback
-            const roleLabel = (user.role || 'alumni').charAt(0).toUpperCase() + (user.role || 'alumni').slice(1);
-            const content = `
-                <h2>🎓 ${user.name} ${user.surname}</h2>
-                <div style="background:#fef9e7;padding:1.5rem;border-radius:12px;margin:1rem 0;">
-                    <p><strong>ID:</strong> #${user.id}</p>
-                    <p><strong>Email:</strong> ${user.email || '—'}</p>
-                    <p><strong>Role:</strong> ${roleLabel}</p>
-                    <p><strong>City:</strong> ${user.city || '—'}</p>
-                    <p><strong>Birthday:</strong> ${user.birthday || '—'}</p>
-                </div>
-                <a href="/logout" style="display:inline-block;padding:8px 18px;background:#111;color:#fff;border-radius:10px;text-decoration:none;margin-top:12px;">Logout →</a>
-                <a href="/users/${user.id}/edit" style="display:inline-block;padding:8px 18px;background:#fef08a;color:#111;border-radius:10px;text-decoration:none;margin-top:12px;margin-left:8px;">Edit Profile ✏️</a>
-            `;
-            renderHtmlPage(res, 200, `${user.name} ${user.surname}`, content);
+            const user = await UserModel.getById(req.session.userId);
+            if (!user) return this.handleLogout(req, res);
+            const page = workspace(role || req.session.role);
+            const template = await readTemplate(path.join(__dirname, '..', 'views', 'workspace.html'));
+            const content = role
+                ? `<p>${page.summary}</p><ul>${page.links.map(([url, label]) => `<li><a href="${url}">${label}</a></li>`).join('')}</ul>`
+                : `<dl><dt>Email</dt><dd>${escapeHtml(user.email)}</dd><dt>City</dt><dd>${escapeHtml(user.city || '?')}</dd><dt>Birthday</dt><dd>${escapeHtml(user.birthday || '?')}</dd></dl><a href="${page.path}">Open ${page.title}</a>`;
+            const replacements = { TITLE: role ? page.title : 'My Profile', ROLE: page.label, NAME: req.session.name };
+            const html = template.replace(/<!-- (TITLE|ROLE|NAME|CONTENT) -->/g, (_, key) =>
+                key === 'CONTENT' ? content : escapeHtml(replacements[key]));
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+            res.end(renderNavigation(html, req));
+        } catch (error) {
+            errorHandler(req, res, error);
         }
     }
 }

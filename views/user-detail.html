@@ -58,21 +58,6 @@
         }
 
         /* ── Header ──────────────────────────────────────────────────────── */
-        .ease-nav-wrapper {
-            background-color: var(--color-cream-paper);
-            border-bottom: 1px solid var(--color-border-mist);
-            padding: var(--spacing-18) var(--spacing-28);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .ease-nav-container {
-            max-width: var(--page-max-width);
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
         .ease-brand-lockup {
             display: flex;
             align-items: center;
@@ -93,22 +78,6 @@
             font-weight: 600;
             letter-spacing: -0.2px;
         }
-        .ease-nav-links {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-        }
-        .ease-nav-item {
-            font-family: var(--font-suisse-intl);
-            font-size: var(--text-body);
-            color: var(--color-charcoal);
-            text-decoration: none;
-            padding: var(--spacing-7) var(--spacing-14);
-            border-radius: var(--radius-nav);
-            transition: background-color 0.15s ease;
-        }
-        .ease-nav-item:hover { background-color: var(--color-keylime-wash); }
-        .ease-nav-item.active { font-weight: 600; color: var(--color-ink); }
 
         .ease-btn-primary {
             display: inline-flex;
@@ -280,38 +249,15 @@
 
         @media (max-width: 900px) {
             .profile-grid-metrics, .ease-footer-container { grid-template-columns: 1fr; }
-            .ease-nav-links { display: none; }
         }
+        [data-admin-only][hidden] { display: none !important; }
     </style>
+    <link rel="stylesheet" href="/nav.css">
 </head>
 <body>
 
     <!-- ── Header Component ────────────────────────────────────────────── -->
-    <header class="ease-nav-wrapper">
-        <div class="ease-nav-container">
-            <a href="/" class="ease-brand-lockup">
-                <span class="ease-brand-mark"></span>
-                <span class="ease-brand-text">Alumni Tracking System</span>
-            </a>
-
-            <nav class="ease-nav-links">
-                <a href="/" class="ease-nav-item">Home</a>
-                <a href="/about" class="ease-nav-item">About Us</a>
-                <a href="/users" class="ease-nav-item active">Alumni Directory</a>
-                <a href="/announcements" class="ease-nav-item">Announcements</a>
-                <a href="/jobs" class="ease-nav-item">Careers</a>
-                <a href="/mentorship" class="ease-nav-item">Mentorship</a>
-                <a href="/register" class="ease-nav-item">Register</a>
-                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
-            </nav>
-
-            <div class="ease-nav-cta">
-                <a href="/users" class="ease-btn-primary">
-                    <span>← All Alumni</span>
-                </a>
-            </div>
-        </div>
-    </header>
+    <!-- SITE_NAVIGATION -->
 
     <!-- ── Profile Main ────────────────────────────────────────────────── -->
     <main class="profile-main">
@@ -357,9 +303,9 @@
                     <a href="/users" class="ease-tag-pill">← Back to Directory</a>
                     
                     <div style="display:flex; gap:10px; align-items:center;">
-                        <a href="/users/<!-- USER_ID -->/edit" id="editBtnLink" class="ease-btn-primary" style="background-color:var(--color-forest-ink);">Edit Record</a>
+                        <a href="/users/<!-- USER_ID -->/edit" id="editBtnLink" data-admin-only hidden class="ease-btn-primary" style="background-color:var(--color-forest-ink);">Edit Record</a>
                         
-                        <form action="/users/<!-- USER_ID -->/delete" id="deleteForm" method="POST" onsubmit="return confirm('Are you sure you want to delete this alumnus record?');" style="display:inline; margin:0;">
+                        <form action="/users/<!-- USER_ID -->/delete" id="deleteForm" data-admin-only hidden method="POST" onsubmit="return confirm('Are you sure you want to delete this alumnus record?');" style="display:inline; margin:0;">
                             <button type="submit" class="ease-tag-pill" style="color:#b91c1c; border-color:#fee2e2; cursor:pointer;">Delete</button>
                         </form>
                     </div>
@@ -439,5 +385,6 @@
             }
         });
     </script>
+    <script src="/nav.js"></script>
 </body>
 </html>

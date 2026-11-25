@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const renderNavigation = require('./views/renderNavigation');
 
 // Load environment variables from .env if present (zero-dependency)
 const envPath = path.join(__dirname, '.env');
@@ -29,7 +30,7 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 
 // Initialize Database connection & verify tables
 const db = require('./config/db');
-db.initDb().catch(err => console.warn('Database init note:', err.message));
+const databaseReady = db.initDb();
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 const loggerMiddleware          = require('./middleware/logger');
@@ -39,7 +40,8 @@ const errorHandler              = require('./middleware/errorHandler');
 const sessionMiddleware         = require('./middleware/session');
 
 // ── MVC Routers ───────────────────────────────────────────────────────────────
-const UserController           = require('./controllers/userController');
+const handleAdminRoutes = require('./routes/adminRoutes');
+const { allowRequest } = require('./middleware/auth');
 const handleApiUserRoutes           = require('./routes/apiUserRoutes');
 const handleUserRoutes              = require('./routes/userRoutes');
 const handleApiAnnouncementRoutes   = require('./routes/apiAnnouncementRoutes');
@@ -49,18 +51,21 @@ const handleApiJobApplicationRoutes = require('./routes/apiJobApplicationRoutes'
 const handleApiSkillRoutes          = require('./routes/apiSkillRoutes');
 
 // ── Server ────────────────────────────────────────────────────────────────────
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
     // 1. Apply middleware to every request
     loggerMiddleware(req, res);        // terminal logging (color-coded)
     errorLoggerMiddleware(req, res);   // auto-log 4xx/5xx to logs/error.log
-    sessionMiddleware(req, res);       // parse cookies → req.session
-
     try {
+        await databaseReady;
+        await sessionMiddleware(req, res);
+        if (!allowRequest(req, res)) return;
+        if (await handleAdminRoutes(req, res)) return;
         // ── Static assets ─────────────────────────────────────────────────────
-        if (req.url === '/nav.js') {
-            return fs.readFile(path.join(__dirname, 'public', 'nav.js'), (err, content) => {
+        if (req.url === '/nav.js' || req.url === '/nav.css') {
+            const isCss = req.url === '/nav.css';
+            return fs.readFile(path.join(__dirname, 'public', isCss ? 'nav.css' : 'nav.js'), (err, content) => {
                 if (err) return errorHandler(req, res, err, 500);
-                res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+                res.writeHead(200, { 'Content-Type': isCss ? 'text/css; charset=utf-8' : 'application/javascript; charset=utf-8' });
                 res.end(content);
             });
         }
@@ -69,16 +74,16 @@ const server = http.createServer((req, res) => {
         if (req.url === '/') {
             return fs.readFile(path.join(__dirname, 'index.html'), (err, content) => {
                 if (err) return errorHandler(req, res, err, 500);
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                res.end(content);
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+                res.end(renderNavigation(content.toString('utf8'), req));
             });
         }
 
         if (req.url === '/about') {
             return fs.readFile(path.join(__dirname, 'about.html'), (err, content) => {
                 if (err) return errorHandler(req, res, err, 500);
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                res.end(content);
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+                res.end(renderNavigation(content.toString('utf8'), req));
             });
         }
 
@@ -86,8 +91,8 @@ const server = http.createServer((req, res) => {
         if (req.url === '/jobs' && req.method === 'GET') {
             return fs.readFile(path.join(__dirname, 'views', 'jobs.html'), (err, content) => {
                 if (err) return errorHandler(req, res, err, 500);
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                res.end(content);
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+                res.end(renderNavigation(content.toString('utf8'), req));
             });
         }
 
@@ -96,8 +101,8 @@ const server = http.createServer((req, res) => {
         if (jobDetailMatch && req.method === 'GET') {
             return fs.readFile(path.join(__dirname, 'views', 'job-detail.html'), (err, content) => {
                 if (err) return errorHandler(req, res, err, 500);
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                res.end(content);
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+                res.end(renderNavigation(content.toString('utf8'), req));
             });
         }
 
@@ -105,17 +110,9 @@ const server = http.createServer((req, res) => {
         if (req.url === '/mentorship' && req.method === 'GET') {
             return fs.readFile(path.join(__dirname, 'views', 'mentorship.html'), (err, content) => {
                 if (err) return errorHandler(req, res, err, 500);
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                res.end(content);
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+                res.end(renderNavigation(content.toString('utf8'), req));
             });
-        }
-
-        // ── Registration Page ─────────────────────────────────────────────────
-        if ((req.url === '/register' || req.url.startsWith('/register?')) && req.method === 'GET') {
-            return UserController.renderRegister(req, res);
-        }
-        if (req.url === '/register' && req.method === 'POST') {
-            return UserController.handleRegister(req, res);
         }
 
         // ── Legacy route kept for backwards compatibility ─────────────────────
@@ -128,8 +125,8 @@ const server = http.createServer((req, res) => {
         if (req.url === '/api/swagger' && req.method === 'GET') {
             return fs.readFile(path.join(__dirname, 'swagger.html'), (err, content) => {
                 if (err) return errorHandler(req, res, err, 500);
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                res.end(content);
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+                res.end(renderNavigation(content.toString('utf8'), req));
             });
         }
 

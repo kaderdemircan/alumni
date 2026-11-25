@@ -1,43 +1,53 @@
-/**
- * Auth Middleware
- * Protects routes that require the user to be logged in.
- * Usage: authMiddleware(req, res, next)
- * 
- * Role-based helpers:
- *   requireAuth       — any logged-in user
- *   requireRole(roles) — specific role(s): 'student' | 'alumni' | 'staff'
- */
-
-function requireAuth(req, res, next) {
-    if (!req.session || !req.session.isLoggedIn) {
-        res.writeHead(302, { Location: '/login?redirect=' + encodeURIComponent(req.url) });
-        return res.end();
+function deny(req, res, status, message) {
+    if (req.url.startsWith('/api/')) {
+        res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ error: message }));
+    } else if (status === 401) {
+        res.writeHead(303, { Location: '/login' });
+        res.end();
+    } else {
+        res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end(message);
     }
-    if (next) next();
+    return false;
 }
 
-function requireRole(allowedRoles) {
-    return function(req, res, next) {
-        if (!req.session || !req.session.isLoggedIn) {
-            res.writeHead(302, { Location: '/login?redirect=' + encodeURIComponent(req.url) });
-            return res.end();
-        }
-        const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
-        if (!roles.includes(req.session.role)) {
-            res.writeHead(403, { 'Content-Type': 'text/html; charset=utf-8' });
-            return res.end(`
-                <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Access Denied</title>
-                <style>body{font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f8f9fa;}
-                .box{text-align:center;padding:2rem;background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
-                </style></head><body><div class="box">
-                <h2>🚫 Access Denied</h2>
-                <p>Your role (<strong>${req.session.role}</strong>) does not have permission to view this page.</p>
-                <p>Required role(s): <strong>${roles.join(', ')}</strong></p>
-                <a href="/">← Go Home</a>
-                </div></body></html>`);
-        }
-        if (next) next();
-    };
+function requireAuth(req, res) {
+    res.setHeader('Cache-Control', 'no-store');
+    return req.session.isLoggedIn || deny(req, res, 401, 'Sign in to continue.');
 }
 
-module.exports = { requireAuth, requireRole };
+function requireRole(req, res, ...roles) {
+    return requireAuth(req, res) &&
+        (roles.includes(req.session.role) || deny(req, res, 403, 'You do not have permission to access this resource.'));
+}
+
+function allowRequest(req, res) {
+    const path = req.url.split('?')[0];
+    const read = req.method === 'GET' || req.method === 'HEAD';
+    if (!read && ['cross-site', 'same-site'].includes(req.headers['sec-fetch-site'])) {
+        return deny(req, res, 403, 'Cross-site requests are forbidden.');
+    }
+    if (/^\/admin(?:\/|$)/.test(path)) return requireRole(req, res, 'admin');
+    if (/^\/(profile|student|alumni-hub|staff|logout)$/.test(path)) return requireAuth(req, res);
+    const userApplications = path.match(/^\/api\/users\/(\d+)\/applications$/);
+    if (userApplications) {
+        if (!requireAuth(req, res)) return false;
+        if (String(req.session.userId) === userApplications[1]) return true;
+        return requireRole(req, res, 'admin');
+    }
+    if (/^\/api\/jobs\/\d+\/applications$/.test(path) && req.method === 'POST') return requireAuth(req, res);
+    if (/^\/api\/(?:applications(?:\/|$)|jobs\/\d+\/applications$)/.test(path)) {
+        return requireRole(req, res, 'admin');
+    }
+    if (/^\/(?:api\/)?users(?:\/|$)/.test(path) && read && !path.endsWith('/edit')) {
+        return requireAuth(req, res);
+    }
+    if (/^\/(?:api\/)?(?:users|announcements|jobs|skills)(?:\/|$)/.test(path) &&
+        (!read || path.endsWith('/edit'))) {
+        return requireRole(req, res, 'admin');
+    }
+    return true;
+}
+
+module.exports = { requireAuth, requireRole, allowRequest };

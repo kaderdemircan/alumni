@@ -58,21 +58,6 @@
         }
 
         /* ── Header ────────────────────────────────────────────── */
-        .ease-nav-wrapper {
-            background-color: var(--color-cream-paper);
-            border-bottom: 1px solid var(--color-border-mist);
-            padding: var(--spacing-18) var(--spacing-28);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .ease-nav-container {
-            max-width: var(--page-max-width);
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
         .ease-brand-lockup {
             display: flex;
             align-items: center;
@@ -93,22 +78,6 @@
             font-weight: 600;
             letter-spacing: -0.2px;
         }
-        .ease-nav-links {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-4);
-        }
-        .ease-nav-item {
-            font-family: var(--font-suisse-intl);
-            font-size: var(--text-body);
-            color: var(--color-charcoal);
-            text-decoration: none;
-            padding: var(--spacing-7) var(--spacing-14);
-            border-radius: var(--radius-nav);
-            transition: background-color 0.15s ease;
-        }
-        .ease-nav-item:hover { background-color: var(--color-keylime-wash); }
-        .ease-nav-item.active { font-weight: 600; color: var(--color-ink); }
 
         .ease-btn-primary {
             display: inline-flex;
@@ -339,39 +308,14 @@
 
         @media (max-width: 900px) {
             .jobs-grid, .form-grid-2, .ease-footer-container { grid-template-columns: 1fr; }
-            .ease-nav-links { display: none; }
         }
     </style>
+    <link rel="stylesheet" href="/nav.css">
 </head>
 <body>
 
     <!-- ── Header Component ────────────────────────────────────────────── -->
-    <header class="ease-nav-wrapper">
-        <div class="ease-nav-container">
-            <a href="/" class="ease-brand-lockup">
-                <span class="ease-brand-mark"></span>
-                <span class="ease-brand-text">Alumni Tracking System</span>
-            </a>
-
-            <nav class="ease-nav-links">
-                <a href="/" class="ease-nav-item">Home</a>
-                <a href="/about" class="ease-nav-item">About Us</a>
-                <a href="/users" class="ease-nav-item">Alumni Directory</a>
-                <a href="/announcements" class="ease-nav-item">Announcements</a>
-                <a href="/jobs" class="ease-nav-item active">Careers</a>
-                <a href="/mentorship" class="ease-nav-item">Mentorship</a>
-                <a href="/register" class="ease-nav-item">Register</a>
-                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
-            </nav>
-
-            <div class="ease-nav-cta">
-                <a href="#post-job" class="ease-btn-primary">
-                    <span>+ Post an Opportunity</span>
-                    <span>→</span>
-                </a>
-            </div>
-        </div>
-    </header>
+    <!-- SITE_NAVIGATION -->
 
     <main class="jobs-main">
         <div class="page-header-box">
