@@ -77,6 +77,29 @@ class ApiUserController {
     }
 
     /**
+     * POST /api/register or POST /api/auth/register
+     * Register a new user account with email, password, profile, and role
+     */
+    async register(req, res) {
+        try {
+            const body = await parseJsonBody(req);
+            const result = await UserModel.register(body);
+
+            if (!result.success) {
+                const statusCode = result.error && result.error.includes('already exists') ? 409 : 400;
+                return sendJson(res, statusCode, { error: result.error });
+            }
+
+            sendJson(res, 201, {
+                message: 'User registered successfully',
+                user: result.user
+            });
+        } catch (error) {
+            sendJson(res, 400, { error: error.message || 'Invalid JSON payload' });
+        }
+    }
+
+    /**
      * POST /api/users
      * Create a new user
      */

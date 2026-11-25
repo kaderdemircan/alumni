@@ -48,7 +48,13 @@ function handleApiUserRoutes(req, res) {
         return true;
     }
 
-    // 4. DIRECT ROUTES: /api/users
+    // 4. AUTH & REGISTRATION: /api/register and /api/auth/register
+    if ((url === '/api/register' || url === '/api/auth/register') && method === 'POST') {
+        ApiUserController.register(req, res);
+        return true;
+    }
+
+    // 5. DIRECT ROUTES: /api/users
     if (url === '/api/users') {
         if (method === 'GET') {
             ApiUserController.getAll(req, res);

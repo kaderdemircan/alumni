@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — Alumni Tracking System</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-forest-ink: #111111;
+            --color-ink: #111111;
+            --color-sage-mist: #fef08a;
+            --color-keylime-wash: #fef9e7;
+            --color-mint-veil: #fae588;
+            --color-slate-hush: #b6ced5;
+            --color-cream-paper: #fffefc;
+            --color-charcoal: #222222;
+            --color-border-mist: #efeeeb;
+            --color-blue-ink: #2980b9;
+            --color-success: #27ae60;
+            --color-error: #c0392b;
+
+            --font-faire-octave: 'Cormorant Garamond', Georgia, serif;
+            --font-suisse-intl: 'Inter', system-ui, -apple-system, sans-serif;
+
+            --text-body: 14px;
+            --leading-body: 1.5;
+            --text-heading: 40px;
+            --leading-heading: 1.35;
+            --text-heading-lg: 54px;
+
+            --spacing-4: 4px;
+            --spacing-7: 7px;
+            --spacing-9: 9px;
+            --spacing-11: 11px;
+            --spacing-14: 14px;
+            --spacing-18: 18px;
+            --spacing-21: 21px;
+            --spacing-28: 28px;
+            --spacing-35: 35px;
+            --spacing-42: 42px;
+            --spacing-70: 70px;
+            --spacing-99: 99px;
+
+            --page-max-width: 1200px;
+            --radius-nav: 7px;
+            --radius-cards: 14px;
+            --radius-badges: 999px;
+            --radius-buttons: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-suisse-intl);
+            background-color: var(--color-cream-paper);
+            color: var(--color-charcoal);
+            line-height: var(--leading-body);
+            font-size: var(--text-body);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* ── Header & Navigation ─────────────────────────────────────────── */
+        .ease-nav-wrapper {
+            background-color: var(--color-cream-paper);
+            border-bottom: 1px solid var(--color-border-mist);
+            padding: var(--spacing-18) var(--spacing-28);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .ease-nav-container {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ease-brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-9);
+            text-decoration: none;
+            color: var(--color-ink);
+        }
+
+        .ease-brand-mark {
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-ink);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .ease-brand-text {
+            font-family: var(--font-suisse-intl);
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        .ease-nav-links {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+
+        .ease-nav-item {
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            color: var(--color-charcoal);
+            text-decoration: none;
+            padding: var(--spacing-7) var(--spacing-14);
+            border-radius: var(--radius-nav);
+            transition: background-color 0.15s ease;
+        }
+
+        .ease-nav-item:hover {
+            background-color: var(--color-keylime-wash);
+        }
+
+        .ease-nav-item.active {
+            font-weight: 600;
+            color: var(--color-ink);
+        }
+
+        .ease-nav-cta {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-11);
+        }
+
+        /* ── Buttons & Tags ──────────────────────────────────────────────── */
+        .ease-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-9);
+            background-color: var(--color-forest-ink);
+            color: var(--color-cream-paper);
+            text-decoration: none;
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            font-weight: 500;
+            padding: var(--spacing-14) var(--spacing-28);
+            border-radius: var(--radius-buttons);
+            border: 1px solid var(--color-forest-ink);
+            cursor: pointer;
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .ease-btn-primary:hover {
+            background-color: #222222;
+            transform: translateY(-1px);
+        }
+
+        .ease-btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ease-btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-7);
+            background-color: transparent;
+            color: var(--color-forest-ink);
+            text-decoration: none;
+            font-family: var(--font-suisse-intl);
+            font-size: var(--text-body);
+            padding: var(--spacing-9) var(--spacing-18);
+            border-radius: var(--radius-buttons);
+            border: 1px solid var(--color-forest-ink);
+            cursor: pointer;
+        }
+
+        .ease-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--color-cream-paper);
+            color: var(--color-forest-ink);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: var(--radius-badges);
+            border: 1px solid var(--color-border-mist);
+        }
+
+        .ease-eyebrow {
+            font-family: var(--font-suisse-intl);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+            display: block;
+        }
+
+        /* ── Page Layout ─────────────────────────────────────────────────── */
+        .register-main {
+            max-width: var(--page-max-width);
+            margin: var(--spacing-42) auto var(--spacing-99);
+            padding: 0 var(--spacing-21);
+        }
+
+        .register-header-panel {
+            background-color: var(--color-keylime-wash);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-42);
+            margin-bottom: var(--spacing-35);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: var(--spacing-28);
+        }
+
+        .register-header-text h1 {
+            font-family: var(--font-faire-octave);
+            font-size: var(--text-heading-lg);
+            font-weight: 300;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+        }
+
+        .register-header-text p {
+            font-size: 15px;
+            color: var(--color-charcoal);
+            max-width: 620px;
+            line-height: 1.6;
+        }
+
+        /* ── Two Column Registration Shell ──────────────────────────────── */
+        .register-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: var(--spacing-28);
+            align-items: start;
+        }
+
+        /* ── Left: Main Registration Form ────────────────────────────────── */
+        .form-shell {
+            background-color: var(--color-cream-paper);
+            border: 1px solid var(--color-border-mist);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-35);
+        }
+
+        .form-section-title {
+            font-family: var(--font-faire-octave);
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-18);
+            padding-bottom: var(--spacing-9);
+            border-bottom: 1px solid var(--color-border-mist);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .form-group-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-18);
+            margin-bottom: var(--spacing-18);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-7);
+            margin-bottom: var(--spacing-18);
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-forest-ink);
+            letter-spacing: 0.02em;
+        }
+
+        .form-label span.req {
+            color: var(--color-error);
+            margin-left: 2px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            font-family: var(--font-suisse-intl);
+            font-size: 14px;
+            background-color: var(--color-cream-paper);
+            border: 1px solid var(--color-border-mist);
+            border-radius: var(--radius-cards);
+            color: var(--color-forest-ink);
+            outline: none;
+            transition: border-color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--color-forest-ink);
+            background-color: #fff;
+        }
+
+        .input-hint {
+            font-size: 11px;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        .password-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            color: #666;
+            padding: 4px;
+        }
+
+        /* Password Strength Meter */
+        .password-meter {
+            height: 4px;
+            width: 100%;
+            background-color: var(--color-border-mist);
+            border-radius: 2px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .password-meter-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.25s ease, background-color 0.25s ease;
+        }
+
+        .meter-weak { width: 33%; background-color: #e74c3c; }
+        .meter-medium { width: 66%; background-color: #f39c12; }
+        .meter-strong { width: 100%; background-color: #27ae60; }
+
+        .checkbox-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: var(--spacing-21) 0;
+            font-size: 13px;
+            color: var(--color-charcoal);
+        }
+
+        .checkbox-row input {
+            margin-top: 3px;
+            cursor: pointer;
+        }
+
+        /* ── Right: Benefits & Verification Panel ───────────────────────── */
+        .side-info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-21);
+        }
+
+        .info-card {
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-28);
+        }
+
+        .info-card.slate {
+            background-color: var(--color-slate-hush);
+        }
+
+        .info-card.amber {
+            background-color: var(--color-sage-mist);
+        }
+
+        .info-card.butter {
+            background-color: var(--color-keylime-wash);
+            border: 1px solid var(--color-border-mist);
+        }
+
+        .info-card h3 {
+            font-family: var(--font-faire-octave);
+            font-size: 26px;
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+        }
+
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-11);
+        }
+
+        .info-card li {
+            font-size: 13px;
+            line-height: 1.55;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .info-card li strong {
+            color: var(--color-forest-ink);
+        }
+
+        /* ── Alerts ──────────────────────────────────────────────────────── */
+        .alert-box {
+            padding: var(--spacing-14) var(--spacing-21);
+            border-radius: var(--radius-cards);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: var(--spacing-21);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .alert-success {
+            background-color: var(--color-sage-mist);
+            color: var(--color-forest-ink);
+            border: 1px solid var(--color-mint-veil);
+        }
+
+        .alert-danger {
+            background-color: #fde8e8;
+            color: #9b1c1c;
+            border: 1px solid #f8b4b4;
+        }
+
+        /* ── Success Dossier Box ─────────────────────────────────────────── */
+        .success-dossier {
+            display: none;
+            background-color: var(--color-keylime-wash);
+            border: 1px solid var(--color-mint-veil);
+            border-radius: var(--radius-cards);
+            padding: var(--spacing-35);
+            margin-top: var(--spacing-21);
+            text-align: center;
+        }
+
+        .success-dossier h3 {
+            font-family: var(--font-faire-octave);
+            font-size: 32px;
+            font-weight: 300;
+            color: var(--color-forest-ink);
+            margin-bottom: var(--spacing-14);
+        }
+
+        .dossier-pill-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: var(--spacing-18) 0;
+        }
+
+        /* ── Footer ──────────────────────────────────────────────────────── */
+        .ease-footer {
+            border-top: 1px solid var(--color-border-mist);
+            padding: var(--spacing-42) var(--spacing-28);
+            margin-top: var(--spacing-99);
+            background-color: var(--color-cream-paper);
+        }
+
+        .ease-footer-container {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #777;
+        }
+
+        @media (max-width: 900px) {
+            .register-grid {
+                grid-template-columns: 1fr;
+            }
+            .register-header-panel {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .form-group-row {
+                grid-template-columns: 1fr;
+            }
+            .ease-nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Header Component ────────────────────────────────────────────── -->
+    <header class="ease-nav-wrapper">
+        <div class="ease-nav-container">
+            <a href="/" class="ease-brand-lockup">
+                <span class="ease-brand-mark"></span>
+                <span class="ease-brand-text">Alumni Tracking System</span>
+            </a>
+
+            <nav class="ease-nav-links">
+                <a href="/" class="ease-nav-item">Home</a>
+                <a href="/about" class="ease-nav-item">About Us</a>
+                <a href="/users" class="ease-nav-item">Alumni Directory</a>
+                <a href="/announcements" class="ease-nav-item">Announcements</a>
+                <a href="/jobs" class="ease-nav-item">Careers</a>
+                <a href="/mentorship" class="ease-nav-item">Mentorship</a>
+                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
+            </nav>
+
+            <div class="ease-nav-cta" id="nav-cta">
+                <a href="/login" class="ease-btn-secondary ease-btn-sm" style="margin-right:8px;">Login</a>
+                <a href="/register" class="ease-btn-primary" style="background-color: var(--color-ink); color: #fff;">
+                    <span>Register</span>
+                    <span>→</span>
+                </a>
+            </div>        </div>
+    </header>
+
+    <!-- ── Main Content ────────────────────────────────────────────────── -->
+    <main class="register-main">
+
+        <!-- Header Panel -->
+        <div class="register-header-panel">
+            <div class="register-header-text">
+                <span class="ease-eyebrow">ACADEMIC COMMUNITY ONBOARDING</span>
+                <h1>Join the Alumni Network</h1>
+                <p>Register your verified member credentials to connect with peers, discover career vacancies, access structured mentorship programs, and attend academic reunions.</p>
+            </div>
+            <div>
+                <span class="ease-tag-pill">● SECURE REGISTRATION</span>
+            </div>
+        </div>
+
+        <!-- Server side injected alert if rendered without JS -->
+        <div id="serverAlert">
+            <!-- ALERT_MESSAGE -->
+        </div>
+
+        <div id="clientAlert" style="display: none;"></div>
+
+        <!-- Registration Shell -->
+        <div class="register-grid">
+
+            <!-- LEFT: Registration Form -->
+            <div class="form-shell">
+                <form id="registerForm" action="/register" method="POST">
+
+                    <!-- SECTION 1: Credentials -->
+                    <div class="form-section-title">
+                        <span>01. Account Credentials</span>
+                        <span class="ease-tag-pill">Authentication</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Institutional or Personal Email <span class="req">*</span></label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="e.g. kader.demircan@alumni.edu" required autocomplete="email">
+                        <span class="input-hint">Used for system authentication, password resets, and verified notifications.</span>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label class="form-label" for="password">Password <span class="req">*</span></label>
+                            <div class="password-wrap">
+                                <input type="password" id="password" name="password" class="form-input" placeholder="Minimum 6 characters" minlength="6" required autocomplete="new-password">
+                                <button type="button" class="password-toggle" id="togglePass" title="Toggle password visibility">👁️</button>
+                            </div>
+                            <div class="password-meter">
+                                <div class="password-meter-fill" id="meterFill"></div>
+                            </div>
+                            <span class="input-hint" id="passHint">At least 6 characters required.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirmPassword">Confirm Password <span class="req">*</span></label>
+                            <div class="password-wrap">
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="Repeat your password" required autocomplete="new-password">
+                                <button type="button" class="password-toggle" id="toggleConfirm" title="Toggle password visibility">👁️</button>
+                            </div>
+                            <span class="input-hint" id="confirmHint">Passwords must match.</span>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: Personal Profile -->
+                    <div class="form-section-title" style="margin-top: var(--spacing-28);">
+                        <span>02. Personal Dossier</span>
+                        <span class="ease-tag-pill">Identity</span>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label class="form-label" for="name">First Name <span class="req">*</span></label>
+                            <input type="text" id="name" name="name" class="form-input" placeholder="e.g. Kader" required autocomplete="given-name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="surname">Surname <span class="req">*</span></label>
+                            <input type="text" id="surname" name="surname" class="form-input" placeholder="e.g. Demircan" required autocomplete="family-name">
+                        </div>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label class="form-label" for="birthday">Date of Birth <span class="req">*</span></label>
+                            <input type="date" id="birthday" name="birthday" class="form-input" required max="2026-11-25">
+                            <span class="input-hint">Calendar date format (YYYY-MM-DD).</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="age">Recorded Age</label>
+                            <input type="number" id="age" name="age" class="form-input" min="0" max="120" placeholder="Auto-calculated from birthday">
+                            <span class="input-hint">Auto-computes when date of birth is selected.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group-row">
+                        <div class="form-group">
+                            <label class="form-label" for="city">Current City of Residence</label>
+                            <input type="text" id="city" name="city" class="form-input" placeholder="e.g. İstanbul, London, San Francisco">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Contact Phone (Optional)</label>
+                            <input type="tel" id="phone" name="phone" class="form-input" placeholder="+90 555 123 4567">
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: Community Role & Intent -->
+                    <div class="form-section-title" style="margin-top: var(--spacing-28);">
+                        <span>03. Community Role & Academic Track</span>
+                        <span class="ease-tag-pill">Domain Alignment</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="role">Registration Intent / Role <span class="req">*</span></label>
+                        <select id="role" name="role" class="form-select" required>
+                            <option value="alumni" selected>Alumnus / Verified Graduate (Default)</option>
+                            <option value="student">Current Undergrad / Pre-Alumni Candidate</option>
+                            <option value="mentor">Alumni Mentor (Experienced Leader offering guidance)</option>
+                            <option value="mentee">Alumni Mentee (Seeking career coaching & advisory)</option>
+                            <option value="employer">Corporate Partner / Talent Recruiter</option>
+                        </select>
+                        <span class="input-hint">Role governs your authorization permissions across directory, career, and mentorship modules.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="bio">Brief Bio or Career Headline (Optional)</label>
+                        <textarea id="bio" name="bio" class="form-textarea" rows="3" placeholder="e.g. Senior Software Architect specializing in distributed systems and Node.js backend pipelines."></textarea>
+                    </div>
+
+                    <!-- SECTION 4: Terms & Submission -->
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="terms" required checked>
+                        <label for="terms">
+                            I affirm that the academic and personal details provided are authentic and adhere to the university honor code and alumni community guidelines.
+                        </label>
+                    </div>
+
+                    <div style="margin-top: var(--spacing-28); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                        <button type="submit" id="submitBtn" class="ease-btn-primary">
+                            <span id="btnText">Create Alumni Account</span>
+                            <span id="btnArrow">→</span>
+                        </button>
+                        <a href="/users" style="font-size: 13px; color: var(--color-forest-ink); text-decoration: underline;">Already have an account? View Directory</a>
+                    </div>
+                </form>
+
+                <!-- Client-Side Success Dossier Box -->
+                <div class="success-dossier" id="successDossier">
+                    <span class="ease-eyebrow">REGISTRATION CONFIRMED</span>
+                    <h3>Welcome to the Network!</h3>
+                    <p id="successSummary" style="color: var(--color-charcoal); margin-bottom: var(--spacing-21);"></p>
+                    <div class="dossier-pill-row">
+                        <span class="ease-tag-pill" id="dossierId">MEMBER #</span>
+                        <span class="ease-tag-pill" id="dossierRole">ROLE: ALUMNI</span>
+                        <span class="ease-tag-pill" id="dossierEmail">EMAIL</span>
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 14px; margin-top: var(--spacing-28);">
+                        <a href="/users" class="ease-btn-primary">
+                            <span>Browse Alumni Directory</span>
+                            <span>→</span>
+                        </a>
+                        <a id="viewProfileBtn" href="/users" class="ease-btn-secondary">View Profile Dossier</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Side Info & Security Transparency -->
+            <div class="side-info-panel">
+                
+                <div class="info-card slate">
+                    <span class="ease-eyebrow">EXCLUSIVE ALUMNI ADVANTAGES</span>
+                    <h3>Why Register?</h3>
+                    <ul>
+                        <li>
+                            <span>●</span>
+                            <span><strong>Lifelong Directory Access:</strong> Search and connect with verified graduates worldwide across faculties.</span>
+                        </li>
+                        <li>
+                            <span>●</span>
+                            <span><strong>Direct Recruiter Inboxes:</strong> Apply to curated job postings with transparent salary bands and internal referral lines.</span>
+                        </li>
+                        <li>
+                            <span>●</span>
+                            <span><strong>1:1 Mentorship Programs:</strong> Match with senior industry leaders across Software, Health, Venture, and Research tracks.</span>
+                        </li>
+                        <li>
+                            <span>●</span>
+                            <span><strong>Campus & Regional Gatherings:</strong> Receive priority invitations and RSVP to annual reunions and technology summits.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="info-card amber">
+                    <span class="ease-eyebrow">IDENTITY & ACCREDITATION</span>
+                    <h3>Verification Process</h3>
+                    <p style="font-size: 13px; line-height: 1.6; color: var(--color-forest-ink);">
+                        All newly registered profiles are automatically cross-referenced with university registrar records. Once matched, your profile receives the verified graduate badge, unlocking full dossier visibility and corporate networking privileges.
+                    </p>
+                </div>
+
+                <div class="info-card butter">
+                    <span class="ease-eyebrow">SECURITY ARCHITECTURE</span>
+                    <h3>Zero-Trust Credential Security</h3>
+                    <p style="font-size: 13px; line-height: 1.6; color: var(--color-charcoal);">
+                        Passwords are cryptographically salted and hashed using Node.js scrypt algorithms before storage. Your authentication credentials are never transmitted or stored in plaintext.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- ── Footer ──────────────────────────────────────────────────────── -->
+    <footer class="ease-footer">
+        <div class="ease-footer-container">
+            <div>
+                © 2026 Alumni Tracking System. Ease Health Architectural Specification.
+            </div>
+            <div>
+                <a href="/about" style="color: inherit; text-decoration: none; margin-right: 14px;">About</a>
+                <a href="/api/swagger" style="color: inherit; text-decoration: none;">API Documentation</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ── Client Script: Realtime Validation, Age Calculation, and AJAX Submission -->
+    <script>
+        (function() {
+            const form = document.getElementById('registerForm');
+            const birthdayInput = document.getElementById('birthday');
+            const ageInput = document.getElementById('age');
+            const passwordInput = document.getElementById('password');
+            const confirmInput = document.getElementById('confirmPassword');
+            const togglePass = document.getElementById('togglePass');
+            const toggleConfirm = document.getElementById('toggleConfirm');
+            const meterFill = document.getElementById('meterFill');
+            const passHint = document.getElementById('passHint');
+            const confirmHint = document.getElementById('confirmHint');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const clientAlert = document.getElementById('clientAlert');
+            const successDossier = document.getElementById('successDossier');
+
+            // 1. Password Visibility Toggles
+            togglePass.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePass.textContent = type === 'password' ? '👁️' : '🙈';
+            });
+
+            toggleConfirm.addEventListener('click', function() {
+                const type = confirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmInput.setAttribute('type', type);
+                toggleConfirm.textContent = type === 'password' ? '👁️' : '🙈';
+            });
+
+            // 2. Birthday to Age Automatic Calculation
+            birthdayInput.addEventListener('change', function() {
+                if (!birthdayInput.value) return;
+                const bDate = new Date(birthdayInput.value);
+                if (isNaN(bDate.getTime())) return;
+
+                const today = new Date();
+                let age = today.getFullYear() - bDate.getFullYear();
+                const m = today.getMonth() - bDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) {
+                    age--;
+                }
+                if (age >= 0 && age <= 120) {
+                    ageInput.value = age;
+                }
+            });
+
+            // 3. Password Strength Meter
+            passwordInput.addEventListener('input', function() {
+                const val = passwordInput.value;
+                meterFill.className = 'password-meter-fill';
+
+                if (val.length === 0) {
+                    meterFill.style.width = '0%';
+                    passHint.textContent = 'At least 6 characters required.';
+                    passHint.style.color = '#777';
+                } else if (val.length < 6) {
+                    meterFill.className = 'password-meter-fill meter-weak';
+                    passHint.textContent = 'Too short (min 6 characters).';
+                    passHint.style.color = '#e74c3c';
+                } else if (val.length < 10 || !/[A-Z]/.test(val) || !/[0-9]/.test(val)) {
+                    meterFill.className = 'password-meter-fill meter-medium';
+                    passHint.textContent = 'Good. Consider adding numbers and capitals for strength.';
+                    passHint.style.color = '#d35400';
+                } else {
+                    meterFill.className = 'password-meter-fill meter-strong';
+                    passHint.textContent = 'Strong password.';
+                    passHint.style.color = '#27ae60';
+                }
+
+                validateConfirm();
+            });
+
+            // 4. Confirm Password Matching
+            function validateConfirm() {
+                if (!confirmInput.value) {
+                    confirmHint.textContent = 'Passwords must match.';
+                    confirmHint.style.color = '#777';
+                    return;
+                }
+                if (confirmInput.value !== passwordInput.value) {
+                    confirmHint.textContent = '⚠️ Passwords do not match.';
+                    confirmHint.style.color = '#e74c3c';
+                } else {
+                    confirmHint.textContent = '✅ Passwords match.';
+                    confirmHint.style.color = '#27ae60';
+                }
+            }
+            confirmInput.addEventListener('input', validateConfirm);
+
+            // 5. AJAX Form Submission with Progressive Enhancement
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // Validate passwords match before sending
+                if (passwordInput.value !== confirmInput.value) {
+                    showAlert('Passwords do not match. Please re-enter your password.', 'danger');
+                    confirmInput.focus();
+                    return;
+                }
+
+                const payload = {
+                    name: document.getElementById('name').value.trim(),
+                    surname: document.getElementById('surname').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    password: passwordInput.value,
+                    confirmPassword: confirmInput.value,
+                    birthday: birthdayInput.value,
+                    age: ageInput.value ? Number(ageInput.value) : undefined,
+                    city: document.getElementById('city').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    role: document.getElementById('role').value,
+                    bio: document.getElementById('bio').value.trim()
+                };
+
+                // UI Loading state
+                submitBtn.disabled = true;
+                btnText.textContent = 'Registering Profile...';
+
+                try {
+                    const response = await fetch('/api/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Registration failed. Please check your inputs.');
+                    }
+
+                    // Success handling
+                    form.style.display = 'none';
+                    clientAlert.style.display = 'none';
+
+                    const u = data.user || {};
+                    document.getElementById('dossierId').textContent = 'MEMBER #' + (u.id || '');
+                    document.getElementById('dossierRole').textContent = 'ROLE: ' + (u.role || 'ALUMNI').toUpperCase();
+                    document.getElementById('dossierEmail').textContent = u.email || payload.email;
+                    document.getElementById('successSummary').textContent = 
+                        'Congratulations ' + u.name + ' ' + u.surname + '! Your alumni account has been initialized and registered into the system.';
+                    
+                    if (u.id) {
+                        document.getElementById('viewProfileBtn').href = '/users/' + u.id;
+                    }
+
+                    successDossier.style.display = 'block';
+
+                } catch (err) {
+                    showAlert(err.message, 'danger');
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Create Alumni Account';
+                }
+            });
+
+            function showAlert(message, type) {
+                clientAlert.className = 'alert-box alert-' + type;
+                clientAlert.textContent = (type === 'danger' ? '⚠️ ' : '✅ ') + message;
+                clientAlert.style.display = 'flex';
+                clientAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+        })();
+    </script>
+    <script src="/nav.js"></script>
+</body>
+</html>

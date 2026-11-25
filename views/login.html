@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Alumni Tracking System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-forest-ink: #111111;
+            --color-ink: #111111;
+            --color-sage-mist: #fef08a;
+            --color-keylime-wash: #fef9e7;
+            --color-slate-hush: #b6ced5;
+            --color-cream-paper: #fffefc;
+            --color-charcoal: #222222;
+            --color-border-mist: #efeeeb;
+            --color-error: #c0392b;
+            --color-success: #27ae60;
+            --font-faire-octave: 'Cormorant Garamond', Georgia, serif;
+            --font-suisse-intl: 'Inter', system-ui, sans-serif;
+            --radius-nav: 7px; --radius-cards: 14px; --radius-buttons: 14px; --radius-badges: 999px;
+            --spacing-4:4px;--spacing-7:7px;--spacing-9:9px;--spacing-11:11px;--spacing-14:14px;
+            --spacing-18:18px;--spacing-21:21px;--spacing-28:28px;--spacing-35:35px;--spacing-42:42px;
+            --spacing-70:70px;--spacing-99:99px;--page-max-width:1200px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-suisse-intl); background-color: var(--color-cream-paper); color: var(--color-charcoal); font-size: 14px; -webkit-font-smoothing: antialiased; }
+
+        /* Nav */
+        .ease-nav-wrapper { background: var(--color-cream-paper); border-bottom: 1px solid var(--color-border-mist); padding: var(--spacing-18) var(--spacing-28); position: sticky; top: 0; z-index: 100; }
+        .ease-nav-container { max-width: var(--page-max-width); margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+        .ease-brand-lockup { display: flex; align-items: center; gap: var(--spacing-9); text-decoration: none; color: var(--color-ink); }
+        .ease-brand-mark { width: 12px; height: 12px; background: var(--color-ink); border-radius: 50%; display: inline-block; }
+        .ease-brand-text { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; }
+        .ease-nav-links { display: flex; align-items: center; gap: var(--spacing-4); }
+        .ease-nav-item { font-size: 14px; color: var(--color-charcoal); text-decoration: none; padding: var(--spacing-7) var(--spacing-14); border-radius: var(--radius-nav); transition: background 0.15s; }
+        .ease-nav-item:hover { background: var(--color-keylime-wash); }
+        .ease-nav-cta { display: flex; align-items: center; gap: var(--spacing-11); }
+        .ease-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-7); background: var(--color-forest-ink); color: var(--color-cream-paper); text-decoration: none; font-size: 14px; font-weight: 500; padding: var(--spacing-9) var(--spacing-18); border-radius: var(--radius-buttons); border: 1px solid var(--color-forest-ink); cursor: pointer; transition: background 0.15s, transform 0.15s; }
+        .ease-btn-primary:hover { background: #222; transform: translateY(-1px); }
+        .ease-btn-secondary { display: inline-flex; align-items: center; gap: var(--spacing-7); background: transparent; color: var(--color-forest-ink); text-decoration: none; font-size: 14px; padding: var(--spacing-9) var(--spacing-18); border-radius: var(--radius-buttons); border: 1px solid var(--color-forest-ink); cursor: pointer; }
+        .ease-btn-sm { padding: var(--spacing-9) var(--spacing-14); font-size: 13px; }
+
+        /* Login page */
+        .login-main { max-width: 480px; margin: var(--spacing-70) auto var(--spacing-99); padding: 0 var(--spacing-21); }
+        .login-shell { background: var(--color-cream-paper); border: 1px solid var(--color-border-mist); border-radius: var(--radius-cards); padding: var(--spacing-42); }
+        .login-heading { font-family: var(--font-faire-octave); font-size: 42px; font-weight: 300; color: var(--color-forest-ink); margin-bottom: var(--spacing-7); }
+        .login-sub { font-size: 14px; color: #666; margin-bottom: var(--spacing-35); }
+        .form-group { display: flex; flex-direction: column; gap: var(--spacing-7); margin-bottom: var(--spacing-18); }
+        .form-label { font-size: 12px; font-weight: 600; color: var(--color-forest-ink); letter-spacing: .02em; }
+        .form-input, .form-select { width: 100%; padding: 12px 14px; font-family: var(--font-suisse-intl); font-size: 14px; background: var(--color-cream-paper); border: 1px solid var(--color-border-mist); border-radius: var(--radius-cards); color: var(--color-forest-ink); outline: none; transition: border-color 0.15s; }
+        .form-input:focus, .form-select:focus { border-color: var(--color-forest-ink); background: #fff; }
+        .alert-box { padding: var(--spacing-14) var(--spacing-18); border-radius: var(--radius-cards); font-size: 13px; font-weight: 500; margin-bottom: var(--spacing-21); }
+        .alert-danger { background: #fde8e8; color: #9b1c1c; border: 1px solid #f8b4b4; }
+        .alert-success { background: var(--color-sage-mist); color: var(--color-forest-ink); border: 1px solid #fae588; }
+        .role-tabs { display: flex; gap: var(--spacing-9); margin-bottom: var(--spacing-21); }
+        .role-tab { flex: 1; text-align: center; padding: var(--spacing-9) var(--spacing-14); border-radius: var(--radius-cards); border: 1px solid var(--color-border-mist); cursor: pointer; font-size: 13px; font-weight: 500; color: #666; background: #fafafa; transition: all .15s; }
+        .role-tab.active { background: var(--color-forest-ink); color: #fff; border-color: var(--color-forest-ink); }
+        .role-tab:hover:not(.active) { background: var(--color-keylime-wash); }
+        .divider { text-align: center; color: #aaa; font-size: 12px; margin: var(--spacing-21) 0; }
+        .ease-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--color-forest-ink); display: block; margin-bottom: var(--spacing-14); }
+        @media (max-width: 900px) { .ease-nav-links { display: none; } }
+    </style>
+</head>
+<body>
+    <!-- Nav -->
+    <header class="ease-nav-wrapper">
+        <div class="ease-nav-container">
+            <a href="/" class="ease-brand-lockup">
+                <span class="ease-brand-mark"></span>
+                <span class="ease-brand-text">Alumni Tracking System</span>
+            </a>
+            <nav class="ease-nav-links">
+                <a href="/" class="ease-nav-item">Home</a>
+                <a href="/about" class="ease-nav-item">About Us</a>
+                <a href="/users" class="ease-nav-item">Alumni Directory</a>
+                <a href="/announcements" class="ease-nav-item">Announcements</a>
+                <a href="/jobs" class="ease-nav-item">Careers</a>
+                <a href="/mentorship" class="ease-nav-item">Mentorship</a>
+                <a href="/api/swagger" class="ease-nav-item">API Docs</a>
+            </nav>
+            <div class="ease-nav-cta" id="nav-cta">
+                <a href="/login" class="ease-btn-secondary ease-btn-sm">Login</a>
+                <a href="/register" class="ease-btn-primary ease-btn-sm">Register <span>→</span></a>
+            </div>
+        </div>
+    </header>
+
+    <main class="login-main">
+        <div class="login-shell">
+            <span class="ease-eyebrow">Account Access</span>
+            <h1 class="login-heading">Welcome back.</h1>
+            <p class="login-sub">Sign in to your Alumni Network account to access your profile, career tools, and community resources.</p>
+
+            <!-- ALERT_MESSAGE -->
+
+            <!-- Role tabs -->
+            <div class="role-tabs">
+                <div class="role-tab active" data-role="alumni" onclick="selectRole('alumni', this)">Alumni</div>
+                <div class="role-tab" data-role="student" onclick="selectRole('student', this)">Student</div>
+                <div class="role-tab" data-role="staff" onclick="selectRole('staff', this)">Staff</div>
+            </div>
+
+            <form id="loginForm" method="POST" action="/login">
+                <input type="hidden" name="roleHint" id="roleHint" value="alumni">
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="ease-btn-primary" style="width:100%;margin-top:var(--spacing-14);">
+                    Sign In →
+                </button>
+            </form>
+
+            <div class="divider">— or —</div>
+
+            <p style="text-align:center;font-size:13px;color:#666;">
+                Don't have an account? <a href="/register" style="color:var(--color-forest-ink);font-weight:600;">Create one →</a>
+            </p>
+        </div>
+    </main>
+
+    <script src="/nav.js"></script>
+    <script>
+        function selectRole(role, el) {
+            document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('roleHint').value = role;
+        }
+    </script>
+</body>
+</html>

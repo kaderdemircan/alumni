@@ -22,6 +22,7 @@ const UserModel = require('../models/userModel');
 const USERS_VIEW_PATH = path.join(__dirname, '..', 'views', 'users.html');
 const USER_DETAIL_VIEW_PATH = path.join(__dirname, '..', 'views', 'user-detail.html');
 const USER_EDIT_VIEW_PATH = path.join(__dirname, '..', 'views', 'user-edit.html');
+const REGISTER_VIEW_PATH = path.join(__dirname, '..', 'views', 'register.html');
 
 /**
  * Helper to parse URL-encoded or JSON body from web forms
@@ -163,6 +164,66 @@ function readTemplate(filePath) {
 }
 
 class UserController {
+    /**
+     * GET /register
+     * View Layer Route: Renders views/register.html registration page
+     */
+    async renderRegister(req, res) {
+        try {
+            const template = await readTemplate(REGISTER_VIEW_PATH);
+            let alertHtml = '';
+            if (req.url.includes('registered=true') || req.url.includes('success=true')) {
+                alertHtml = '<div class="alert-box alert-success">✅ Registration complete! Welcome to the Alumni Network. You can now explore the directory or view your profile.</div>';
+            }
+            let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(html);
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.end(`Server Error: ${error.message}`);
+        }
+    }
+
+    /**
+     * POST /register
+     * View Layer Route: Handles web form submission for user registration
+     */
+    async handleRegister(req, res) {
+        try {
+            const body = await parseRequestBody(req);
+            const result = await UserModel.register(body);
+
+            const isJson = (req.headers['accept'] && req.headers['accept'].includes('application/json')) ||
+                           (req.headers['content-type'] && req.headers['content-type'].includes('application/json'));
+
+            if (!result.success) {
+                if (isJson) {
+                    const statusCode = result.error && result.error.includes('already exists') ? 409 : 400;
+                    res.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8' });
+                    return res.end(JSON.stringify({ success: false, error: result.error }));
+                }
+
+                const template = await readTemplate(REGISTER_VIEW_PATH);
+                const alertHtml = `<div class="alert-box alert-danger">⚠️ Registration Failed: ${result.error}</div>`;
+                let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
+                res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
+                return res.end(html);
+            }
+
+            if (isJson) {
+                res.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' });
+                return res.end(JSON.stringify({ success: true, message: 'Registration successful', user: result.user }));
+            }
+
+            // Post/Redirect/Get pattern: redirect to user profile with success notice
+            res.writeHead(303, { 'Location': `/users/${result.user.id}?registered=true` });
+            res.end();
+        } catch (error) {
+            res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.end(`Error: ${error.message}`);
+        }
+    }
+
     /**
      * GET /users
      * View Layer Route: Renders views/users.html containing alumni directory & registration form
@@ -411,6 +472,157 @@ class UserController {
     // Direct domain helper methods
     index(req, res) { return this.getAll(req, res); }
     show(req, res, id) { return this.getById(req, res, id); }
+
+    /**
+     * GET /login
+     * Renders the login page.
+     */
+    async renderLogin(req, res) {
+        try {
+            // If already logged in, redirect to profile
+            if (req.session && req.session.isLoggedIn) {
+                res.writeHead(302, { Location: '/profile' });
+                return res.end();
+            }
+            const template = await readTemplate(path.join(__dirname, '..', 'views', 'login.html'));
+            let html = template.replace('<!-- ALERT_MESSAGE -->', '');
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(html);
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Server error: ' + err.message);
+        }
+    }
+
+    /**
+     * POST /login
+     * Authenticates the user and sets session cookies.
+     * Supports roles: student, alumni, staff
+     */
+    async handleLogin(req, res) {
+        try {
+            const body = await parseRequestBody(req);
+            const email = (body.email || '').trim().toLowerCase();
+            const password = body.password || '';
+
+            if (!email || !password) {
+                const template = await readTemplate(path.join(__dirname, '..', 'views', 'login.html'));
+                const alertHtml = '<div class="alert-box alert-danger">⚠️ Email and password are required.</div>';
+                let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
+                res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' });
+                return res.end(html);
+            }
+
+            const user = await UserModel.findByEmail(email);
+            if (!user) {
+                const template = await readTemplate(path.join(__dirname, '..', 'views', 'login.html'));
+                const alertHtml = '<div class="alert-box alert-danger">⚠️ No account found with that email address.</div>';
+                let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
+                res.writeHead(401, { 'Content-Type': 'text/html; charset=utf-8' });
+                return res.end(html);
+            }
+
+            const valid = UserModel.verifyPassword(password, user.password_hash || '');
+            if (!valid) {
+                const template = await readTemplate(path.join(__dirname, '..', 'views', 'login.html'));
+                const alertHtml = '<div class="alert-box alert-danger">⚠️ Incorrect password. Please try again.</div>';
+                let html = template.replace('<!-- ALERT_MESSAGE -->', alertHtml);
+                res.writeHead(401, { 'Content-Type': 'text/html; charset=utf-8' });
+                return res.end(html);
+            }
+
+            // Determine effective role (registered role or hint)
+            const role = user.role || body.roleHint || 'alumni';
+            const allowedRoles = ['student', 'alumni', 'staff', 'mentor', 'mentee', 'employer'];
+            const effectiveRole = allowedRoles.includes(role) ? role : 'alumni';
+
+            const displayName = encodeURIComponent(`${user.name} ${user.surname}`);
+            const cookieOpts = 'HttpOnly; Path=/; SameSite=Strict; Max-Age=86400'; // 1 day
+
+            res.writeHead(303, {
+                'Location': '/profile',
+                'Set-Cookie': [
+                    `userId=${user.id}; ${cookieOpts}`,
+                    `userRole=${effectiveRole}; HttpOnly; Path=/; SameSite=Strict; Max-Age=86400`,
+                    `userName=${displayName}; Path=/; SameSite=Strict; Max-Age=86400`
+                ]
+            });
+            res.end();
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Server error: ' + err.message);
+        }
+    }
+
+    /**
+     * GET /logout
+     * Clears session cookies and redirects to home.
+     */
+    handleLogout(req, res) {
+        const expire = 'HttpOnly; Path=/; SameSite=Strict; Max-Age=0';
+        res.writeHead(303, {
+            'Location': '/',
+            'Set-Cookie': [
+                `userId=; ${expire}`,
+                `userRole=; ${expire}`,
+                `userName=; ${expire}`
+            ]
+        });
+        res.end();
+    }
+
+    /**
+     * GET /profile
+     * Shows the currently logged-in user's profile.
+     * Requires authentication; redirects to /login if not logged in.
+     */
+    async profile(req, res) {
+        if (!req.session || !req.session.isLoggedIn) {
+            res.writeHead(302, { Location: '/login' });
+            return res.end();
+        }
+
+        const userId = parseInt(req.session.userId, 10);
+        const user = await UserModel.getById(userId);
+        if (!user) {
+            res.writeHead(302, { Location: '/login' });
+            return res.end();
+        }
+
+        try {
+            let template = await readTemplate(USER_DETAIL_VIEW_PATH);
+            template = template.replace(/<!-- USER_ID -->/g, user.id);
+            template = template.replace(/<!-- USER_NAME -->/g, user.name);
+            template = template.replace(/<!-- USER_SURNAME -->/g, user.surname);
+            template = template.replace(/<!-- USER_AGE -->/g, user.age || '—');
+            template = template.replace(/<!-- USER_BIRTHDAY -->/g, user.birthday || '—');
+            template = template.replace(/<!-- USER_EMAIL -->/g, user.email || '—');
+            template = template.replace(/<!-- USER_ROLE -->/g, user.role || req.session.role || 'alumni');
+            template = template.replace(/<!-- USER_CITY -->/g, user.city || '—');
+            template = template.replace(/<!-- USER_BIO -->/g, user.bio || '—');
+            // Inject logout button if template has placeholder
+            const logoutBtn = `<a href="/logout" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#111;color:#fff;border-radius:12px;text-decoration:none;font-size:13px;font-weight:500;margin-top:16px;">Logout →</a>`;
+            template = template.replace(/<!-- LOGOUT_BUTTON -->/g, logoutBtn);
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(template);
+        } catch (err) {
+            // Inline fallback
+            const roleLabel = (user.role || 'alumni').charAt(0).toUpperCase() + (user.role || 'alumni').slice(1);
+            const content = `
+                <h2>🎓 ${user.name} ${user.surname}</h2>
+                <div style="background:#fef9e7;padding:1.5rem;border-radius:12px;margin:1rem 0;">
+                    <p><strong>ID:</strong> #${user.id}</p>
+                    <p><strong>Email:</strong> ${user.email || '—'}</p>
+                    <p><strong>Role:</strong> ${roleLabel}</p>
+                    <p><strong>City:</strong> ${user.city || '—'}</p>
+                    <p><strong>Birthday:</strong> ${user.birthday || '—'}</p>
+                </div>
+                <a href="/logout" style="display:inline-block;padding:8px 18px;background:#111;color:#fff;border-radius:10px;text-decoration:none;margin-top:12px;">Logout →</a>
+                <a href="/users/${user.id}/edit" style="display:inline-block;padding:8px 18px;background:#fef08a;color:#111;border-radius:10px;text-decoration:none;margin-top:12px;margin-left:8px;">Edit Profile ✏️</a>
+            `;
+            renderHtmlPage(res, 200, `${user.name} ${user.surname}`, content);
+        }
+    }
 }
 
 const userControllerInstance = new UserController();

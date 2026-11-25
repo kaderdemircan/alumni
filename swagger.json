@@ -85,6 +85,66 @@
         }
       }
     },
+    "/api/register": {
+      "post": {
+        "tags": ["API Users (ApiUserController)"],
+        "summary": "Register a new user account with credentials",
+        "description": "Creates a new user profile with email, salted scrypt password hash, personal details, and assigned community role.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterInput"
+              },
+              "example": {
+                "name": "Kader",
+                "surname": "Demircan",
+                "email": "kader.demircan@alumni.edu",
+                "password": "SecurePassword123!",
+                "confirmPassword": "SecurePassword123!",
+                "birthday": "2000-05-15",
+                "age": 24,
+                "city": "İstanbul",
+                "role": "alumni"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error / Missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict: Account with email already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/users/{id}": {
       "get": {
         "tags": ["API Users (ApiUserController)"],
@@ -528,6 +588,54 @@
             "type": "string",
             "format": "date",
             "example": "2001-05-14"
+          }
+        }
+      },
+      "UserRegisterInput": {
+        "type": "object",
+        "required": ["name", "surname", "email", "password", "birthday"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Kader"
+          },
+          "surname": {
+            "type": "string",
+            "example": "Demircan"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "kader.demircan@alumni.edu"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 6,
+            "example": "SecurePass123!"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "format": "password",
+            "example": "SecurePass123!"
+          },
+          "birthday": {
+            "type": "string",
+            "format": "date",
+            "example": "2000-05-15"
+          },
+          "age": {
+            "type": "number",
+            "example": 24
+          },
+          "city": {
+            "type": "string",
+            "example": "İstanbul"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["alumni", "student", "mentor", "mentee", "employer"],
+            "example": "alumni"
           }
         }
       },

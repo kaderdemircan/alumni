@@ -8,6 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const db = require('../config/db');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -93,8 +94,215 @@ class UserModel {
                 city: r.city || ''
             }));
         } catch (error) {
-            return [...this.users];
+            return this.users.map(({ password_hash, ...u }) => ({ ...u }));
         }
+    }
+
+    /**
+     * Secure password hashing using Node.js built-in scrypt
+     * @param {string} password
+     * @returns {string} salt:derivedKey
+     */
+    hashPassword(password) {
+        if (!password || typeof password !== 'string') return '';
+        const salt = crypto.randomBytes(16).toString('hex');
+        const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+        return `${salt}:${hash}`;
+    }
+
+    /**
+     * Verify a password against stored salt:hash
+     * @param {string} password
+     * @param {string} storedHash
+     * @returns {boolean}
+     */
+    verifyPassword(password, storedHash) {
+        if (!password || !storedHash || !storedHash.includes(':')) return false;
+        try {
+            const [salt, key] = storedHash.split(':');
+            const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+            return crypto.timingSafeEqual(Buffer.from(key, 'hex'), Buffer.from(hash, 'hex'));
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * Find user by email address
+     * @param {string} email
+     * @returns {Promise<Object|null>}
+     */
+    async findByEmail(email) {
+        if (!email || typeof email !== 'string') return null;
+        const normalized = email.trim().toLowerCase();
+
+        try {
+            const res = await db.query(
+                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, status, password_hash FROM users WHERE LOWER(email) = $1 LIMIT 1;",
+                [normalized]
+            );
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                return {
+                    id: Number(r.id),
+                    name: r.name,
+                    surname: r.surname,
+                    age: Number(r.age),
+                    birthday: r.birthday || '',
+                    email: r.email || '',
+                    city: r.city || '',
+                    role: r.role || 'alumni',
+                    status: r.status || 'active',
+                    password_hash: r.password_hash || ''
+                };
+            }
+            return null;
+        } catch (e) {
+            const user = this.users.find(u => (u.email || '').toLowerCase() === normalized);
+            return user ? { ...user } : null;
+        }
+    }
+
+    /**
+     * Register a new user with email, password, profile, and role
+     * @param {Object} userData
+     * @returns {Promise<{ success: boolean, user?: Object, error?: string }>}
+     */
+    async register(userData) {
+        if (!userData || typeof userData !== 'object') {
+            return { success: false, error: 'Invalid registration payload' };
+        }
+
+        const name = (userData.name || '').trim();
+        const surname = (userData.surname || '').trim();
+        const email = (userData.email || '').trim().toLowerCase();
+        const password = userData.password ? String(userData.password) : '';
+        const confirmPassword = userData.confirmPassword !== undefined ? String(userData.confirmPassword) : null;
+        let birthday = (userData.birthday || '').trim();
+        let age = userData.age !== undefined && userData.age !== '' ? Number(userData.age) : null;
+        const city = (userData.city || '').trim();
+        const role = (userData.role || 'alumni').trim().toLowerCase();
+        const bio = (userData.bio || '').trim();
+        const phone = (userData.phone || '').trim();
+
+        // 1. Mandatory field checks
+        if (!name || name.length < 1) {
+            return { success: false, error: 'First name is required' };
+        }
+        if (!surname || surname.length < 1) {
+            return { success: false, error: 'Surname is required' };
+        }
+        if (!email) {
+            return { success: false, error: 'Email address is required' };
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return { success: false, error: 'Please provide a valid email address' };
+        }
+        if (!password) {
+            return { success: false, error: 'Password is required' };
+        }
+        if (password.length < 6) {
+            return { success: false, error: 'Password must be at least 6 characters long' };
+        }
+        if (confirmPassword !== null && confirmPassword !== password) {
+            return { success: false, error: 'Passwords do not match' };
+        }
+
+        // 2. Birthday / Age validation & derivation
+        if (birthday) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
+                return { success: false, error: 'Birthday must follow YYYY-MM-DD format' };
+            }
+            const bDate = new Date(birthday);
+            if (isNaN(bDate.getTime())) {
+                return { success: false, error: 'Birthday must be a valid calendar date' };
+            }
+            if (bDate > new Date()) {
+                return { success: false, error: 'Birthday cannot be in the future' };
+            }
+
+            if (age === null || isNaN(age)) {
+                const today = new Date();
+                let calcAge = today.getFullYear() - bDate.getFullYear();
+                const m = today.getMonth() - bDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < bDate.getDate())) {
+                    calcAge--;
+                }
+                age = Math.max(0, calcAge);
+            }
+        } else {
+            if (age === null || isNaN(age) || age < 0) {
+                return { success: false, error: 'Birthday or a valid age is required' };
+            }
+            const birthYear = new Date().getFullYear() - age;
+            birthday = `${birthYear}-01-01`;
+        }
+
+        if (age < 0 || age > 120) {
+            return { success: false, error: 'Age must be between 0 and 120' };
+        }
+
+        // 3. Duplicate email check
+        const existing = await this.findByEmail(email);
+        if (existing) {
+            return { success: false, error: 'An account with this email address already exists' };
+        }
+
+        // 4. Role and Status determination
+        const allowedRoles = ['alumni', 'student', 'mentor', 'mentee', 'employer'];
+        const assignedRole = allowedRoles.includes(role) ? role : 'alumni';
+        const status = 'active';
+        const password_hash = this.hashPassword(password);
+
+        // 5. Database persistence
+        try {
+            const res = await db.query(
+                `INSERT INTO users (name, surname, age, birthday, email, password_hash, city, phone, bio, status)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                 RETURNING id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, status;`,
+                [name, surname, age, birthday, email, password_hash, city, phone, bio, status]
+            );
+
+            if (res.rows.length > 0) {
+                const r = res.rows[0];
+                const newUser = {
+                    id: Number(r.id),
+                    name: r.name,
+                    surname: r.surname,
+                    age: Number(r.age),
+                    birthday: r.birthday,
+                    email: r.email,
+                    city: r.city || '',
+                    role: assignedRole,
+                    status: r.status
+                };
+                this.users.push({ ...newUser, password_hash });
+                this._saveFallback();
+                return { success: true, user: newUser };
+            }
+        } catch (e) {
+            console.warn('DB register fallback:', e.message);
+        }
+
+        // 6. In-memory / Fallback file persistence
+        const newUser = {
+            id: this.currentId++,
+            name,
+            surname,
+            age,
+            birthday,
+            email,
+            city,
+            role: assignedRole,
+            status,
+            created_at: new Date().toISOString()
+        };
+
+        this.users.push({ ...newUser, password_hash });
+        this._saveFallback();
+
+        return { success: true, user: { ...newUser } };
     }
 
     async findAll() {

@@ -36,8 +36,10 @@ const loggerMiddleware          = require('./middleware/logger');
 const { errorLoggerMiddleware } = require('./middleware/errorLogger');
 const notFoundHandler           = require('./middleware/notFoundHandler');
 const errorHandler              = require('./middleware/errorHandler');
+const sessionMiddleware         = require('./middleware/session');
 
 // ── MVC Routers ───────────────────────────────────────────────────────────────
+const UserController           = require('./controllers/userController');
 const handleApiUserRoutes           = require('./routes/apiUserRoutes');
 const handleUserRoutes              = require('./routes/userRoutes');
 const handleApiAnnouncementRoutes   = require('./routes/apiAnnouncementRoutes');
@@ -51,8 +53,18 @@ const server = http.createServer((req, res) => {
     // 1. Apply middleware to every request
     loggerMiddleware(req, res);        // terminal logging (color-coded)
     errorLoggerMiddleware(req, res);   // auto-log 4xx/5xx to logs/error.log
+    sessionMiddleware(req, res);       // parse cookies → req.session
 
     try {
+        // ── Static assets ─────────────────────────────────────────────────────
+        if (req.url === '/nav.js') {
+            return fs.readFile(path.join(__dirname, 'public', 'nav.js'), (err, content) => {
+                if (err) return errorHandler(req, res, err, 500);
+                res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
+                res.end(content);
+            });
+        }
+
         // ── Static Pages ─────────────────────────────────────────────────────
         if (req.url === '/') {
             return fs.readFile(path.join(__dirname, 'index.html'), (err, content) => {
@@ -96,6 +108,14 @@ const server = http.createServer((req, res) => {
                 res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
                 res.end(content);
             });
+        }
+
+        // ── Registration Page ─────────────────────────────────────────────────
+        if ((req.url === '/register' || req.url.startsWith('/register?')) && req.method === 'GET') {
+            return UserController.renderRegister(req, res);
+        }
+        if (req.url === '/register' && req.method === 'POST') {
+            return UserController.handleRegister(req, res);
         }
 
         // ── Legacy route kept for backwards compatibility ─────────────────────

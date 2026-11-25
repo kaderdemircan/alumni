@@ -27,6 +27,42 @@ function handleUserRoutes(req, res) {
     const url = req.url.split('?')[0]; // Strip query string for matching
     const method = req.method;
 
+    // GET /login - Render Login Page
+    if (url === '/login' && method === 'GET') {
+        UserController.renderLogin(req, res);
+        return true;
+    }
+
+    // POST /login - Process login form
+    if (url === '/login' && method === 'POST') {
+        UserController.handleLogin(req, res);
+        return true;
+    }
+
+    // GET /logout - Clear session and redirect home
+    if (url === '/logout' && method === 'GET') {
+        UserController.handleLogout(req, res);
+        return true;
+    }
+
+    // GET /profile - View own profile (requires login)
+    if (url === '/profile' && method === 'GET') {
+        UserController.profile(req, res);
+        return true;
+    }
+
+    // GET /register - Render Registration Page (HTML)
+    if (url === '/register' && method === 'GET') {
+        UserController.renderRegister(req, res);
+        return true;
+    }
+
+    // POST /register - Process registration web form submission
+    if (url === '/register' && method === 'POST') {
+        UserController.handleRegister(req, res);
+        return true;
+    }
+
     // GET /users - View Layer: Render alumni directory & registration form (HTML)
     if ((req.url === '/users' || req.url.startsWith('/users?')) && method === 'GET') {
         UserController.getAll(req, res);
