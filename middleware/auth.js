@@ -29,6 +29,12 @@ function allowRequest(req, res) {
         return deny(req, res, 403, 'Cross-site requests are forbidden.');
     }
     if (/^\/admin(?:\/|$)/.test(path)) return requireRole(req, res, 'admin');
+    if (req.session.pendingAlumni && /^\/(?:alumni-hub|(?:api\/)?users)(?:\/|$)/.test(path)) {
+        return deny(req, res, 403, 'Your alumni registration is awaiting review.');
+    }
+    if (req.session.pendingAlumni && /^\/api\/jobs\/\d+\/applications$/.test(path) && !read) {
+        return deny(req, res, 403, 'Your alumni registration is awaiting review.');
+    }
     if (/^\/(profile|student|alumni-hub|staff|logout)$/.test(path)) return requireAuth(req, res);
     const userApplications = path.match(/^\/api\/users\/(\d+)\/applications$/);
     if (userApplications) {

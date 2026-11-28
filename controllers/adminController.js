@@ -9,6 +9,8 @@ const Announcement = require('../models/announcementModel');
 const Job = require('../models/jobPostingModel');
 const Application = require('../models/jobApplicationModel');
 const escapeHtml = require('../views/escapeHtml');
+const adminPreferences = require('../views/adminPreferences');
+const { sitePreferences, renderSiteSettings } = require('../views/sitePreferences');
 
 function redirect(res, path, result, action) {
     const query = result.success ? `${action}=true` : 'error=' + encodeURIComponent(result.error || 'The change could not be saved.');
@@ -48,7 +50,7 @@ function parseBody(req) {
 }
 
 // ── Shared nav/style snippet injected into every admin page ──────────────────
-const NAV_HTML = (activePage) => `
+const NAV_HTML = (activePage, { t }) => `
 <style>
   :root{--ink:#111;--cream:#fffefc;--yellow:#fef08a;--slate:#b6ced5;--border:#efeeeb;--red:#e74c3c;--green:#27ae60;}
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -70,7 +72,7 @@ const NAV_HTML = (activePage) => `
   .sidebar-footer a{color:#888;text-decoration:none;font-size:12px;display:block;margin-bottom:6px;}
   .sidebar-footer a:hover{color:#fff;}
   /* Main area */
-  .admin-main{margin-left:230px;flex:1;display:flex;flex-direction:column;}
+  .admin-main{min-width:0;margin-left:230px;flex:1;display:flex;flex-direction:column;}
   .admin-topbar{background:#fff;border-bottom:1px solid var(--border);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
   .admin-topbar h1{font-size:18px;font-weight:600;color:var(--ink);}
   .admin-topbar .topbar-right{display:flex;align-items:center;gap:12px;font-size:13px;color:#666;}
@@ -82,7 +84,7 @@ const NAV_HTML = (activePage) => `
   .stat-card .stat-value{font-size:36px;font-weight:300;color:var(--ink);line-height:1;}
   .stat-card .stat-sub{font-size:12px;color:#aaa;margin-top:6px;}
   /* Tables */
-  .admin-table-wrap{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;}
+  .admin-table-wrap{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:auto;}
   .table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
   .table-header h2{font-size:15px;font-weight:600;color:var(--ink);}
   table{width:100%;border-collapse:collapse;}
@@ -120,25 +122,56 @@ const NAV_HTML = (activePage) => `
   .alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:20px;}
   .alert-success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;}
   .alert-danger{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;}
-  @media(max-width:900px){.stat-grid{grid-template-columns:1fr 1fr;}.admin-sidebar{display:none;}.admin-main{margin-left:0;}}
+  .review-list{display:grid;gap:12px;max-width:850px;margin-top:18px;}
+  .review-card{margin:0;overflow-wrap:anywhere;}
+  .review-card h2{margin-bottom:12px;}
+  .review-card dd{white-space:pre-wrap;}
+  .review-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .admin-fields{display:grid;gap:8px;}
+  .admin-fields dt{font-weight:600;}
+  .admin-fields dd{margin-bottom:8px;overflow-wrap:anywhere;}
+  html[data-theme="dark"]{color-scheme:dark;--ink:#edf2e9;--cream:#17201c;--border:#39463f;}
+  [data-theme="dark"] body{background:#131a17;color:#edf2e9;}
+  [data-theme="dark"] .admin-sidebar{background:#101613;}
+  [data-theme="dark"] .admin-topbar,[data-theme="dark"] .stat-card,
+  [data-theme="dark"] .admin-table-wrap,[data-theme="dark"] .form-card{background:#202a25;}
+  [data-theme="dark"] th,[data-theme="dark"] .form-group :is(input,select,textarea){background:#17201c;color:#edf2e9;}
+  [data-theme="dark"] :is(td,.form-group label,.stat-label,.stat-sub,.admin-topbar .topbar-right){color:#cbd6ce;border-color:var(--border);}
+  [data-theme="dark"] tr:hover td{background:#293730;}
+  [data-theme="dark"] .btn-primary{background:#e1ecbe;color:#17201c;}
+  @media(max-width:900px){
+    .admin-layout{display:block;}
+    .admin-sidebar{position:static;width:auto;height:auto;}
+    .sidebar-nav{display:flex;flex-wrap:wrap;padding:4px 12px;}
+    .sidebar-nav a{padding:8px;}
+    .sidebar-section{display:none;}
+    .sidebar-footer{display:flex;align-items:center;gap:12px;}
+    .admin-main{margin-left:0;}
+    .admin-content,.admin-topbar{padding:16px;}
+    .stat-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media(max-width:520px){.form-row{grid-template-columns:1fr;}.topbar-right>span{display:none;}}
 </style>
 <div class="admin-layout">
   <aside class="admin-sidebar">
     <div class="sidebar-brand">
-      <span><span class="dot"></span>Admin Panel</span>
+      <span><span class="dot"></span>${t.panel}</span>
       <small>Alumni Tracking System</small>
     </div>
     <nav class="sidebar-nav">
-      <div class="sidebar-section">Overview</div>
-      <a href="/admin" class="${activePage==='dashboard'?'active':''}"><span class="nav-icon">📊</span> Dashboard</a>
-      <div class="sidebar-section">Manage</div>
-      <a href="/admin/users" class="${activePage==='users'?'active':''}"><span class="nav-icon">👥</span> Users</a>
-      <a href="/admin/announcements" class="${activePage==='announcements'?'active':''}"><span class="nav-icon">📢</span> Announcements</a>
-      <a href="/admin/jobs" class="${activePage==='jobs'?'active':''}"><span class="nav-icon">💼</span> Jobs</a>
+      <div class="sidebar-section">${t.overview}</div>
+      <a href="/admin" class="${activePage==='dashboard'?'active':''}"><span class="nav-icon">📊</span> ${t.dashboard}</a>
+      <div class="sidebar-section">${t.manage}</div>
+      <a href="/admin/users" class="${activePage==='users'?'active':''}"><span class="nav-icon">👥</span> ${t.users}</a>
+      <a href="/admin/announcements" class="${activePage==='announcements'?'active':''}"><span class="nav-icon">📢</span> ${t.announcements}</a>
+      <a href="/admin/jobs" class="${activePage==='jobs'?'active':''}"><span class="nav-icon">💼</span> ${t.jobs}</a>
+      <a href="/admin/alumni-review" class="${activePage === 'review' ? 'active' : ''}">${t.review}</a>
+      <a href="/admin/profile" class="${activePage === 'profile' ? 'active' : ''}">${t.profile}</a>
+      <a href="/admin/settings" class="${activePage === 'settings' ? 'active' : ''}">${t.settings}</a>
     </nav>
     <div class="sidebar-footer">
-      <a href="/">← Back to Site</a>
-      <form method="post" action="/logout"><button type="submit" class="btn btn-sm">Sign Out</button></form>
+      <a href="/">← ${t.back}</a>
+      <form method="post" action="/logout"><button type="submit" class="btn btn-sm">${t.logout}</button></form>
     </div>
   </aside>
   <div class="admin-main">
@@ -162,16 +195,119 @@ function topbar(title, session, extraHtml = '') {
     <div class="admin-content">`;
 }
 
-function sendPage(res, html) {
+function sendPage(req, res, html) {
+    const preferences = sitePreferences(req);
+    const { language, theme, t } = adminPreferences(preferences);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin — Alumni</title><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet"></head><body>${html}</body></html>`);
+    res.end(`<!DOCTYPE html><html lang="${language}" data-theme="${theme}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${t.panel} — Alumni</title><link rel="stylesheet" href="/nav.css"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet"></head><body>${html}${renderSiteSettings(preferences)}</body></html>`);
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
 class AdminController {
 
+    async alumniReview(req, res) {
+        const preferences = adminPreferences(sitePreferences(req));
+        const { t } = preferences;
+        const pending = await UserModel.pendingAlumni();
+        const result = new URL(req.url, 'http://localhost').searchParams.get('result');
+        const message = result === 'approved' ? t.approved : result === 'deleted' ? t.deleted :
+            result === 'changed' ? t.changed : '';
+        const cards = pending.map(account => `
+            <article class="form-card review-card">
+                <h2>${escapeHtml(account.name)} ${escapeHtml(account.surname)}</h2>
+                <dl class="admin-fields">
+                    <dt>${t.email}</dt><dd>${escapeHtml(account.email)}</dd>
+                    <dt>${t.details}</dt><dd>${escapeHtml(account.graduation_details || '—')}</dd>
+                </dl>
+                <div class="review-actions">
+                    <form method="post" action="/admin/alumni-review/${Number(account.id)}/approve">
+                        <button class="btn btn-success" type="submit">${t.approve}</button>
+                    </form>
+                    <form method="post" action="/admin/alumni-review/${Number(account.id)}/delete"
+                          data-confirm="${escapeHtml(t.confirm)}" onsubmit="return confirm(this.dataset.confirm)">
+                        <button class="btn btn-danger" type="submit">${t.remove}</button>
+                    </form>
+                </div>
+            </article>`).join('');
+        const html = NAV_HTML('review', preferences) + topbar(t.review, req.session) +
+            `${message ? `<p class="alert alert-success" role="status">${message}</p>` : ''}
+             <p>${t.reviewHelp}</p>
+             <div class="review-list">${cards || `<p>${t.none}</p>`}</div></div>` + NAV_CLOSE;
+        sendPage(req, res, html);
+    }
+
+    async reviewAlumnus(req, res, id, action) {
+        const changed = await UserModel.reviewAlumnus(id, action);
+        const result = changed ? (action === 'approve' ? 'approved' : 'deleted') : 'changed';
+        res.writeHead(303, { Location: '/admin/alumni-review?result=' + result });
+        res.end();
+    }
+
+    async profile(req, res) {
+        const preferences = adminPreferences(sitePreferences(req));
+        const { t } = preferences;
+        const user = await UserModel.getById(req.session.userId);
+        if (!user) {
+            res.writeHead(303, { Location: '/login' });
+            return res.end();
+        }
+        const fields = [[t.name, user.name + ' ' + user.surname], [t.email, user.email],
+            [t.role, t.administrator], [t.city, user.city], [t.birthday, user.birthday]];
+        const html = NAV_HTML('profile', preferences) + topbar(t.profile, req.session) +
+            `<div class="form-card"><dl class="admin-fields">${fields.map(([label, value]) =>
+                `<dt>${label}</dt><dd>${escapeHtml(value || '—')}</dd>`).join('')}</dl></div></div>` + NAV_CLOSE;
+        sendPage(req, res, html);
+    }
+
+    settings(req, res, invalid = false) {
+        const preferences = adminPreferences(sitePreferences(req));
+        const { language, theme, t } = preferences;
+        const saved = new URL(req.url, 'http://localhost').searchParams.get('saved') === 'true';
+        const html = NAV_HTML('settings', preferences) + topbar(t.settings, req.session) +
+            `${invalid ? `<p class="alert alert-danger" role="alert">${t.invalid}</p>` : ''}
+            ${saved && !invalid ? `<p class="alert alert-success" role="status">${t.saved}</p>` : ''}
+            <form class="form-card" method="post" action="/admin/settings">
+                <div class="form-row">
+                    <div class="form-group"><label for="admin-language">${t.language}</label>
+                        <select id="admin-language" name="language">
+                            <option value="en" ${language === 'en' ? 'selected' : ''}>English</option>
+                            <option value="tr" ${language === 'tr' ? 'selected' : ''}>Türkçe</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label for="admin-theme">${t.theme}</label>
+                        <select id="admin-theme" name="theme">
+                            <option value="light" ${theme === 'light' ? 'selected' : ''}>${t.light}</option>
+                            <option value="dark" ${theme === 'dark' ? 'selected' : ''}>${t.dark}</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">${t.save}</button>
+            </form></div>` + NAV_CLOSE;
+        sendPage(req, res, html);
+    }
+
+    async saveSettings(req, res) {
+        const body = await parseBody(req);
+        if (!body || !['en', 'tr'].includes(body.language) || !['light', 'dark'].includes(body.theme)) {
+            return this.settings(req, res, true);
+        }
+        const saved = await UserModel.updateAccount(req.session.userId, {
+            admin_language: body.language, admin_theme: body.theme
+        });
+        if (!saved) throw new Error('Could not save administrator settings.');
+        const secure = req.socket.encrypted || process.env.SESSION_COOKIE_SECURE === 'true' ? '; Secure' : '';
+        const options = 'Path=/; SameSite=Lax; Max-Age=31536000' + secure;
+        res.setHeader('Set-Cookie', [
+            `alumni_language=${body.language}; ${options}`,
+            `alumni_theme=${body.theme}; ${options}`
+        ]);
+        res.writeHead(303, { Location: '/admin/settings?saved=true' });
+        res.end();
+    }
+
     // ── Dashboard ─────────────────────────────────────────────────────────────
     async dashboard(req, res) {
+        const { t } = adminPreferences(sitePreferences(req));
         const [users, announcements, jobs, apps] = await Promise.all([
             UserModel.getAll(), Announcement.getAll(), Job.getAll(), Application.getAll()
         ]);
@@ -191,18 +327,18 @@ class AdminController {
                 <td><span class="badge badge-${escapeHtml(u.role || 'alumni')}">${escapeHtml(u.role || 'alumni')}</span></td>
             </tr>`).join('');
 
-        const html = NAV_HTML('dashboard') +
-            topbar('Dashboard', req.session) + `
+        const html = NAV_HTML('dashboard', adminPreferences(sitePreferences(req))) +
+            topbar(t.dashboard, req.session, `<a class="btn btn-primary" href="/admin/alumni-review">${t.queue}</a>`) + `
             <div class="stat-grid">
-                <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-value">${users.length}</div><div class="stat-sub">all roles combined</div></div>
-                <div class="stat-card"><div class="stat-label">Announcements</div><div class="stat-value">${announcements.length}</div><div class="stat-sub">published</div></div>
-                <div class="stat-card"><div class="stat-label">Job Postings</div><div class="stat-value">${jobs.length}</div><div class="stat-sub">active listings</div></div>
-                <div class="stat-card"><div class="stat-label">Applications</div><div class="stat-value">${apps.length}</div><div class="stat-sub">submitted</div></div>
+                <div class="stat-card"><div class="stat-label">${t.totalUsers}</div><div class="stat-value">${users.length}</div><div class="stat-sub">${t.allRoles}</div></div>
+                <div class="stat-card"><div class="stat-label">${t.announcements}</div><div class="stat-value">${announcements.length}</div><div class="stat-sub">${t.posted}</div></div>
+                <div class="stat-card"><div class="stat-label">${t.jobs}</div><div class="stat-value">${jobs.length}</div><div class="stat-sub">${t.activeOpen}</div></div>
+                <div class="stat-card"><div class="stat-label">${t.applications}</div><div class="stat-value">${apps.length}</div><div class="stat-sub">${t.submitted}</div></div>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
               <div class="admin-table-wrap">
-                <div class="table-header"><h2>Role Breakdown</h2></div>
+                <div class="table-header"><h2>${t.roleBreakdown}</h2></div>
                 <table><thead><tr><th>Role</th><th>Count</th><th>Share</th></tr></thead>
                 <tbody>${roleBreakdown}</tbody></table>
               </div>
@@ -213,7 +349,7 @@ class AdminController {
               </div>
             </div>
             </div>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     // ── Users List ────────────────────────────────────────────────────────────
@@ -241,7 +377,7 @@ class AdminController {
                 </td>
             </tr>`).join('');
 
-        const html = NAV_HTML('users') +
+        const html = NAV_HTML('users', adminPreferences(sitePreferences(req))) +
             topbar('User Management', req.session, `<a href="/admin/users/new" class="btn btn-primary">+ New User</a>`) + `
             ${errorAlert(req) || alert}
             <div class="admin-table-wrap">
@@ -253,12 +389,12 @@ class AdminController {
             </div>
             </div>
             <script>function filterTable(inp,id){const q=inp.value.toLowerCase();document.querySelectorAll('#'+id+' tbody tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';});}</script>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     // ── New User Form ─────────────────────────────────────────────────────────
     async usersNew(req, res) {
-        const html = NAV_HTML('users') +
+        const html = NAV_HTML('users', adminPreferences(sitePreferences(req))) +
             topbar('Create User', req.session) + `
             <div class="form-card">
                 <h2>➕ New User</h2>
@@ -294,7 +430,7 @@ class AdminController {
                 </form>
             </div>
             </div>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     async usersCreate(req, res) {
@@ -312,7 +448,7 @@ class AdminController {
         const roleOpts = [...new Set(['student', 'alumni', 'staff', 'admin', user.role].filter(Boolean))]
             .map(r => `<option value="${escapeHtml(r)}" ${user.role===r?'selected':''}>${r === 'staff' ? 'University Staff' : escapeHtml(r.charAt(0).toUpperCase() + r.slice(1))}</option>`).join('');
 
-        const html = NAV_HTML('users') +
+        const html = NAV_HTML('users', adminPreferences(sitePreferences(req))) +
             topbar(`Edit User #${escapeHtml(user.id)}`, req.session) + `
             ${alert}
             <div class="form-card">
@@ -349,7 +485,7 @@ class AdminController {
                 </form>
             </div>
             </div>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     async usersUpdate(req, res, id) {
@@ -414,7 +550,7 @@ class AdminController {
                 </td>
             </tr>`).join('');
 
-        const html = NAV_HTML('announcements') +
+        const html = NAV_HTML('announcements', adminPreferences(sitePreferences(req))) +
             topbar('Announcements', req.session, `<a href="/admin/announcements/new" class="btn btn-primary">+ New</a>`) + `
             ${errorAlert(req) || alert}
             <div class="admin-table-wrap">
@@ -422,11 +558,11 @@ class AdminController {
                 <table><thead><tr><th>ID</th><th>Title</th><th>Author</th><th>Category</th><th>Priority</th><th>Date</th><th>Actions</th></tr></thead>
                 <tbody>${rows}</tbody></table>
             </div></div>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     announcementsNew(req, res) {
-        const html = NAV_HTML('announcements') +
+        const html = NAV_HTML('announcements', adminPreferences(sitePreferences(req))) +
             topbar('New Announcement', req.session) + `
             <div class="form-card">
                 <h2>➕ New Announcement</h2>
@@ -449,7 +585,7 @@ class AdminController {
                     <a href="/admin/announcements" class="btn" style="background:#f4f5f7;color:#333;margin-left:8px;">Cancel</a>
                 </form>
             </div></div>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     async announcementsCreate(req, res) {
@@ -461,7 +597,7 @@ class AdminController {
         const item = await Announcement.getById(id);
         if (!item) { res.writeHead(302,{Location:'/admin/announcements'}); return res.end(); }
 
-        const html = NAV_HTML('announcements') +
+        const html = NAV_HTML('announcements', adminPreferences(sitePreferences(req))) +
             topbar(`Edit Announcement #${escapeHtml(item.id)}`, req.session) + `
             <div class="form-card">
                 <h2>✏️ Edit Announcement</h2>
@@ -480,7 +616,7 @@ class AdminController {
                     <a href="/admin/announcements" class="btn" style="background:#f4f5f7;color:#333;margin-left:8px;">Cancel</a>
                 </form>
             </div></div>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     async announcementsUpdate(req, res, id) {
@@ -517,7 +653,7 @@ class AdminController {
                 </td>
             </tr>`).join('');
 
-        const html = NAV_HTML('jobs') +
+        const html = NAV_HTML('jobs', adminPreferences(sitePreferences(req))) +
             topbar('Job Postings', req.session, `<a href="/admin/jobs/new" class="btn btn-primary">+ New Job</a>`) + `
             ${errorAlert(req) || alert}
             <div class="admin-table-wrap">
@@ -525,11 +661,11 @@ class AdminController {
                 <table><thead><tr><th>ID</th><th>Title</th><th>Company</th><th>Location</th><th>Type</th><th>Deadline</th><th>Actions</th></tr></thead>
                 <tbody>${rows}</tbody></table>
             </div></div>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     jobsNew(req, res) {
-        const html = NAV_HTML('jobs') +
+        const html = NAV_HTML('jobs', adminPreferences(sitePreferences(req))) +
             topbar('New Job Posting', req.session) + `
             <div class="form-card">
                 <h2>➕ New Job Posting</h2>
@@ -552,7 +688,7 @@ class AdminController {
                     <a href="/admin/jobs" class="btn" style="background:#f4f5f7;color:#333;margin-left:8px;">Cancel</a>
                 </form>
             </div></div>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     async jobsCreate(req, res) {
@@ -564,7 +700,7 @@ class AdminController {
         const job = await Job.getById(id);
         if (!job) { res.writeHead(302,{Location:'/admin/jobs'}); return res.end(); }
 
-        const html = NAV_HTML('jobs') +
+        const html = NAV_HTML('jobs', adminPreferences(sitePreferences(req))) +
             topbar(`Edit Job #${escapeHtml(job.id)}`, req.session) + `
             <div class="form-card">
                 <h2>✏️ Edit Job</h2>
@@ -585,7 +721,7 @@ class AdminController {
                     <a href="/admin/jobs" class="btn" style="background:#f4f5f7;color:#333;margin-left:8px;">Cancel</a>
                 </form>
             </div></div>` + NAV_CLOSE;
-        sendPage(res, html);
+        sendPage(req, res, html);
     }
 
     async jobsUpdate(req, res, id) {

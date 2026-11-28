@@ -1,21 +1,26 @@
-﻿const { workspace } = require('../config/roles');
+const { workspace } = require('../config/roles');
 const escapeHtml = require('./escapeHtml');
+const { sitePreferences, renderSiteSettings } = require('./sitePreferences');
 
 const links = [
-    ['/', 'Home'],
-    ['/about', 'About'],
-    ['/users', 'Directory'],
-    ['/announcements', 'Announcements'],
-    ['/jobs', 'Careers'],
-    ['/mentorship', 'Mentorship'],
-    ['/api/swagger', 'API Docs']
+    ['/', 'Home', 'Ana Sayfa'],
+    ['/about', 'About', 'Hakkımızda'],
+    ['/users', 'Directory', 'Üye Rehberi'],
+    ['/announcements', 'Announcements', 'Duyurular'],
+    ['/jobs', 'Careers', 'Kariyer'],
+    ['/mentorship', 'Mentorship', 'Mentorluk'],
+    ['/api/swagger', 'API Docs', 'API Belgeleri']
 ];
 
 function renderNavigation(html, req) {
+    if (!html.includes('<!-- SITE_NAVIGATION -->')) return html;
+    const preferences = sitePreferences(req);
+    const { language, theme, t } = preferences;
     const pathname = req.url.split('?')[0];
     const session = req.session;
     const isAdmin = session?.role === 'admin';
     const page = workspace(session?.role);
+    const hubLabels = { student: 'Öğrenci Merkezi', alumni: 'Mezun Merkezi', staff: 'Personel Merkezi', admin: 'Yönetim Paneli' };
 
     function link(href, label, className = '') {
         const pageIsActive = pathname === href;
@@ -25,22 +30,24 @@ function renderNavigation(html, req) {
     }
 
     const account = session?.isLoggedIn
-        ? `${link(page.path, page.title, 'site-nav__hub')}
-           ${link('/profile', 'My Profile', 'site-nav__button')}
+        ? `${session.pendingAlumni ? '' : link(page.path, language === 'tr' ? hubLabels[page.role] : page.title, 'site-nav__hub')}
+           ${link('/profile', t.profile, 'site-nav__button')}
            <form method="post" action="/logout">
-               <button class="site-nav__button site-nav__button--primary" type="submit">Sign Out</button>
+               <button class="site-nav__button site-nav__button--primary" type="submit">${t.signOut}</button>
            </form>`
-        : `${link('/login', 'Sign In', 'site-nav__button')}
-           ${link('/register', 'Register', 'site-nav__button site-nav__button--primary')}`;
+        : `${link('/login', t.signIn, 'site-nav__button')}
+           ${link('/register', t.register, 'site-nav__button site-nav__button--primary')}`;
 
-    return html.replace('<!-- SITE_NAVIGATION -->', () => `
-        <header class="site-nav"${isAdmin ? ' data-admin="true"' : ''}>
+    return html.replace(/<html(?=\s|>)/i, `<html data-site-theme="${theme}"`)
+        .replace('</body>', () => renderSiteSettings(preferences) + '</body>')
+        .replace('<!-- SITE_NAVIGATION -->', () => `
+        <header class="site-nav" lang="${language}"${isAdmin ? ' data-admin="true"' : ''}>
             <div class="site-nav__inner">
                 <a class="site-nav__brand" href="/">Alumni Network</a>
-                <nav class="site-nav__links" aria-label="Main navigation">
-                    ${links.map(([url, label]) => link(url, label)).join('')}
+                <nav class="site-nav__links" aria-label="${t.main}">
+                    ${links.map(([url, en, tr]) => link(url, language === 'tr' ? tr : en)).join('')}
                 </nav>
-                <nav class="site-nav__account" aria-label="Account">
+                <nav class="site-nav__account" aria-label="${t.account}">
                     ${account}
                 </nav>
             </div>

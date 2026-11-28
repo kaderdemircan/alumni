@@ -51,7 +51,7 @@ class ApiUserController {
      */
     async getAll(req, res) {
         try {
-            const users = await UserModel.getAll();
+            const users = await UserModel.getAll({ includePending: req.session.role === 'admin' });
             sendJson(res, 200, users);
         } catch (error) {
             sendJson(res, 500, { error: 'Internal server error' });
@@ -68,7 +68,7 @@ class ApiUserController {
             return sendJson(res, 400, { error: 'Invalid user ID' });
         }
 
-        const user = await UserModel.getById(numericId);
+        const user = await UserModel.getById(numericId, { includePending: req.session.role === 'admin' });
         if (!user) {
             return sendJson(res, 404, { error: 'User not found' });
         }
@@ -212,7 +212,7 @@ class ApiUserController {
         if (isNaN(numericId)) return sendJson(res, 400, { error: 'Invalid user ID' });
 
         try {
-            const user = await UserModel.getById(numericId);
+            const user = await UserModel.getById(numericId, { includePending: req.session.role === 'admin' });
             if (!user) return sendJson(res, 404, { error: 'User not found' });
 
             const applications = await UserModel.getJobApplications(numericId);
@@ -236,7 +236,7 @@ class ApiUserController {
         if (isNaN(numericId)) return sendJson(res, 400, { error: 'Invalid user ID' });
 
         try {
-            const user = await UserModel.getById(numericId);
+            const user = await UserModel.getById(numericId, { includePending: req.session.role === 'admin' });
             if (!user) return sendJson(res, 404, { error: 'User not found' });
 
             const body = await parseJsonBody(req);
@@ -268,7 +268,7 @@ class ApiUserController {
         if (isNaN(numericId)) return sendJson(res, 400, { error: 'Invalid user ID' });
 
         try {
-            const user = await UserModel.getById(numericId);
+            const user = await UserModel.getById(numericId, { includePending: req.session.role === 'admin' });
             if (!user) return sendJson(res, 404, { error: 'User not found' });
 
             const skills = await UserModel.getSkills(numericId);

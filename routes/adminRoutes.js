@@ -15,6 +15,23 @@ async function handleAdminRoutes(req, res) {
         await adminController.dashboard(req, res); return true;
     }
 
+    if (url === '/admin/alumni-review' && method === 'GET') {
+        await adminController.alumniReview(req, res); return true;
+    }
+    const review = url.match(/^\/admin\/alumni-review\/(\d+)\/(approve|delete)$/);
+    if (review && method === 'POST') {
+        await adminController.reviewAlumnus(req, res, review[1], review[2]); return true;
+    }
+    if (url === '/admin/profile' && method === 'GET') {
+        await adminController.profile(req, res); return true;
+    }
+    if (url === '/admin/settings' && method === 'GET') {
+        adminController.settings(req, res); return true;
+    }
+    if (url === '/admin/settings' && method === 'POST') {
+        await adminController.saveSettings(req, res); return true;
+    }
+
     // ── Users
     if (url === '/admin/users' && method === 'GET') { await adminController.usersList(req, res); return true; }
     if (url === '/admin/users/new' && method === 'GET') { await adminController.usersNew(req, res); return true; }

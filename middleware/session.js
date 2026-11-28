@@ -38,6 +38,9 @@ async function sessionMiddleware(req, res) {
         isLoggedIn: true,
         userId: user.id,
         role: workspace(user.role).role,
+        pendingAlumni: user.role === 'alumni' && user.alumni_verification === 'pending',
+        adminLanguage: user.admin_language,
+        adminTheme: user.admin_theme,
         name: `${user.name} ${user.surname}`
     };
 }

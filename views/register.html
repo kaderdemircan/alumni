@@ -472,6 +472,7 @@
                 grid-template-columns: 1fr;
             }
         }
+        #graduationFields[hidden] { display: none; }
     </style>
     <link rel="stylesheet" href="/nav.css">
 </head>
@@ -601,6 +602,13 @@
                         <span class="input-hint">Your account type determines which hub opens when you sign in.</span>
                     </div>
 
+                    <div class="form-group" id="graduationFields" hidden>
+                        <label class="form-label" for="graduationDetails">Graduation Details</label>
+                        <textarea id="graduationDetails" name="graduation_details" class="form-input" maxlength="500"
+                                  placeholder="University, degree program, and graduation year"></textarea>
+                        <span class="input-hint">An administrator will review these details against university records.</span>
+                    </div>
+
                     <div class="form-group">
                         <label class="form-label" for="bio">Brief Bio or Career Headline (Optional)</label>
                         <textarea id="bio" name="bio" class="form-textarea" rows="3" placeholder="e.g. Senior Software Architect specializing in distributed systems and Node.js backend pipelines."></textarea>
@@ -708,6 +716,16 @@
     <script>
         (function() {
             const form = document.getElementById('registerForm');
+            const accountType = document.getElementById('role');
+            const graduationDetails = document.getElementById('graduationDetails');
+            function updateGraduationFields() {
+                const isAlumni = accountType.value === 'alumni';
+                document.getElementById('graduationFields').hidden = !isAlumni;
+                graduationDetails.disabled = !isAlumni;
+                graduationDetails.required = isAlumni;
+            }
+            accountType.addEventListener('change', updateGraduationFields);
+            updateGraduationFields();
             const birthdayInput = document.getElementById('birthday');
             const ageInput = document.getElementById('age');
             const passwordInput = document.getElementById('password');
@@ -817,7 +835,8 @@
                     city: document.getElementById('city').value.trim(),
                     phone: document.getElementById('phone').value.trim(),
                     role: document.getElementById('role').value,
-                    bio: document.getElementById('bio').value.trim()
+                    bio: document.getElementById('bio').value.trim(),
+                    graduation_details: graduationDetails.disabled ? undefined : graduationDetails.value.trim()
                 };
 
                 // UI Loading state
@@ -849,6 +868,7 @@
                     document.getElementById('dossierRole').textContent = 'ACCOUNT TYPE: ' + document.getElementById('role').selectedOptions[0].textContent;
                     document.getElementById('dossierEmail').textContent = u.email || payload.email;
                     document.getElementById('successSummary').textContent = 
+                        u.alumni_verification === 'pending' ? 'Your alumni registration is awaiting review. Sign in to view your status.' :
                         'Your account is ready, ' + u.name + '. Sign in to continue.';
                     
 

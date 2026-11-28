@@ -29,7 +29,7 @@ function handleUserRoutes(req, res) {
     const method = req.method;
     if (url === '/api/auth/session' && method === 'GET') {
         const { isLoggedIn, role } = req.session;
-        const page = workspace(role);
+        const page = req.session.pendingAlumni ? { path: '/profile', title: 'My Profile' } : workspace(role);
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify(isLoggedIn ? { isLoggedIn, role, path: page.path, title: page.title } : { isLoggedIn }));
         return true;

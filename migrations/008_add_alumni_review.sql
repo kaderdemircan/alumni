@@ -1,0 +1,5 @@
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS graduation_details VARCHAR(500),
+    ADD COLUMN IF NOT EXISTS alumni_verification VARCHAR(12),
+    ADD COLUMN IF NOT EXISTS admin_language VARCHAR(5) NOT NULL DEFAULT 'en',
+    ADD COLUMN IF NOT EXISTS admin_theme VARCHAR(5) NOT NULL DEFAULT 'light';

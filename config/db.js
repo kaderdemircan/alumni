@@ -104,6 +104,8 @@ async function initDb() {
 
         await query(fs.readFileSync(path.join(__dirname, '..', 'migrations', '007_add_user_auth.sql'), 'utf8'));
 
+        await query(fs.readFileSync(path.join(__dirname, '..', 'migrations', '008_add_alumni_review.sql'), 'utf8'));
+
         // 2. Announcements table
         await query(`
             CREATE TABLE IF NOT EXISTS announcements (

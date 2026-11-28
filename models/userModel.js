@@ -80,10 +80,11 @@ class UserModel {
      * Retrieve all users from PostgreSQL (or fallback)
      * @returns {Promise<Array<Object>>}
      */
-    async getAll() {
+    async getAll({ includePending = true } = {}) {
         try {
             const res = await db.query(
-                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, role, status, phone, bio FROM users ORDER BY id ASC;"
+                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, role, status, phone, bio FROM users WHERE ($1 OR role IS DISTINCT FROM 'alumni' OR alumni_verification IS DISTINCT FROM 'pending') ORDER BY id ASC;",
+                [includePending]
             );
             return res.rows.map(r => ({
                 id: Number(r.id),
@@ -96,7 +97,8 @@ class UserModel {
                 role: r.role, status: r.status, phone: r.phone, bio: r.bio
             }));
         } catch (error) {
-            return this.users.map(({ password_hash, ...u }) => ({ ...u }));
+            return this.users.filter(u => includePending || u.role !== 'alumni' || u.alumni_verification !== 'pending')
+                .map(({ password_hash, graduation_details, admin_language, admin_theme, ...u }) => u);
         }
     }
 
@@ -140,7 +142,7 @@ class UserModel {
 
         try {
             const res = await db.query(
-                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, role, status, password_hash FROM users WHERE LOWER(email) = $1 LIMIT 1;",
+                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, role, status, password_hash, alumni_verification, admin_language, admin_theme FROM users WHERE LOWER(email) = $1 LIMIT 1;",
                 [normalized]
             );
             if (res.rows.length > 0) {
@@ -155,7 +157,8 @@ class UserModel {
                     city: r.city || '',
                     role: r.role || 'alumni',
                     status: r.status || 'active',
-                    password_hash: r.password_hash || ''
+                    password_hash: r.password_hash || '',
+                    alumni_verification: r.alumni_verification, admin_language: r.admin_language, admin_theme: r.admin_theme
                 };
             }
             return null;
@@ -173,7 +176,7 @@ class UserModel {
      */
     async register(userData, { admin = false } = {}) {
         if (!userData || typeof userData !== 'object' ||
-            ['name', 'surname', 'email', 'password', 'confirmPassword', 'birthday', 'city', 'role', 'bio', 'phone']
+            ['name', 'surname', 'email', 'password', 'confirmPassword', 'birthday', 'city', 'role', 'bio', 'phone', 'graduation_details']
                 .some(key => userData[key] != null && typeof userData[key] !== 'string')) {
             return { success: false, error: 'Invalid registration payload' };
         }
@@ -259,16 +262,21 @@ class UserModel {
         }
 
         // 4. Role and Status determination
+        const graduationDetails = (userData.graduation_details || '').trim();
+        const verification = role === 'alumni' && !admin ? 'pending' : null;
+        if (verification && (!graduationDetails || graduationDetails.length > 500)) {
+            return { success: false, error: 'Enter your university, degree program, and graduation year (up to 500 characters).' };
+        }
         const status = admin && userData.status === 'inactive' ? 'inactive' : 'active';
         const password_hash = this.hashPassword(password);
 
         // 5. Database persistence
         try {
             const res = await db.query(
-                `INSERT INTO users (name, surname, age, birthday, email, password_hash, city, phone, bio, status, role)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                `INSERT INTO users (name, surname, age, birthday, email, password_hash, city, phone, bio, status, role, graduation_details, alumni_verification)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
                  RETURNING id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, status;`,
-                [name, surname, age, birthday, email, password_hash, city, phone, bio, status, role]
+                [name, surname, age, birthday, email, password_hash, city, phone, bio, status, role, graduationDetails || null, verification]
             );
 
             if (res.rows.length > 0) {
@@ -282,7 +290,7 @@ class UserModel {
                     email: r.email,
                     city: r.city || '',
                     role,
-                    status: r.status
+                    status: r.status, alumni_verification: verification
                 };
                 return { success: true, user: newUser };
             }
@@ -304,18 +312,51 @@ class UserModel {
             email,
             city,
             role,
-            status, phone, bio,
+            status, phone, bio, graduation_details: graduationDetails || null, alumni_verification: verification,
             created_at: new Date().toISOString()
         };
 
         this.users.push({ ...newUser, password_hash });
         this._saveFallback();
 
-        return { success: true, user: { ...newUser } };
+        const { graduation_details, ...profile } = newUser;
+        return { success: true, user: profile };
+    }
+
+    async pendingAlumni() {
+        try {
+            const result = await db.query(`SELECT id, name, surname, email, graduation_details FROM users
+                WHERE role = 'alumni' AND alumni_verification = 'pending' ORDER BY id`);
+            return result.rows;
+        } catch (error) {
+            if (db.isConnected) throw error;
+            return this.users.filter(user => user.role === 'alumni' && user.alumni_verification === 'pending');
+        }
+    }
+
+    async reviewAlumnus(id, action) {
+        const approve = action === 'approve';
+        const where = "WHERE id = $1 AND role = 'alumni' AND alumni_verification = 'pending'";
+        try {
+            const statement = approve
+                ? "UPDATE users SET alumni_verification = 'approved', updated_at = NOW()"
+                : 'DELETE FROM users';
+            const result = await db.query(`${statement} ${where}`, [id]);
+            return result.rowCount === 1;
+        } catch (error) {
+            if (db.isConnected) throw error;
+            const index = this.users.findIndex(user =>
+                user.id === Number(id) && user.role === 'alumni' && user.alumni_verification === 'pending');
+            if (index === -1) return false;
+            if (approve) this.users[index].alumni_verification = 'approved';
+            else this.users.splice(index, 1);
+            this._saveFallback();
+            return true;
+        }
     }
 
     async updateAccount(id, changes) {
-        const fields = ['name', 'surname', 'email', 'age', 'birthday', 'city', 'phone', 'bio', 'role', 'status', 'password_hash'];
+        const fields = ['name', 'surname', 'email', 'age', 'birthday', 'city', 'phone', 'bio', 'role', 'status', 'password_hash', 'admin_language', 'admin_theme'];
         const entries = fields.filter(key => changes[key] !== undefined).map(key => [key, changes[key]]);
         if (!entries.length) return false;
         try {
@@ -341,14 +382,14 @@ class UserModel {
      * @param {number|string} id
      * @returns {Promise<Object|null>}
      */
-    async getById(id) {
+    async getById(id, { includePending = true } = {}) {
         const numericId = parseInt(id, 10);
         if (isNaN(numericId)) return null;
 
         try {
             const res = await db.query(
-                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, role, status, phone, bio FROM users WHERE id = $1 LIMIT 1;",
-                [numericId]
+                "SELECT id, name, surname, age, TO_CHAR(birthday, 'YYYY-MM-DD') AS birthday, email, city, role, status, phone, bio, alumni_verification FROM users WHERE id = $1 AND ($2 OR role IS DISTINCT FROM 'alumni' OR alumni_verification IS DISTINCT FROM 'pending') LIMIT 1;",
+                [numericId, includePending]
             );
             if (res.rows.length > 0) {
                 const r = res.rows[0];
@@ -360,14 +401,14 @@ class UserModel {
                     birthday: r.birthday || '',
                     email: r.email || '',
                     city: r.city || '',
-                    role: r.role, status: r.status, phone: r.phone, bio: r.bio
+                    role: r.role, status: r.status, phone: r.phone, bio: r.bio, alumni_verification: r.alumni_verification
                 };
             }
             return null;
         } catch (error) {
             const user = this.users.find(u => u.id === numericId);
-            if (!user) return null;
-            const { password_hash, ...profile } = user;
+            if (!user || (!includePending && user.role === 'alumni' && user.alumni_verification === 'pending')) return null;
+            const { password_hash, graduation_details, admin_language, admin_theme, ...profile } = user;
             return profile;
         }
     }

@@ -237,7 +237,7 @@ class UserController {
     async getAll(req, res) {
         try {
             const template = await readTemplate(USERS_VIEW_PATH);
-            const users = await UserModel.getAll();
+            const users = await UserModel.getAll({ includePending: req.session.role === 'admin' });
             const tableRows = renderUserTableRows(users);
 
             // Check for success/deleted banner flags
@@ -274,7 +274,7 @@ class UserController {
             if (!result.success) {
                 // Validation error: re-render view template with error alert
                 const template = await readTemplate(USERS_VIEW_PATH);
-                const users = await UserModel.getAll();
+                const users = await UserModel.getAll({ includePending: req.session.role === 'admin' });
                 const tableRows = renderUserTableRows(users);
                 const alertHtml = `<div class="alert alert-danger">⚠️ Kayıt Başarısız: ${result.error}</div>`;
 
@@ -304,7 +304,7 @@ class UserController {
             return renderHtmlPage(res, 400, 'Invalid ID', `<h2>Geçersiz ID</h2><p>Lütfen geçerli bir sayı girin.</p><a href="/users" class="btn">⬅️ Back to Directory</a>`);
         }
 
-        const user = await UserModel.getById(numericId);
+        const user = await UserModel.getById(numericId, { includePending: req.session.role === 'admin' });
         if (!user) {
             return renderHtmlPage(res, 404, 'Not Found', `<h2>Kullanıcı Bulunamadı</h2><p>ID #${numericId} numaralı mezun bulunamadı.</p><a href="/users" class="btn">⬅️ Back to Directory</a>`);
         }
@@ -349,7 +349,7 @@ class UserController {
             return renderHtmlPage(res, 400, 'Invalid ID', '<h2>Geçersiz ID</h2><p>Lütfen geçerli bir sayı girin.</p><a href="/users" class="btn">⬅️ Back</a>');
         }
 
-        const user = await UserModel.getById(numericId);
+        const user = await UserModel.getById(numericId, { includePending: req.session.role === 'admin' });
         if (!user) {
             return renderHtmlPage(res, 404, 'Not Found', `<h2>Kullanıcı Bulunamadı</h2><p>ID #${numericId} numaralı mezun bulunamadı.</p><a href="/users" class="btn">⬅️ Back</a>`);
         }
@@ -392,7 +392,7 @@ class UserController {
                 }
 
                 // Validation error: re-render edit form with error
-                const user = await UserModel.getById(numericId);
+                const user = await UserModel.getById(numericId, { includePending: req.session.role === 'admin' });
                 if (user) {
                     try {
                         let template = await readTemplate(USER_EDIT_VIEW_PATH);
@@ -482,7 +482,7 @@ class UserController {
     async renderLogin(req, res, status = 200, message = '') {
         try {
             if (status === 200 && req.session.isLoggedIn) {
-                res.writeHead(303, { Location: workspace(req.session.role).path });
+                res.writeHead(303, { Location: req.session.pendingAlumni ? '/profile' : workspace(req.session.role).path });
                 return res.end();
             }
             const template = await readTemplate(path.join(__dirname, '..', 'views', 'login.html'));
@@ -508,7 +508,7 @@ class UserController {
                 return this.renderLogin(req, res, 401, 'The email address or password is incorrect, or this account is inactive.');
             }
             session.start(req, res, user);
-            res.writeHead(303, { Location: workspace(user.role).path });
+            res.writeHead(303, { Location: user.role === 'alumni' && user.alumni_verification === 'pending' ? '/profile' : workspace(user.role).path });
             res.end();
         } catch (error) {
             errorHandler(req, res, error);
@@ -532,7 +532,7 @@ class UserController {
             const template = await readTemplate(path.join(__dirname, '..', 'views', 'workspace.html'));
             const content = role
                 ? `<p>${page.summary}</p><ul>${page.links.map(([url, label]) => `<li><a href="${url}">${label}</a></li>`).join('')}</ul>`
-                : `<dl><dt>Email</dt><dd>${escapeHtml(user.email)}</dd><dt>City</dt><dd>${escapeHtml(user.city || '?')}</dd><dt>Birthday</dt><dd>${escapeHtml(user.birthday || '?')}</dd></dl><a href="${page.path}">Open ${page.title}</a>`;
+                : `<dl><dt>Email</dt><dd>${escapeHtml(user.email)}</dd><dt>City</dt><dd>${escapeHtml(user.city || '?')}</dd><dt>Birthday</dt><dd>${escapeHtml(user.birthday || '?')}</dd></dl>${req.session.pendingAlumni ? '<p>Your alumni registration is awaiting review.</p>' : `${user.role === 'alumni' && user.alumni_verification === 'approved' ? '<p>Alumni status verified.</p>' : ''}<a href="${page.path}">Open ${page.title}</a>`}`;
             const replacements = { TITLE: role ? page.title : 'My Profile', ROLE: page.label, NAME: req.session.name };
             const html = template.replace(/<!-- (TITLE|ROLE|NAME|CONTENT) -->/g, (_, key) =>
                 key === 'CONTENT' ? content : escapeHtml(replacements[key]));
